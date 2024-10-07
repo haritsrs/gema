@@ -22,14 +22,14 @@ export default function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1">
-          <div className="bg-gray-800 p-4 flex items-center justify-between">
-            <div className="text-3xl font-bold">GEMA</div>
-            <FontAwesomeIcon icon={faUserCircle} className="text-white text-3xl" />
-          </div>
+          <div className="flex-1">
+            <div className="bg-gray-800 p-4 flex items-center justify-between">
+              <div className="text-3xl font-bold">GEMA</div>
+              <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
+            </div>
 
-          <div className="p-4 space-y-4">
-            {/* Post 1 */}
+            <div className="p-4 space-y-4">
+              {/* Post 1 */}
             <div className="bg-gray-800 p-4 rounded-lg">
               <div className="flex items-center space-x-2">
                 <img src="https://placehold.co/40x40" alt="Profile picture of Statman Dave" className="rounded-full"/>
@@ -56,7 +56,6 @@ export default function Home() {
                   <FontAwesomeIcon icon={faChartBar} />
                   <span>34K</span>
                 </div>
-                <FontAwesomeIcon icon={faShare} />
               </div>
             </div>
 
@@ -88,7 +87,7 @@ export default function Home() {
                   <FontAwesomeIcon icon={faChartBar} />
                   <span>942K</span>
                 </div>
-                <FontAwesomeIcon icon={faShare} />
+
               </div>
             </div>
 
@@ -119,7 +118,6 @@ export default function Home() {
                   <FontAwesomeIcon icon={faChartBar} />
                   <span>942K</span>
                 </div>
-                <FontAwesomeIcon icon={faShare} />
               </div>
             </div>
           </div>
