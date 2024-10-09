@@ -16,7 +16,7 @@ export const metadata = {
 
 const Sidebar = () => {
   return (
-    <div className="w-4 h-screen bg-purple-800 text-white flex flex-col items-center py-4">
+    <div className="w-15 h-screen bg-purple-800 text-white flex flex-col items-center py-4">
       <Link href="/" passHref>
         <FontAwesomeIcon icon={faHome} size="2x" className="mb-6" />
       </Link>
