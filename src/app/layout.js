@@ -1,5 +1,18 @@
 import "./globals.css";
 import Sidebar from '../components/sidebar';
+import localFont from "next/font/local";
+
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
 
 // Defining metadata
 export const metadata = {
@@ -10,10 +23,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-grow p-6">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <div className="flex min-h-screen">
+          
+        <div className="fixed top-0 left-0 h-full w-15 bg-purple-800 text-white p-4">
+        <Sidebar />
+        </div>
+          
+          <main className="ml-1/4 w-3/4 p-6 bg-gray-900 text-white min-h-screen">
             {children}
           </main>
         </div>

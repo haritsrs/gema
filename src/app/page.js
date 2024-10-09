@@ -32,7 +32,7 @@ export default function RootLayout() {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-gray-900 antialiased mx-8`}
       >
         <div className="flex">
           <main className="flex-grow p-6">
@@ -44,7 +44,6 @@ export default function RootLayout() {
                   <div className="text-3xl font-bold">GEMA</div>
                   <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
                 </div>
-
                 <div className="p-4 space-y-4">
                   {/* Post 1 */}
                   <div className="bg-gray-800 p-4 rounded-lg">
