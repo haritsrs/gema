@@ -41,7 +41,7 @@ export default function RootLayout() {
               {/* Main Content */}
               <div className="flex-1">
                 <div className="mx-4 bg-gray-800 p-4 flex items-center justify-between">
-                <img src="/img/imgtest.jpg" alt="GEMA Logo" className="h-10" />
+                <img src="/img/logo.png" alt="GEMA Logo" className="h-12" />
                   <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
                 </div>
                 <div className="p-4 space-y-4">
