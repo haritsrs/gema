@@ -9,6 +9,7 @@ import "./globals.css";
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase.js';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 
 // Importing custom fonts
@@ -27,10 +28,18 @@ const geistMono = localFont({
 export default function RootLayout() {
   const [postContent, setPostContent] = useState('');
   const [posts, setPosts] = useState([]);
+  
   const fetchPosts = async () => {
     const querySnapshot = await getDocs(collection(db, 'posts'));
     const postsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setPosts(postsData);
+    const postsCollection = collection(db, 'posts');
+    const postsSnapshot = await getDocs(postsCollection);
+    const postsList = postsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setPosts(postsList);
 
   };
 
@@ -40,11 +49,40 @@ export default function RootLayout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (postContent.trim() === '') return;
+    const newPost = {
+      content: postContent,
+      createdAt: Timestamp.fromDate(new Date()),
+    };
+    try {
+      
+      await addDoc(collection(db, 'posts'), newPost); // Add new post to Firestore
+      setPostContent(''); // Clear input field
+      fetchPosts(); // Fetch posts again to update the displayed list
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  }
 
-    await addDoc(collection(db, 'posts'), { content: postContent, timestamp: new Date() });
-    setPostContent('');
-    fetchPosts();
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp || !timestamp.toDate) return "Unknown"; // Return "Unknown" if undefined
+    const now = new Date();
+    const secondsAgo = Math.floor((now - timestamp.toDate()) / 1000);
+    
+  
+    if (secondsAgo < 60) {
+      return `${secondsAgo}s ago`;
+    } else if (secondsAgo < 3600) {
+      const minutesAgo = Math.floor(secondsAgo / 60);
+      return `${minutesAgo}m ago`;
+    } else if (secondsAgo < 86400) {
+      const hoursAgo = Math.floor(secondsAgo / 3600);
+      return `${hoursAgo}h ago`;
+    } else {
+      const daysAgo = Math.floor(secondsAgo / 86400);
+      return `${daysAgo}d ago`;
+    }
   };
 
   return (
@@ -79,6 +117,19 @@ export default function RootLayout() {
                         Post
                       </button>
                     </form>
+                    <div>
+        <h2 className="text-xl font-bold mb-2">Posts</h2>
+        <ul>
+          {posts.map(post => (
+            <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded">
+              <div>{post.content}</div>
+              <div className="text-gray-500 text-sm mt-1">
+      {formatTimestamp(post.createdAt)} {/* Display the formatted timestamp */}
+    </div>
+  </li>
+          ))}
+        </ul>
+      </div>      
                   </div>
   
                   {/* Example Posts */}
