@@ -16,21 +16,36 @@ export const metadata = {
 
 const Sidebar = () => {
   return (
-    <div className="w-15 h-screen bg-purple-800 text-white flex flex-col items-center py-4">
+    <div className="w-15 h-screen bg-purple-800 text-white py-4">
       <Link href="/" passHref>
-        <FontAwesomeIcon icon={faHome} size="2x" className="mb-6" />
+        <div className="flex items-center mb-6">
+          <FontAwesomeIcon icon={faHome} size="2x" />
+          <span className="ml-2">Home</span>
+        </div>
       </Link>
       <Link href="/search" passHref>
-        <FontAwesomeIcon icon={faSearch} size="2x" className="mb-6" />
+        <div className="flex items-center mb-6">
+          <FontAwesomeIcon icon={faSearch} size="2x" />
+          <span className="ml-2">Search</span>
+        </div>
       </Link>
       <Link href="/notifications" passHref>
-        <FontAwesomeIcon icon={faBell} size="2x" className="mb-6" />
+        <div className="flex items-center mb-6">
+          <FontAwesomeIcon icon={faBell} size="2x" />
+          <span className="ml-2">Notifications</span>
+        </div>
       </Link>
       <Link href="/messages" passHref>
-        <FontAwesomeIcon icon={faComment} size="2x" className="mb-6" />
+        <div className="flex items-center mb-6">
+          <FontAwesomeIcon icon={faComment} size="2x" />
+          <span className="ml-2">Messages</span>
+        </div>
       </Link>
       <Link href="/explore" passHref>
-        <FontAwesomeIcon icon={faGlobe} size="2x" className="mb-6" />
+        <div className="flex items-center mb-6">
+          <FontAwesomeIcon icon={faGlobe} size="2x" />
+          <span className="ml-2">Explore</span>
+        </div>
       </Link>
     </div>
   );

@@ -97,13 +97,13 @@ export default function RootLayout() {
             <div className="flex min-h-screen bg-gray-900 text-white">
               {/* Main Content */}
               <div className="flex-1">
-                <div className="mx-4 bg-gray-800 p-4 flex items-center justify-between">
+                <div className="mx-20 bg-gray-800 p-4 flex items-center justify-between">
                   <img src="/img/logo.png" alt="GEMA Logo" className="h-12" />
                   <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
                 </div>
                 <div className="p-4 space-y-4">
                   {/* Create a Post */}
-                  <div className="container mx-auto p-4">
+                  <div className="container mx-auto p-4 ">
                     <h1 className="text-2xl font-bold mb-4">Create a Post</h1>
                     <form onSubmit={handleSubmit} className="mb-6">
                       <textarea
@@ -113,7 +113,7 @@ export default function RootLayout() {
                         onChange={(e) => setPostContent(e.target.value)}
                         placeholder="What's on your mind?"
                       />
-                      <button type="submit" className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                      <button type="submit" className="mt-2 px-12 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                         Post
                       </button>
                     </form>
@@ -123,7 +123,7 @@ export default function RootLayout() {
           {posts.map(post => (
             <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded">
               <div>{post.content}</div>
-              <div className="text-gray-500 text-sm mt-1">
+              <div className="text-gray-500 text-sm mt-">
       {formatTimestamp(post.createdAt)} {/* Display the formatted timestamp */}
     </div>
   </li>
@@ -134,7 +134,7 @@ export default function RootLayout() {
   
                   {/* Example Posts */}
                   {/* Post 1 */}
-                  <div className="bg-gray-800 p-4 rounded-lg">
+                  <div className="bg-gray-800 p-4 rounded-lg mx-20">
                     <div className="flex items-center space-x-2">
                       <img src="https://placehold.co/40x40" alt="Profile picture of Statman Dave" className="rounded-full" />
                       <div>
