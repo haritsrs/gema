@@ -10,9 +10,8 @@ import { useState, useEffect } from 'react';
 import { db } from '../../firebase.js';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { Timestamp } from 'firebase/firestore';
+import LoginPopup from '../components/login';
 
-
-// Importing custom fonts
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -28,19 +27,15 @@ const geistMono = localFont({
 export default function RootLayout() {
   const [postContent, setPostContent] = useState('');
   const [posts, setPosts] = useState([]);
-  
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+
+  const openLoginPopup = () => setShowLoginPopup(true);
+  const closeLoginPopup = () => setShowLoginPopup(false);
+
   const fetchPosts = async () => {
     const querySnapshot = await getDocs(collection(db, 'posts'));
     const postsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setPosts(postsData);
-    const postsCollection = collection(db, 'posts');
-    const postsSnapshot = await getDocs(postsCollection);
-    const postsList = postsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setPosts(postsList);
-
   };
 
   useEffect(() => {
@@ -49,40 +44,31 @@ export default function RootLayout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (postContent.trim() === '') return;
+
     const newPost = {
       content: postContent,
       createdAt: Timestamp.fromDate(new Date()),
     };
+
     try {
-      
-      await addDoc(collection(db, 'posts'), newPost); // Add new post to Firestore
-      setPostContent(''); // Clear input field
-      fetchPosts(); // Fetch posts again to update the displayed list
+      await addDoc(collection(db, 'posts'), newPost);
+      setPostContent('');
+      fetchPosts();
     } catch (error) {
       console.error('Error adding document: ', error);
     }
   }
 
   const formatTimestamp = (timestamp) => {
-    if (!timestamp || !timestamp.toDate) return "Unknown"; // Return "Unknown" if undefined
+    if (!timestamp || !timestamp.toDate) return "Unknown";
     const now = new Date();
     const secondsAgo = Math.floor((now - timestamp.toDate()) / 1000);
-    
-  
-    if (secondsAgo < 60) {
-      return `${secondsAgo}s ago`;
-    } else if (secondsAgo < 3600) {
-      const minutesAgo = Math.floor(secondsAgo / 60);
-      return `${minutesAgo}m ago`;
-    } else if (secondsAgo < 86400) {
-      const hoursAgo = Math.floor(secondsAgo / 3600);
-      return `${hoursAgo}h ago`;
-    } else {
-      const daysAgo = Math.floor(secondsAgo / 86400);
-      return `${daysAgo}d ago`;
-    }
+
+    if (secondsAgo < 60) return `${secondsAgo}s ago`;
+    if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
+    if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
+    return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
 
   return (
@@ -95,15 +81,13 @@ export default function RootLayout() {
         <div className="flex">
           <main className="flex-grow p-6">
             <div className="flex min-h-screen bg-gray-900 text-white">
-              {/* Main Content */}
               <div className="flex-1">
                 <div className="mx-20 bg-gray-800 p-4 flex items-center justify-between">
                   <img src="/img/logo.png" alt="GEMA Logo" className="h-12" />
                   <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
                 </div>
                 <div className="p-4 space-y-4">
-                  {/* Create a Post */}
-                  <div className="container mx-auto p-4 ">
+                  <div className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold mb-4">Create a Post</h1>
                     <form onSubmit={handleSubmit} className="mb-6">
                       <textarea
@@ -117,21 +101,27 @@ export default function RootLayout() {
                         Post
                       </button>
                     </form>
+                    <button
+                      onClick={openLoginPopup}
+                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                    >
+                      Login
+                    </button>
+                    {showLoginPopup && <LoginPopup onClose={closeLoginPopup} />}
                     <div>
-        <h2 className="text-xl font-bold mb-2">Posts</h2>
-        <ul>
-          {posts.map(post => (
-            <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded">
-              <div>{post.content}</div>
-              <div className="text-gray-500 text-sm mt-">
-      {formatTimestamp(post.createdAt)} {/* Display the formatted timestamp */}
-    </div>
-  </li>
-          ))}
-        </ul>
-      </div>      
+                      <h2 className="text-xl font-bold mb-2">Posts</h2>
+                      <ul>
+                        {posts.map(post => (
+                          <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded">
+                            <div>{post.content}</div>
+                            <div className="text-gray-500 text-sm mt-">
+                              {formatTimestamp(post.createdAt)}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-  
                   {/* Example Posts */}
                   {/* Post 1 */}
                   <div className="bg-gray-800 p-4 rounded-lg mx-20">
