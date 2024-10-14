@@ -10,7 +10,6 @@ import { useState, useEffect } from 'react';
 import { db } from '../../firebase.js';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { Timestamp } from 'firebase/firestore';
-import LoginPopup from '../components/login';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,10 +26,6 @@ const geistMono = localFont({
 export default function RootLayout() {
   const [postContent, setPostContent] = useState('');
   const [posts, setPosts] = useState([]);
-  const [showLoginPopup, setShowLoginPopup] = useState(false);
-
-  const openLoginPopup = () => setShowLoginPopup(true);
-  const closeLoginPopup = () => setShowLoginPopup(false);
 
   const fetchPosts = async () => {
     const querySnapshot = await getDocs(collection(db, 'posts'));
@@ -77,12 +72,12 @@ export default function RootLayout() {
         <title>GEMA</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} bg-gray-900 antialiased mx-16`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} bg-gray-900 antialiased mx-40`}>
         <div className="flex">
           <main className="flex-grow p-6">
             <div className="flex min-h-screen bg-gray-900 text-white">
               <div className="flex-1">
-                <div className="mx-20 bg-gray-800 p-4 flex items-center justify-between">
+                <div className="mx-7 bg-gray-800 p-4 flex items-center justify-between">
                   <img src="/img/logo.png" alt="GEMA Logo" className="h-12" />
                   <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
                 </div>
@@ -101,13 +96,6 @@ export default function RootLayout() {
                         Post
                       </button>
                     </form>
-                    <button
-                      onClick={openLoginPopup}
-                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
-                    >
-                      Login
-                    </button>
-                    {showLoginPopup && <LoginPopup onClose={closeLoginPopup} />}
                     <div>
                       <h2 className="text-xl font-bold mb-2">Posts</h2>
                       <ul>
