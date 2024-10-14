@@ -16,35 +16,35 @@ export const metadata = {
 
 const Sidebar = () => {
   return (
-    <div className="w-15 h-screen bg-purple-800 text-white py-4">
+    <div className= "flex justify-between pl-4 pr-4 text-white md:flex-col md:pl-0 md:pr-0 md:py-4">
       <Link href="/" passHref>
-        <div className="flex items-center mb-6">
+        <div className="md:flex items-center mb-0 md:mb-6">
           <FontAwesomeIcon icon={faHome} size="2x" />
-          <span className="ml-2">Home</span>
+          <span className="hidden md:block ml-2">Home</span>
         </div>
       </Link>
       <Link href="/search" passHref>
-        <div className="flex items-center mb-6">
+        <div className="md:flex items-center mb-0 md:mb-6">
           <FontAwesomeIcon icon={faSearch} size="2x" />
-          <span className="ml-2">Search</span>
+          <span className="hidden md:block ml-2">Search</span>
         </div>
       </Link>
       <Link href="/notifications" passHref>
-        <div className="flex items-center mb-6">
+        <div className="md:flex items-center mb-0 md:mb-6">
           <FontAwesomeIcon icon={faBell} size="2x" />
-          <span className="ml-2">Notifications</span>
+          <span className="hidden md:block ml-2">Notifications</span>
         </div>
       </Link>
       <Link href="/messages" passHref>
-        <div className="flex items-center mb-6">
+        <div className="flex items-center mb-0 md:mb-6">
           <FontAwesomeIcon icon={faComment} size="2x" />
-          <span className="ml-2">Messages</span>
+          <span className="hidden md:block ml-2">Messages</span>
         </div>
       </Link>
       <Link href="/explore" passHref>
-        <div className="flex items-center mb-6">
+        <div className="md:flex items-center mb-0 md:mb-6">
           <FontAwesomeIcon icon={faGlobe} size="2x" />
-          <span className="ml-2">Explore</span>
+          <span className="hidden md:block ml-2">Explore</span>
         </div>
       </Link>
     </div>

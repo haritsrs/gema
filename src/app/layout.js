@@ -4,6 +4,8 @@ import "./globals.css";
 import Sidebar from '../components/sidebar';
 import AuthSidebar from '../components/AuthSidebar';
 import localFont from "next/font/local";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserCircle} from '@fortawesome/free-solid-svg-icons';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,16 +24,24 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen">
-          <div className="fixed top-0 left-0 h-full w-40 bg-purple-800 text-white p-4">
+          <aside className="hidden md:block fixed top-0 left-0 h-full w-40 bg-purple-800 text-white p-4">
             <Sidebar />
-          </div>
+          </aside>
 
-          <main className="ml-1/4 mr-1/4 w-1/2 p-6 bg-gray-900 text-white min-h-screen">
+          <main className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0">
+             <div className="md:mx-40 p-4 flex items-center justify-between">
+                <img src="/img/logo.png" alt="GEMA Logo" className="h-12" />
+                <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
+             </div>
             {children}
           </main>
 
-          <div className="fixed top-0 right-0 h-full w-40 bg-purple-900 text-white p-4">
+          <aside className="hidden md:block fixed top-0 right-0 h-full w-40 bg-purple-900 text-white p-4">
             <AuthSidebar />
+          </aside>
+          
+          <div className="md:hidden fixed bg-purple-800 bottom-0 left-0 w-screen text-white p-2">
+            <Sidebar />
           </div>
         </div>
       </body>
