@@ -30,14 +30,14 @@ export default function RootLayout({ children }) {
     setIsVisible(!isVisible);
   };
 
-
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen">
-          <aside className="hidden md:block fixed top-0 left-0 h-full w-[20%] bg-purple-800 text-white p-4">
+          <aside className="hidden md:block fixed top-0 left-0 h-full w-40 bg-purple-800 text-white p-4">
             <Sidebar />
           </aside>
+          
 
           <main className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-[5%]">
              <div className="md:mx-[18%] p-4 flex items-center justify-between">
@@ -55,10 +55,13 @@ export default function RootLayout({ children }) {
                 <AuthSidebar />
                 )}
 
-            {children}
+            <div className="md:mx-4 flex items-center justify-start">
+                {children}
+            </div>
+
           </main>
 
-          <aside className="hidden md:block fixed top-0 right-0 h-full w-[20%] bg-gray-950 text-white p-4">
+          <aside className="hidden md:block fixed top-0 right-0 h-full w-40 bg-gray-950 text-white p-4">
             <AuthSidebar />
           </aside>
          
