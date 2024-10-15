@@ -64,7 +64,7 @@ export default function AuthSidebar() {
           <button onClick={handleGoogleLogin} className="mt-2 w-full bg-blue-500 text-white px-4 py-2 rounded">
             Sign in with Google
           </button>
-          <button onClick={handleAnonymousLogin} className="mt-2 w-full bg-gray-500 text-white px-4 py-2 rounded">
+          <button onClick={handleAnonymousLogin} className="mt-2 w-full bg-gray-500 text-sm text-white px-4 py-2 rounded">
             Sign in Anonymously
           </button>
           <button onClick={handleEmailLogin} className="mt-2 w-full bg-green-500 text-white px-4 py-2 rounded">
