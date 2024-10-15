@@ -51,11 +51,14 @@ export default function RootLayout({ children }) {
              </div>
 
             {/* Conditional Div */}
-            {isVisible && (
+            {/*isVisible && (
+                <AuthSidebar />
+                )*/}
+
+            <div className="md:mx-4 flex-col md:flex justify-start">
+                {isVisible && (
                 <AuthSidebar />
                 )}
-
-            <div className="md:mx-4 flex items-center justify-start">
                 {children}
             </div>
 
