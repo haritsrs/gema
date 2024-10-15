@@ -6,6 +6,7 @@ import AuthSidebar from '../components/AuthSidebar';
 import localFont from "next/font/local";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle} from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,6 +21,16 @@ const geistMono = localFont({
 });
 
 export default function RootLayout({ children }) {
+
+  {/* Mobile Drop-down menu visibility */}
+
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => {
+    setIsVisible(!isVisible);
+  };
+
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -31,12 +42,23 @@ export default function RootLayout({ children }) {
           <main className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-[5%]">
              <div className="md:mx-[18%] p-4 flex items-center justify-between">
                 <img src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
-                <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
+
+                <FontAwesomeIcon icon={faUserCircle} className="hidden md:block text-white h-16 text-2xl" />
+
+                <button className="md:hidden text-white text-3xl hover:text-purple-800" onClick={toggleVisibility}>
+                  <FontAwesomeIcon icon={faUserCircle} className="md:hidden" />
+                </button>
              </div>
+
+            {/* Conditional Div */}
+            {isVisible && (
+                <AuthSidebar />
+                )}
+
             {children}
           </main>
 
-          <aside className="hidden md:block fixed top-0 right-0 h-full w-[20%] bg-purple-900 text-white p-4">
+          <aside className="hidden md:block fixed top-0 right-0 h-full w-[20%] bg-gray-950 text-white p-4">
             <AuthSidebar />
           </aside>
          

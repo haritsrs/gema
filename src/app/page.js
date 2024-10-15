@@ -74,11 +74,6 @@ export default function Page() {
         <main className="flex md:justify-start">
           <div className="flex min-h-screen text-white">
             <div className="flex-1">
-              {/* Logo and User icon */}
-    {/*<div className="mx-7 bg-gray-800 p-4 flex items-center justify-between">
-                <img src="/img/logo.png" alt="GEMA Logo" className="h-12" />
-                <FontAwesomeIcon icon={faUserCircle} className="text-white text-2xl w-16" />
-              </div>*/}
 
               {/* Post creation form */}
               <div className="p-4 space-y-4">
@@ -86,13 +81,13 @@ export default function Page() {
                   <h1 className="text-2xl font-bold mb-4">Create a Post</h1>
                   <form onSubmit={handleSubmit} className="mb-6">
                     <textarea
-                      className="w-full text-black p-2 border rounded"
+                      className="w-full text-black p-2 border rounded-lg"
                       rows="4"
                       value={postContent}
                       onChange={(e) => setPostContent(e.target.value)}
                       placeholder="What's on your mind?"
                     />
-                    <button type="submit" className="mt-2 px-12 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-900">
                       Post
                     </button>
                   </form>
@@ -102,7 +97,7 @@ export default function Page() {
                     <h2 className="text-xl font-bold mb-2">Posts</h2>
                     <ul>
                       {posts.map(post => (
-                        <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded">
+                        <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded-lg">
                           <div>{post.content}</div>
                           <div className="text-gray-500 text-sm mt-2">
                             {formatTimestamp(post.createdAt)}

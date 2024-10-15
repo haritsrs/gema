@@ -50,17 +50,17 @@ export default function AuthSidebar() {
   };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
+    <div className="bg-gray-800 mx-[5%] p-4 md:mx-0 rounded-lg">
       {user ? (
         <div>
-          <h2 className="text-xl">Welcome, {user.displayName || 'User'}!</h2>
+          <h2 className="text-xl text-white">Welcome, {user.displayName || 'User'}!</h2>
           <button onClick={handleSignOut} className="mt-2 w-full bg-red-500 text-white px-4 py-2 rounded">
             Sign Out
           </button>
         </div>
       ) : (
         <div>
-          <h2 className="text-xl">New to the app?</h2>
+          <h2 className="text-xl text-white py-2 md:py-0">New to the app?</h2>
           <button onClick={handleGoogleLogin} className="mt-2 w-full bg-blue-500 text-white px-4 py-2 rounded">
             Sign in with Google
           </button>
