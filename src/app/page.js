@@ -71,7 +71,7 @@ export default function Page() {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased md:mx-40`}>
       <div className="flex">
-        <main className="flex md:justify-start">
+        <main className="flex md:justify-center">
           <div className="flex min-h-screen text-white">
             <div className="flex-1">
 
