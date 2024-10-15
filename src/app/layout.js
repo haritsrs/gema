@@ -39,8 +39,8 @@ export default function RootLayout({ children }) {
           </aside>
           
 
-          <main className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-[5%]">
-             <div className="md:mx-[18%] p-4 flex items-center justify-between">
+          <main className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-10">
+             <div className="md:mx-40 p-4 flex items-center justify-between">
                 <img src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
 
                 <FontAwesomeIcon icon={faUserCircle} className="hidden md:block text-white h-16 text-2xl" />
@@ -55,7 +55,7 @@ export default function RootLayout({ children }) {
                 <AuthSidebar />
                 )*/}
 
-            <div className="md:mx-4 flex-col md:flex justify-start">
+            <div className="md:mx-4 flex-col md:flex">
                 {isVisible && (
                 <AuthSidebar />
                 )}
@@ -64,7 +64,7 @@ export default function RootLayout({ children }) {
 
           </main>
 
-          <aside className="hidden md:block fixed top-0 right-0 h-full w-40 bg-gray-950 text-white p-4">
+          <aside className="hidden md:block fixed top-0 right-0 h-full w-[18%] bg-gray-950 text-white p-4">
             <AuthSidebar />
           </aside>
          
