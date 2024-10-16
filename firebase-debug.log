@@ -1,0 +1,104 @@
+[debug] [2024-10-14T07:18:19.260Z] ----------------------------------------------------------------------
+[debug] [2024-10-14T07:18:19.262Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\nxa7y\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2024-10-14T07:18:19.263Z] CLI Version:   13.21.0
+[debug] [2024-10-14T07:18:19.263Z] Platform:      win32
+[debug] [2024-10-14T07:18:19.263Z] Node Version:  v20.18.0
+[debug] [2024-10-14T07:18:19.263Z] Time:          Mon Oct 14 2024 14:18:19 GMT+0700 (Western Indonesia Time)
+[debug] [2024-10-14T07:18:19.263Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-10-14T07:18:19.353Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"compilerOptions"}
+[debug] [2024-10-14T07:18:19.357Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-10-14T07:18:19.358Z] > authorizing via signed-in user (haritssetiono23@gmail.com)
+[debug] [2024-10-14T07:18:19.358Z] [iam] checking project gema-610a4 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2024-10-14T07:18:19.359Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:19.359Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:19.360Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/gema-610a4:testIamPermissions [none]
+[debug] [2024-10-14T07:18:19.360Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/gema-610a4:testIamPermissions x-goog-quota-user=projects/gema-610a4
+[debug] [2024-10-14T07:18:19.360Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/gema-610a4:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-10-14T07:18:20.571Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/gema-610a4:testIamPermissions 200
+[debug] [2024-10-14T07:18:20.571Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/gema-610a4:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-10-14T07:18:20.572Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:20.572Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:20.573Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/gema-610a4 [none]
+[debug] [2024-10-14T07:18:21.442Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/gema-610a4 200
+[debug] [2024-10-14T07:18:21.442Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/gema-610a4 {"projectId":"gema-610a4","projectNumber":"275057235109","displayName":"GEMA","name":"projects/gema-610a4","resources":{"hostingSite":"gema-610a4","realtimeDatabaseInstance":"gema-610a4-default-rtdb"},"state":"ACTIVE","etag":"1_524ca669-6246-4482-b759-2bcb4363e4b0"}
+[debug] [2024-10-14T07:18:24.743Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:24.743Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:24.743Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/gema-610a4/sites pageToken=&pageSize=10
+[debug] [2024-10-14T07:18:25.784Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/gema-610a4/sites 200
+[debug] [2024-10-14T07:18:25.784Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/gema-610a4/sites {"sites":[{"name":"projects/gema-610a4/sites/gema-610a4","defaultUrl":"https://gema-610a4.web.app","appId":"1:275057235109:web:aa381697e7f3bde03fe94c","type":"DEFAULT_SITE"}]}
+[debug] [2024-10-14T07:18:25.784Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:25.784Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:25.784Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:275057235109:web:aa381697e7f3bde03fe94c/config [none]
+[debug] [2024-10-14T07:18:26.828Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:275057235109:web:aa381697e7f3bde03fe94c/config 200
+[debug] [2024-10-14T07:18:26.828Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:275057235109:web:aa381697e7f3bde03fe94c/config {"projectId":"gema-610a4","appId":"1:275057235109:web:aa381697e7f3bde03fe94c","databaseURL":"https://gema-610a4-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"gema-610a4.appspot.com","apiKey":"AIzaSyDYz6CEV7dfnKkC_W8jLmt-FK2QxbctDpM","authDomain":"gema-610a4.firebaseapp.com","messagingSenderId":"275057235109","measurementId":"G-DDC0R37JEM"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 14.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2024-10-14T07:18:32.887Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:32.888Z] Checked if tokens are valid: true, expires at: 1728893869942
+[debug] [2024-10-14T07:18:32.888Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/gema-610a4/sites/gema-610a4 [none]
+[debug] [2024-10-14T07:18:33.745Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/gema-610a4/sites/gema-610a4 200
+[debug] [2024-10-14T07:18:33.746Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/gema-610a4/sites/gema-610a4 {"name":"projects/gema-610a4/sites/gema-610a4","defaultUrl":"https://gema-610a4.web.app","appId":"1:275057235109:web:aa381697e7f3bde03fe94c","type":"DEFAULT_SITE"}
+[info]   ▲ Next.js 14.2.15
+
+[info] 
+
+[info]    Creating an optimized production build ...
+
+[info] Failed to compile.
+
+
+[info] ./src/app/search page/layout.js
+Module not found: Can't resolve '../../components/Header'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./src/app/search page/layout.js
+Module not found: Can't resolve '../../components/Footer'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./src/app/search page/page.js
+Error: 
+  x Expression expected
+   ,-[C:\Users\nxa7y\gema\src\app\search page\page.js:1:1]
+ 1 | <!DOCTYPE html>
+   : ^
+ 2 | <html lang="en">
+ 3 | <head>
+ 3 |   <meta charset="UTF-8">
+   `----
+
+  x Expected ';', '}' or <eof>
+   ,-[C:\Users\nxa7y\gema\src\app\search page\page.js:1:1]
+ 1 | <!DOCTYPE html>
+   : ^^^^|^^^^ ^^^^
+   :     `-- This is the expression part of an expression statement
+ 2 | <html lang="en">
+ 3 | <head>
+ 3 |   <meta charset="UTF-8">
+   `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/search page/page.js
+
+
+[info] 
+
+[info] > Build failed because of webpack errors
+
+[debug] [2024-10-14T07:18:46.382Z] Error: ENOENT: no such file or directory, open 'C:\Users\nxa7y\gema\.next\server\middleware-manifest.json'
+[error] 
+[error] Error: An unexpected error has occurred.
