@@ -1,0 +1,71 @@
+"use client";
+
+import { db } from '../../firebase.js';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../../firebase.js'; // Adjust the path if needed
+
+export default function Posting({ onPostCreated }) {
+  const [postContent, setPostContent] = useState('');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user || null);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Log user info when it's updated
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!postContent.trim() || !user) return;
+
+    const newPost = {
+      content: postContent,
+      createdAt: Timestamp.fromDate(new Date()),
+      userId: user.uid,
+      username: user.displayName || user.email,
+      profilePicture: user.photoURL || 'https://placehold.co/40x40',
+      likes: 0,
+      comments: []
+    };
+
+    try {
+      const docRef = await addDoc(collection(db, 'posts'), newPost);
+      setPostContent('');
+      onPostCreated(docRef.id);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+
+  const handleShare = (postId) => {
+    const shareUrl = `${window.location.origin}/posts/${postId}`;
+    navigator.clipboard.writeText(shareUrl);
+    alert("Post link copied to clipboard!");
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mb-6">
+      <textarea
+        className="w-full text-black p-2 border rounded-lg"
+        rows="4"
+        value={postContent}
+        onChange={(e) => setPostContent(e.target.value)}
+        placeholder="What's on your mind?"
+      />
+      <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-900">
+        Post
+      </button>
+      {/* Add the share functionality somewhere here if needed */}
+      {/* <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleShare(postId)}>Share</div> */}
+    </form>
+  );
+}
