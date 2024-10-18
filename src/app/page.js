@@ -29,6 +29,7 @@ export default function Page() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastVisiblePost, setLastVisiblePost] = useState(null); // Track pagination
+  const [noMorePosts, setNoMorePosts] = useState(false); // Track if there are no more posts to fetch
   const observerRef = useRef(); // Ref for the infinite scroll trigger
 
   // Set up Firebase auth listener to get current user
@@ -41,7 +42,7 @@ export default function Page() {
 
   // Fetch relevant posts from Firestore with pagination
   const fetchPosts = async (lastPost = null) => {
-    if (loading) return; // Prevent multiple fetches while already loading
+    if (loading || noMorePosts) return; // Prevent multiple fetches while already loading or if no more posts
 
     setLoading(true);
     try {
@@ -56,20 +57,26 @@ export default function Page() {
         : query(collection(db, 'posts'), orderBy('likes', 'desc'), orderBy('createdAt', 'desc'), limit(7)); // Limit 7 posts initially
 
       const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        const postsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-        // Filter out any duplicate posts that already exist in state
-        setPosts((prevPosts) => {
-          const postIds = prevPosts.map((post) => post.id);
-          const newPosts = postsData.filter((post) => !postIds.includes(post.id));
-          return [...prevPosts, ...newPosts]; // Append only non-duplicate posts
-        });
-
-        // Set the last visible post for pagination
-        const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-        setLastVisiblePost(lastVisible);
+      
+      // If no posts are returned, stop further fetching
+      if (querySnapshot.empty) {
+        setNoMorePosts(true);
+        setLoading(false);
+        return;
       }
+
+      const postsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+      // Filter out any duplicate posts that already exist in state
+      setPosts((prevPosts) => {
+        const postIds = prevPosts.map((post) => post.id);
+        const newPosts = postsData.filter((post) => !postIds.includes(post.id));
+        return [...prevPosts, ...newPosts]; // Append only non-duplicate posts
+      });
+
+      // Set the last visible post for pagination
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      setLastVisiblePost(lastVisible);
     } catch (error) {
       console.error("Error fetching posts: ", error);
     } finally {
@@ -78,12 +85,12 @@ export default function Page() {
   };
 
   // Handle Like functionality
-  const handleLike = async (postId, currentLikes, likedBy) => {
+  const handleLike = async (postId, currentLikes, likedBy = []) => {
     if (!currentUser) return; // Ensure user is logged in
-
+  
     const postRef = doc(db, 'posts', postId);
     const hasLiked = likedBy.includes(currentUser.uid);
-
+  
     try {
       if (hasLiked) {
         // If already liked, remove the like
@@ -98,7 +105,7 @@ export default function Page() {
           likedBy: arrayUnion(currentUser.uid), // Add user to likedBy
         });
       }
-
+  
       // Update the post in the state without refetching all posts
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
@@ -107,8 +114,8 @@ export default function Page() {
                 ...post,
                 likes: hasLiked ? currentLikes - 1 : currentLikes + 1,
                 likedBy: hasLiked
-                  ? post.likedBy.filter((uid) => uid !== currentUser.uid) // Remove user from likedBy
-                  : [...post.likedBy, currentUser.uid], // Add user to likedBy
+                  ? (post.likedBy || []).filter((uid) => uid !== currentUser.uid) // Remove user from likedBy, ensuring likedBy is an array
+                  : [...(post.likedBy || []), currentUser.uid], // Add user to likedBy, ensuring likedBy is an array
               }
             : post
         )
@@ -117,6 +124,7 @@ export default function Page() {
       console.error("Error updating likes: ", error);
     }
   };
+  
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp || !timestamp.toDate) return "Unknown";
@@ -132,7 +140,7 @@ export default function Page() {
   // Infinite scroll logic
   const handleObserver = (entries) => {
     const [entry] = entries;
-    if (entry.isIntersecting && !loading && lastVisiblePost) {
+    if (entry.isIntersecting && !loading && lastVisiblePost && !noMorePosts) {
       fetchPosts(lastVisiblePost); // Fetch next set of posts when scroll reaches the end
     }
   };
@@ -145,13 +153,13 @@ export default function Page() {
     if (observerRef.current) {
       const observer = new IntersectionObserver(handleObserver, {
         root: null,
-        rootMargin: '0px',
-        threshold: 1.0,
+        rootMargin: '200px', // Adjust root margin to trigger earlier, preventing flickering
+        threshold: 0.5, // Trigger only when 50% of the observerRef is visible
       });
       observer.observe(observerRef.current);
       return () => observer.disconnect();
     }
-  }, [lastVisiblePost, loading]);
+  }, [lastVisiblePost, loading, noMorePosts]);
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}>
@@ -165,7 +173,7 @@ export default function Page() {
               <ul>
                 {posts.map((post) => (
                   <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded-lg">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex space-x-2">
                       <img
                         src={post.profilePicture || 'https://placehold.co/40x40'}
                         alt={`${post.username || 'User'}'s profile`}
@@ -180,7 +188,7 @@ export default function Page() {
                         <div>{post.content}</div>
                       </div>
                     </div>
-                    <div className="flex justify-between text-gray-500 mt-2">
+                    <div className="flex items-center justify-evenly text-gray-500 mt-2">
                       <div className="flex items-center space-x-1">
                         <FontAwesomeIcon icon={farComment} />
                         <span>Comment</span>
@@ -202,8 +210,9 @@ export default function Page() {
                   </li>
                 ))}
               </ul>
-              <div ref={observerRef} className="h-4"></div> {/* Infinite scroll trigger */}
-              {loading && <div>Loading...</div>} {/* Show loading when fetching more posts */}
+              <div ref={observerRef} className="h-10"></div> {/* This div triggers infinite scroll */}
+              {loading && <p>Loading more posts...</p>}
+              {noMorePosts && <p>No more posts to load.</p>}
             </div>
           </div>
         </div>
