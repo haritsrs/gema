@@ -34,12 +34,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen">
+
           <aside className="hidden md:block fixed top-0 left-0 h-full w-40 bg-purple-800 text-white p-4">
             <Sidebar />
           </aside>
           
 
-          <main className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-[5%]">
+          <div className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-[5%]">
              <div className="md:mx-[18%] p-4 flex items-center justify-between">
                 <img src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
 
@@ -50,19 +51,14 @@ export default function RootLayout({ children }) {
                 </button>
              </div>
 
-            {/* Conditional Div */}
-            {/*isVisible && (
-                <AuthSidebar />
-                )*/}
-
-            <div className="md:mx-4 flex-col md:flex justify-start">
+            <div className="md:mx-4 flex-col md:flex">
                 {isVisible && (
                 <AuthSidebar />
                 )}
                 {children}
             </div>
 
-          </main>
+          </div>
 
           <aside className="hidden md:block fixed top-0 right-0 h-full w-40 bg-gray-950 text-white p-4">
             <AuthSidebar />

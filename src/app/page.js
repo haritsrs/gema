@@ -55,7 +55,7 @@ export default function Page() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}>
-      <div className="flex flex-col w-full max-w-3xl p-4"> {/* Updated max width */}
+      <div className="flex flex-col w-full md:w-2/3 max-w-3xl p-4"> {/* Updated max width */}
         <div className="flex flex-col min-h-screen text-white">
           <div className="flex-1">
             <div className="space-y-4">
