@@ -3,9 +3,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faRetweet, faChartBar } from '@fortawesome/free-solid-svg-icons';
 import { faComment as farComment } from '@fortawesome/free-regular-svg-icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '../../firebase.js';
-import { collection, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'; // Import arrayUnion, arrayRemove
+import { collection, getDocs, doc, updateDoc, arrayUnion, arrayRemove, orderBy, limit, startAfter, query } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
 import localFont from "next/font/local";
@@ -27,46 +27,95 @@ const geistMono = localFont({
 export default function Page() {
   const [posts, setPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [lastVisiblePost, setLastVisiblePost] = useState(null); // Track pagination
+  const observerRef = useRef(); // Ref for the infinite scroll trigger
 
   // Set up Firebase auth listener to get current user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
-
     return () => unsubscribe();
   }, []);
 
-  // Fetch posts from Firestore
-  const fetchPosts = async () => {
-    const querySnapshot = await getDocs(collection(db, 'posts'));
-    const postsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setPosts(postsData);
+  // Fetch relevant posts from Firestore with pagination
+  const fetchPosts = async (lastPost = null) => {
+    if (loading) return; // Prevent multiple fetches while already loading
+
+    setLoading(true);
+    try {
+      const q = lastPost
+        ? query(
+            collection(db, 'posts'),
+            orderBy('likes', 'desc'),
+            orderBy('createdAt', 'desc'),
+            startAfter(lastPost),
+            limit(7) // Fetch 7 posts at a time
+          )
+        : query(collection(db, 'posts'), orderBy('likes', 'desc'), orderBy('createdAt', 'desc'), limit(7)); // Limit 7 posts initially
+
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const postsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+        // Filter out any duplicate posts that already exist in state
+        setPosts((prevPosts) => {
+          const postIds = prevPosts.map((post) => post.id);
+          const newPosts = postsData.filter((post) => !postIds.includes(post.id));
+          return [...prevPosts, ...newPosts]; // Append only non-duplicate posts
+        });
+
+        // Set the last visible post for pagination
+        const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+        setLastVisiblePost(lastVisible);
+      }
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+    } finally {
+      setLoading(false); // Ensure loading is reset
+    }
   };
 
+  // Handle Like functionality
   const handleLike = async (postId, currentLikes, likedBy) => {
     if (!currentUser) return; // Ensure user is logged in
 
     const postRef = doc(db, 'posts', postId);
-
-    // Check if the current user has already liked the post
     const hasLiked = likedBy.includes(currentUser.uid);
 
-    if (hasLiked) {
-      // If the user already liked, remove their like and remove their UID from 'likedBy'
-      await updateDoc(postRef, {
-        likes: currentLikes - 1,
-        likedBy: arrayRemove(currentUser.uid) // Remove user from likedBy
-      });
-    } else {
-      // If the user hasn't liked yet, add their like and add their UID to 'likedBy'
-      await updateDoc(postRef, {
-        likes: currentLikes + 1,
-        likedBy: arrayUnion(currentUser.uid) // Add user to likedBy
-      });
-    }
+    try {
+      if (hasLiked) {
+        // If already liked, remove the like
+        await updateDoc(postRef, {
+          likes: currentLikes - 1,
+          likedBy: arrayRemove(currentUser.uid), // Remove user from likedBy
+        });
+      } else {
+        // If not liked, add a like
+        await updateDoc(postRef, {
+          likes: currentLikes + 1,
+          likedBy: arrayUnion(currentUser.uid), // Add user to likedBy
+        });
+      }
 
-    fetchPosts();
+      // Update the post in the state without refetching all posts
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                likes: hasLiked ? currentLikes - 1 : currentLikes + 1,
+                likedBy: hasLiked
+                  ? post.likedBy.filter((uid) => uid !== currentUser.uid) // Remove user from likedBy
+                  : [...post.likedBy, currentUser.uid], // Add user to likedBy
+              }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error("Error updating likes: ", error);
+    }
   };
 
   const formatTimestamp = (timestamp) => {
@@ -80,9 +129,29 @@ export default function Page() {
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
 
+  // Infinite scroll logic
+  const handleObserver = (entries) => {
+    const [entry] = entries;
+    if (entry.isIntersecting && !loading && lastVisiblePost) {
+      fetchPosts(lastVisiblePost); // Fetch next set of posts when scroll reaches the end
+    }
+  };
+
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(); // Initial fetch
   }, []);
+
+  useEffect(() => {
+    if (observerRef.current) {
+      const observer = new IntersectionObserver(handleObserver, {
+        root: null,
+        rootMargin: '0px',
+        threshold: 1.0,
+      });
+      observer.observe(observerRef.current);
+      return () => observer.disconnect();
+    }
+  }, [lastVisiblePost, loading]);
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}>
@@ -94,7 +163,7 @@ export default function Page() {
 
               <h2 className="text-xl font-bold mb-2">Posts</h2>
               <ul>
-                {posts.map(post => (
+                {posts.map((post) => (
                   <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <img
@@ -118,7 +187,7 @@ export default function Page() {
                       </div>
                       <div
                         className={`flex items-center space-x-1 cursor-pointer ${
-                          (post.likedBy?.includes(currentUser?.uid)) ? 'text-purple-500' : ''
+                          post.likedBy?.includes(currentUser?.uid) ? 'text-purple-500' : ''
                         }`}
                         onClick={() => handleLike(post.id, post.likes, post.likedBy || [])}
                       >
@@ -133,6 +202,8 @@ export default function Page() {
                   </li>
                 ))}
               </ul>
+              <div ref={observerRef} className="h-4"></div> {/* Infinite scroll trigger */}
+              {loading && <div>Loading...</div>} {/* Show loading when fetching more posts */}
             </div>
           </div>
         </div>
