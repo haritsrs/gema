@@ -70,6 +70,7 @@ export default function Page() {
                         src={post.profilePicture || 'https://placehold.co/40x40'}
                         alt={`${post.username || 'User'}'s profile`}
                         className="rounded-full"
+                        style={{ width: '40px', height: '40px' }} // Add fixed size for profile picture
                       />
                       <div>
                         <div className="font-bold">

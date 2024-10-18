@@ -9,6 +9,8 @@ import { auth } from '../../firebase.js'; // Adjust the path if needed
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
   const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
+  const maxCharacters = 280; // Set your character limit here
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -22,6 +24,18 @@ export default function Posting({ onPostCreated }) {
   useEffect(() => {
     console.log(user);
   }, [user]);
+
+  const handleInputChange = (e) => {
+    const input = e.target.value;
+
+    // Check if character count exceeds the limit
+    if (input.length <= maxCharacters) {
+      setPostContent(input);
+      setError(''); // Clear error if within the limit
+    } else {
+      setError(`You can only enter up to ${maxCharacters} characters.`);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +53,7 @@ export default function Posting({ onPostCreated }) {
 
     try {
       const docRef = await addDoc(collection(db, 'posts'), newPost);
-      setPostContent('');
+      setPostContent(''); // Clear the input after submission
       onPostCreated(docRef.id);
     } catch (error) {
       console.error('Error adding document: ', error);
@@ -58,14 +72,16 @@ export default function Posting({ onPostCreated }) {
         className="w-full text-black p-2 border rounded-lg"
         rows="4"
         value={postContent}
-        onChange={(e) => setPostContent(e.target.value)}
+        onChange={handleInputChange}
         placeholder="What's on your mind?"
       />
+      {error && <div className="text-red-500">{error}</div>}
+      <div className="text-gray-500">
+        Character count: {postContent.length}/{maxCharacters}
+      </div>
       <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-900">
         Post
       </button>
-      {/* Add the share functionality somewhere here if needed */}
-      {/* <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleShare(postId)}>Share</div> */}
     </form>
   );
 }
