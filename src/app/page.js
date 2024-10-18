@@ -84,17 +84,13 @@ export default function Page() {
                         <FontAwesomeIcon icon={farComment} />
                         <span>Comment</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <FontAwesomeIcon icon={faRetweet} />
-                        <span>Share</span>
-                      </div>
                       <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleLike(post.id, post.likes)}>
                         <FontAwesomeIcon icon={faHeart} />
                         <span>{post.likes || 0}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <FontAwesomeIcon icon={faChartBar} />
-                        <span>View Stats</span>
+                        <FontAwesomeIcon icon={faRetweet} />
+                        <span>Share</span>
                       </div>
                     </div>
                   </li>
