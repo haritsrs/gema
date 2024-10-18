@@ -5,7 +5,9 @@ import { faHeart, faRetweet, faChartBar } from '@fortawesome/free-solid-svg-icon
 import { faComment as farComment } from '@fortawesome/free-regular-svg-icons';
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase.js';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'; // Import arrayUnion, arrayRemove
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../../firebase.js';
 import localFont from "next/font/local";
 import Posting from '../components/posting';
 
@@ -24,6 +26,16 @@ const geistMono = localFont({
 
 export default function Page() {
   const [posts, setPosts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Set up Firebase auth listener to get current user
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Fetch posts from Firestore
   const fetchPosts = async () => {
@@ -32,9 +44,28 @@ export default function Page() {
     setPosts(postsData);
   };
 
-  const handleLike = async (postId, currentLikes) => {
+  const handleLike = async (postId, currentLikes, likedBy) => {
+    if (!currentUser) return; // Ensure user is logged in
+
     const postRef = doc(db, 'posts', postId);
-    await updateDoc(postRef, { likes: currentLikes + 1 });
+
+    // Check if the current user has already liked the post
+    const hasLiked = likedBy.includes(currentUser.uid);
+
+    if (hasLiked) {
+      // If the user already liked, remove their like and remove their UID from 'likedBy'
+      await updateDoc(postRef, {
+        likes: currentLikes - 1,
+        likedBy: arrayRemove(currentUser.uid) // Remove user from likedBy
+      });
+    } else {
+      // If the user hasn't liked yet, add their like and add their UID to 'likedBy'
+      await updateDoc(postRef, {
+        likes: currentLikes + 1,
+        likedBy: arrayUnion(currentUser.uid) // Add user to likedBy
+      });
+    }
+
     fetchPosts();
   };
 
@@ -55,7 +86,7 @@ export default function Page() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}>
-      <div className="flex flex-col w-full md:w-2/3 max-w-3xl p-4"> {/* Updated max width */}
+      <div className="flex flex-col w-full md:w-2/3 max-w-3xl p-4">
         <div className="flex flex-col min-h-screen text-white">
           <div className="flex-1">
             <div className="space-y-4">
@@ -70,7 +101,7 @@ export default function Page() {
                         src={post.profilePicture || 'https://placehold.co/40x40'}
                         alt={`${post.username || 'User'}'s profile`}
                         className="rounded-full"
-                        style={{ width: '40px', height: '40px' }} // Add fixed size for profile picture
+                        style={{ width: '40px', height: '40px' }}
                       />
                       <div>
                         <div className="font-bold">
@@ -85,7 +116,12 @@ export default function Page() {
                         <FontAwesomeIcon icon={farComment} />
                         <span>Comment</span>
                       </div>
-                      <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleLike(post.id, post.likes)}>
+                      <div
+                        className={`flex items-center space-x-1 cursor-pointer ${
+                          (post.likedBy?.includes(currentUser?.uid)) ? 'text-purple-500' : ''
+                        }`}
+                        onClick={() => handleLike(post.id, post.likes, post.likedBy || [])}
+                      >
                         <FontAwesomeIcon icon={faHeart} />
                         <span>{post.likes || 0}</span>
                       </div>
