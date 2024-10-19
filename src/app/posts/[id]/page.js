@@ -170,7 +170,7 @@ export default function PostPage() {
 
   return (
     <div className="flex grow-1 w-full text-white p-4 items-center justify-center">
-      <div className="w-full bg-gray-800 p-6 rounded-lg">
+      <div className="w-full max-w-xl bg-gray-800 p-6 rounded-lg">
         {/* Post Display */}
         <div className="flex space-x-2">
           <img
