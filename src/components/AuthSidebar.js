@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithPopup, signInAnonymously, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword} from 'firebase/auth';
 import { auth } from '../../firebase';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { faMask } from '@fortawesome/free-solid-svg-icons';
+
 
 export default function AuthSidebar() {
   const [user, setUser] = useState(null);
@@ -79,11 +83,13 @@ export default function AuthSidebar() {
               Welcome to GEMA!
             </h2>
             
-            <button onClick={handleGoogleLogin} className="mt-2 w-full bg-gray-950 text-white px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-800 hover:bg-opacity-30 hover:outline-purple-800">
+            <button onClick={handleGoogleLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
+              <FontAwesomeIcon icon={faGoogle} className="mr-4" />
               Sign in with Google
             </button>
 
-            <button onClick={handleAnonymousLogin} className="mt-2 w-full bg-gray-950 text-white px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-800 hover:bg-opacity-30 hover:outline-purple-800">
+            <button onClick={handleAnonymousLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
+              <FontAwesomeIcon icon={faMask} className="mr-4" />
               Sign in Anonymously
             </button>
           </div>
@@ -99,18 +105,19 @@ export default function AuthSidebar() {
           {/* Email and Password input fields */}
           <div className="flex-col bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
             <div>
-              <span className="font-white">
-                  Email</span>
+              <span className="font-white font-sm">
+                  Email
+              </span>
               <input
                 type="email"
                 placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex w-full p-2 rounded-lg text-black text-sm outline outline-gray-700"
+                className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
               />
             </div>
             <div>
-              <span className="font-white">
+              <span className="font-white font-sm">
                 Password
               </span>
               <input
@@ -118,7 +125,7 @@ export default function AuthSidebar() {
                 placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="flex w-full p-2 rounded-lg text-black text-sm outline outline-gray-700"
+                className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
               />
             </div>
             

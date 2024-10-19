@@ -69,7 +69,7 @@ export default function Posting({ onPostCreated }) {
   return (
     <form onSubmit={handleSubmit} className="mb-6">
       <textarea
-        className="w-full text-black p-2 border rounded-lg outline outline-gray-700"
+        className="w-full text-black p-2 border rounded-lg outline outline-2 outline-gray-700 focus:outline-purple-800"
         rows="4"
         value={postContent}
         onChange={handleInputChange}
