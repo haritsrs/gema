@@ -137,6 +137,33 @@ export default function Page() {
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
+  
+  //Share Post Methods
+  const sharePost = (post) => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title || "Check out this post!",
+        text: post.content,
+        url: `${window.location.origin}/posts/${post.id}`,
+      })
+      .then(() => console.log('Post shared successfully'))
+      .catch((error) => console.error('Error sharing the post:', error));
+    } else {
+      copyToClipboard(post);
+    }
+  };
+  // If Web Share API not supported
+  const copyToClipboard = (post) => {
+    const postUrl = `${window.location.origin}/posts/${post.id}`;
+    
+    navigator.clipboard.writeText(postUrl)
+      .then(() => {
+        alert('Post URL copied to clipboard!');
+      })
+      .catch(() => {
+        alert('Failed to copy URL.');
+      });
+  };
 
   // Infinite scroll logic
   const handleObserver = (entries) => {
@@ -163,8 +190,8 @@ export default function Page() {
   }, [lastVisiblePost, loading, noMorePosts]);
 
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}>
-      <div className="flex flex-col w-full md:w-2/3 max-w-3xl p-4">
+    <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <div className="flex p-4 items-center justify-center">
         <div className="flex flex-col min-h-screen text-white">
           <div className="flex-1">
             <div className="space-y-4">
@@ -205,7 +232,7 @@ export default function Page() {
           <FontAwesomeIcon icon={faHeart} />
           <span>{post.likes || 0}</span>
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1" onClick={() => sharePost(post)}>
           <FontAwesomeIcon icon={faRetweet} />
           <span>Share</span>
         </div>

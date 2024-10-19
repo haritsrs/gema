@@ -107,7 +107,34 @@ export default function PostPage() {
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
-
+  
+  // Share post methods
+  const sharePost = (post) => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title || "Check out this post!",
+        text: post.content || "Take a look at this post on our platform!",
+        url: `${window.location.origin}/posts/${post.id}`,
+      })
+      .then(() => console.log('Post shared successfully'))
+      .catch((error) => console.error('Error sharing the post:', error));
+    } else {
+      copyToClipboard(post);
+    }
+  };
+  // if Web Share API not supported
+  const copyToClipboard = (postId) => {
+    const postUrl = `${window.location.origin}/posts/${postId}`;
+    
+    navigator.clipboard.writeText(postUrl)
+      .then(() => {
+        alert('Post URL copied to clipboard!');
+      })
+      .catch(() => {
+        alert('Failed to copy URL.');
+      });
+  };
+  
   // Fetch post data
   useEffect(() => {
     const currentPath = window.location.pathname;
@@ -142,7 +169,7 @@ export default function PostPage() {
   if (!post) return <div>Post not found</div>;
 
   return (
-    <div className="text-white p-4">
+    <div className="flex grow text-white p-4 items-center justify-center">
       <div className="bg-gray-800 p-6 rounded-lg">
         {/* Post Display */}
         <div className="flex space-x-2">
@@ -174,7 +201,7 @@ export default function PostPage() {
             <FontAwesomeIcon icon={faHeart} />
             <span>{post.likes || 0}</span>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1" onClick={() => sharePost(post)}>
             <FontAwesomeIcon icon={faRetweet} />
             <span>Share</span>
           </div>

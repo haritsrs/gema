@@ -50,7 +50,7 @@ export default function AuthSidebar() {
   };
 
   return (
-    <div className="bg-gray-800 mx-[5%] p-4 md:mx-0 rounded-lg">
+    <div className="mx-[5%] p-4 md:mx-0 rounded-lg">
       {user ? (
         <div>
           <h2 className="text-xl text-white">Welcome, {user.displayName || 'User'}!</h2>

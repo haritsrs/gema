@@ -35,34 +35,42 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen">
 
-          <aside className="hidden md:block fixed top-0 left-0 h-full w-40 bg-purple-800 text-white p-4">
+          <aside className="hidden md:block fixed top-0 left-0 h-full w-max bg-purple-800 text-white p-4">
             <Sidebar />
           </aside>
           
 
-          <div className="w-full bg-gray-900 justify-center flex-grow overflow-y-auto mb-10 md:mb-0 md:mx-[5%]">
+          <div className="parent-div flex-col grow bg-gray-900 items-center justify-center overflow-y-auto mb-10 md:mb-0 md:pl-40">
              <div className="md:mx-[18%] p-4 flex items-center justify-between">
                 <img src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
 
-                <FontAwesomeIcon icon={faUserCircle} className="hidden md:block text-white h-16 text-2xl" />
-
-                <button className="md:hidden text-white text-3xl hover:text-purple-800" onClick={toggleVisibility}>
-                  <FontAwesomeIcon icon={faUserCircle} className="md:hidden" />
+                <button className="text-white text-3xl hover:text-purple-800" onClick={toggleVisibility}>
+                  <FontAwesomeIcon icon={faUserCircle} />
                 </button>
              </div>
 
-            <div className="md:mx-4 flex-col md:flex">
-                {isVisible && (
-                <AuthSidebar />
-                )}
+            <div className="flex-col md:flex md:grow md:p-4 w-full">
                 {children}
             </div>
 
           </div>
 
-          <aside className="hidden md:block fixed top-0 right-0 h-full w-40 bg-gray-950 text-white p-4">
-            <AuthSidebar />
-          </aside>
+          {isVisible &&(
+            <div className="fixed flex z-50 fixed h-screen w-screen bg-gray-950 bg-opacity-85 text-white p-4 justify-center">
+
+              <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-lg overflow-y-auto">
+
+                <button className="absolute text-bold text-white top-2 right-2 w-8 h-8 rounded-xl bg-gray-800" onClick={toggleVisibility}>
+                  x
+                </button>
+
+                <AuthSidebar />
+
+              </div>
+
+
+            </div>
+          )}
          
 
           {/* Mobile Navbar */}
