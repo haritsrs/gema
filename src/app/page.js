@@ -191,9 +191,9 @@ export default function Page() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <div className="flex p-4 items-center justify-center">
-        <div className="flex flex-col min-h-screen text-white">
-          <div className="flex-1">
+      <div className="flex grow p-4 items-center justify-center">
+        <div className="flex-col min-h-screen text-white">
+          <div className="flex">
             <div className="space-y-4">
               <Posting onPostCreated={fetchPosts} />
 

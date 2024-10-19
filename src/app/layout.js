@@ -49,16 +49,14 @@ export default function RootLayout({ children }) {
                 </button>
              </div>
 
-            <div className="flex-col md:flex md:grow md:p-4 w-full">
-                {children}
-            </div>
+            {children}
 
           </div>
 
           {isVisible &&(
             <div className="fixed flex z-50 fixed h-screen w-screen bg-gray-950 bg-opacity-85 text-white p-4 justify-center">
 
-              <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-lg overflow-y-auto">
+              <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl overflow-y-auto">
 
                 <button className="absolute text-bold text-white top-2 right-2 w-8 h-8 rounded-xl bg-gray-800" onClick={toggleVisibility}>
                   x
