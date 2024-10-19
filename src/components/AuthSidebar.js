@@ -71,7 +71,7 @@ export default function AuthSidebar() {
       {user ? (
         <div>
           <h2 className="text-xl text-white">Welcome, {user.displayName || 'User'}!</h2>
-          <button onClick={handleSignOut} className="mt-2 w-full bg-red-500 text-white px-4 py-2 rounded">
+          <button onClick={handleSignOut} className="mt-2 w-full bg-purple-800  text-white px-4 py-2 rounded-lg hover:bg-red-300 hover:text-red-700">
             Sign Out
           </button>
         </div>
@@ -132,11 +132,11 @@ export default function AuthSidebar() {
             <div className="py-4 items-center justify-center">
               {/* Toggle between Sign In and Sign Up */}
               {isSignUp ? (
-                <button onClick={handleEmailSignUp} className="p-2 text-center bg-purple-800 w-full rounded-lg">
+                <button onClick={handleEmailSignUp} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
                   Sign Up
                 </button>
               ) : (
-                <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg">
+                <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
                   Sign In
                 </button>
               )}

@@ -79,7 +79,7 @@ export default function Posting({ onPostCreated }) {
       <div className="text-gray-500">
         Character count: {postContent.length}/{maxCharacters}
       </div>
-      <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-900">
+      <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-300 hover:text-purple-800">
         Post
       </button>
     </form>
