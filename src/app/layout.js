@@ -47,8 +47,8 @@ export default function RootLayout({ children }) {
 
               <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
 
-                <button className="absolute text-bold text-white top-2 right-2 w-8 h-8 rounded-xl bg-gray-800" onClick={toggleVisibility}>
-                  x
+                <button className="absolute top-2 right-2" onClick={toggleVisibility}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeWidth={1.5}><circle cx={12} cy={12} r={10} opacity={0.5}></circle><path strokeLinecap="round" d="m14.5 9.5l-5 5m0-5l5 5"></path></g></svg>
                 </button>
 
                 <AuthSidebar />
@@ -58,12 +58,12 @@ export default function RootLayout({ children }) {
 
         <div className="flex min-h-screen">
 
-          <div className="hidden md:block fixed top-16 left-2 h-full w-30 items-center justify-center bg-gray-950 outline outline-3 rounded-lg outline-gray-700 hover:outline-purple-800 text-white p-4 m-4">
-            <Sidebar />
+          <div className="hidden md:block fixed top-16 h-full w-max items-center justify-center bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 text-white px-4">
+              <Sidebar />
           </div>
           
 
-          <div className="py-16 flex-col grow items-center justify-center focus:overflow-y-auto md:pb-0">
+          <div className="flex flex-col grow items-center py-16 justify-center overflow-y-auto md:pb-0">
             {children}
           </div>
          
@@ -72,10 +72,7 @@ export default function RootLayout({ children }) {
           <div className="md:hidden fixed bg-gray-900 bottom-0 left-0 w-screen h-max items-center text-white p-2 border border-t-1 border-gray-800">
             <Sidebar />
           </div> 
-        </div>
-
-        
-
+        </div> 
       </body>
     </html>
   );
