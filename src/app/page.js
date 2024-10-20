@@ -126,7 +126,6 @@ export default function Page() {
     }
   };
   
-
   const formatTimestamp = (timestamp) => {
     if (!timestamp || !timestamp.toDate) return "Unknown";
     const now = new Date();
@@ -138,7 +137,7 @@ export default function Page() {
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
   
-  //Share Post Methods
+  // Share Post Methods
   const sharePost = (post) => {
     if (navigator.share) {
       navigator.share({
@@ -152,6 +151,7 @@ export default function Page() {
       copyToClipboard(post);
     }
   };
+  
   // If Web Share API not supported
   const copyToClipboard = (post) => {
     const postUrl = `${window.location.origin}/posts/${post.id}`;
@@ -193,58 +193,65 @@ export default function Page() {
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <div className="flex grow items-center justify-center">
         <div className="flex-col p-4 w-full max-w-xl min-h-screen text-white">
-            <div className="space-y-4">
-              <Posting onPostCreated={fetchPosts} />
+          <div className="space-y-4">
+            <Posting onPostCreated={fetchPosts} />
 
-              <h2 className="text-xl font-bold mb-2">Posts</h2>
-              <ul>
-  {posts.map((post) => (
-    <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded-lg">
-      <Link href={`/posts/${post.id}`}>
-        <div className="flex space-x-2 cursor-pointer">
-          <img
-            src={post.profilePicture || 'https://placehold.co/40x40'}
-            alt={`${post.username || 'User'}'s profile`}
-            className="rounded-full"
-            style={{ width: '40px', height: '40px' }}
-          />
-          <div>
-            <div className="font-bold">
-              {post.username || 'User'}{' '}
-              <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
-            </div>
-            <div>{post.content}</div>
+            <h2 className="text-xl font-bold mb-2">Posts</h2>
+            <ul>
+              {posts.map((post) => (
+                <li key={post.id} className="mb-4 text-white p-4 bg-gray-800 rounded-lg">
+                  <Link href={`/posts/${post.id}`}>
+                    <div className="flex space-x-2 cursor-pointer">
+                      <img
+                        src={post.profilePicture || 'https://placehold.co/40x40'}
+                        alt={`${post.username || 'User'}'s profile`}
+                        className="rounded-full"
+                        style={{ width: '40px', height: '40px' }}
+                      />
+                      <div>
+                        <div className="font-bold">
+                          {post.username || 'User'}{' '}
+                          <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
+                        </div>
+                        <div>{post.content}</div>
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="flex items-center justify-evenly text-gray-500 mt-2">
+                    <div className="flex items-center space-x-1">
+                      <FontAwesomeIcon icon={farComment} />
+                      <span>Comment</span>
+                    </div>
+                    <div
+                      className={`flex items-center space-x-1 cursor-pointer ${
+                        post.likedBy?.includes(currentUser?.uid) ? 'text-purple-500' : ''
+                      }`}
+                      onClick={() => handleLike(post.id, post.likes, post.likedBy)}
+                    >
+                      <FontAwesomeIcon icon={faHeart} />
+                      <span>{post.likes || 0}</span>
+                    </div>
+                    <div
+                      className="flex items-center space-x-1 cursor-pointer"
+                      onClick={() => sharePost(post)}
+                    >
+                      <FontAwesomeIcon icon={faRetweet} />
+                      <span>Share</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <FontAwesomeIcon icon={faChartBar} />
+                      <span>Stats</span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-      </Link>
-      <div className="flex items-center justify-evenly text-gray-500 mt-2">
-        <div className="flex items-center space-x-1">
-          <FontAwesomeIcon icon={farComment} />
-          <span>Comment</span>
-        </div>
-        <div
-          className={`flex items-center space-x-1 cursor-pointer ${
-            post.likedBy?.includes(currentUser?.uid) ? 'text-purple-500' : ''
-          }`}
-          onClick={() => handleLike(post.id, post.likes, post.likedBy || [])}
-        >
-          <FontAwesomeIcon icon={faHeart} />
-          <span>{post.likes || 0}</span>
-        </div>
-        <div className="flex items-center space-x-1" onClick={() => sharePost(post)}>
-          <FontAwesomeIcon icon={faRetweet} />
-          <span>Share</span>
+          <div ref={observerRef} style={{ height: '1px' }}></div>
+          {loading && <div>Loading...</div>}
+          {noMorePosts && <div>No more posts to load.</div>}
         </div>
       </div>
-    </li>
-  ))}
-</ul>
-              <div ref={observerRef} className="h-10"></div> {/* This div triggers infinite scroll */}
-              {loading && <p>Loading more posts...</p>}
-              {noMorePosts && <p>No more posts to load.</p>}
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
   );
 }
