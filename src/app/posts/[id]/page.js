@@ -188,7 +188,7 @@ export default function PostPage() {
           </div>
         </div>
         <div className="flex items-center justify-center text-gray-500 mt-2">
-          <button className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 w-40 items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`} onClick={() => handleLike(postId, post.likes, post.likedBy || [])}>
+          <button className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 w-40 items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`} onClick={() => handleLike(postId, post.likes, post.likedBy || [])}>
             <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
               <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663">
               </path>
@@ -196,7 +196,7 @@ export default function PostPage() {
             <span>{post.likes || 0}</span>
           </button>
 
-          <button className="flex items-center cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-lg p-2 mr-2 w-40 space-x-1 items-center justify-center" onClick={() => sharePost(post)}>
+          <button className="flex cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md p-2 mr-2 w-40 space-x-1 items-center justify-center" onClick={() => sharePost(post)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
               <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5}>
               </path>
@@ -225,7 +225,7 @@ export default function PostPage() {
           )}
 
           {/* Comment Input */}
-          <form onSubmit={handleCommentSubmit} className="mt-4 flex">
+          <form onSubmit={handleCommentSubmit} className="mt-4 flex drop-shadow-md">
             <input
               type="text"
               value={newComment}
@@ -235,7 +235,7 @@ export default function PostPage() {
             />
             <button
               type="submit"
-              className="bg-purple-500 p-2 rounded-r-lg text-white"
+              className="bg-purple-800 active:bg-purple-500 p-2 rounded-r-lg text-white"
             >
               Submit
             </button>
