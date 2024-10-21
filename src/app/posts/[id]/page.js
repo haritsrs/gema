@@ -11,6 +11,7 @@ import {
   arrayRemove,
   addDoc,
   collection,
+  onSnapshot,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
@@ -70,56 +71,48 @@ export default function PostPage() {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-
+  
     try {
       const commentRef = collection(db, "posts", postId, "comments");
       await addDoc(commentRef, {
         userId: currentUser.uid,
         username: currentUser.displayName || "Anonymous",
         content: newComment,
-        createdAt: new Date(),
+        createdAt: new Date(), // Ensure the createdAt is set here
       });
-      setComments((prevComments) => [
-        ...prevComments,
-        {
-          userId: currentUser.uid,
-          username: currentUser.displayName || "Anonymous",
-          content: newComment,
-          createdAt: new Date(),
-        },
-      ]);
       setNewComment(""); // Reset comment input after submission
     } catch (error) {
       console.error("Error submitting comment:", error);
     }
-  };
+  }
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
-    if (!timestamp || !timestamp.toDate) return "Unknown";
+    if (!timestamp) return "Unknown";
     const now = new Date();
     const secondsAgo = Math.floor((now - timestamp.toDate()) / 1000);
-
+  
     if (secondsAgo < 60) return `${secondsAgo}s ago`;
     if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
-  
+
   // Share post methods
   const sharePost = (post) => {
     if (navigator.share) {
       navigator.share({
         title: post.title || "Check out this post!",
         text: post.content || "Take a look at this post on our platform!",
-        url: `${window.location.origin}/posts/${post.id}`,
+        url: `${window.location.origin}/posts/${postId}`,
       })
       .then(() => console.log('Post shared successfully'))
       .catch((error) => console.error('Error sharing the post:', error));
     } else {
-      copyToClipboard(post);
+      copyToClipboard(postId);
     }
   };
+
   // if Web Share API not supported
   const copyToClipboard = (postId) => {
     const postUrl = `${window.location.origin}/posts/${postId}`;
@@ -133,7 +126,7 @@ export default function PostPage() {
       });
   };
   
-  // Fetch post data
+  // Fetch post data and comments
   useEffect(() => {
     const currentPath = window.location.pathname;
     const id = currentPath.split("/posts/")[1];
@@ -163,6 +156,21 @@ export default function PostPage() {
     }
   }, [postId]);
 
+  // Use onSnapshot to listen for changes in comments
+  useEffect(() => {
+    if (postId) {
+      const commentsRef = collection(db, "posts", postId, "comments");
+      const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
+        const commentsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setComments(commentsData); // Set comments data
+      });
+      return () => unsubscribe(); // Clean up the listener on component unmount
+    }
+  }, [postId]);
+
   if (loading) return <div>Loading...</div>;
   if (!post) return <div>Post not found</div>;
 
@@ -182,70 +190,65 @@ export default function PostPage() {
               {post.username || "User"}{" "}
               <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
             </div>
-            {post.imageUrl && ( 
-                          <img 
-                            src={post.imageUrl} 
-                            alt="Post image" 
-                            className="mt-2 w-full h-auto rounded-lg" 
-                          /> 
-                        )} 
+            {post.imageUrl && (
+              <img 
+                src={post.imageUrl} 
+                alt="Post image" 
+                className="mt-2 w-full h-auto rounded-lg" 
+              /> 
+            )}
             <div>{post.content}</div>
           </div>
         </div>
         <div className="flex items-center justify-center text-gray-500 mt-2">
-          <button className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 w-full items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`} onClick={() => handleLike(postId, post.likes, post.likedBy || [])}>
+          <button
+            className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 w-full items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`}
+            onClick={() => handleLike(postId, post.likes, post.likedBy || [])}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
-              <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663">
-              </path>
+              <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663"></path>
             </svg>
             <span>{post.likes || 0}</span>
           </button>
 
-          <button className="flex cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md p-2 mr-2 w-full space-x-1 items-center justify-center" onClick={() => sharePost(post)}>
+          <button 
+            className="flex cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md p-2 mr-2 w-full space-x-1 items-center justify-center" 
+            onClick={() => sharePost(post)}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
-              <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5}>
-              </path>
-              <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd">
-              </path>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 6.627 5.373 12 12 12 6.627 0 12-5.373 12-12S18.627 0 12 0zm-2 17.536V14h-2v-2h2v-2l3 3-3 3zm8-5h-2V5h2v7.536z"></path>
             </svg>
             <span>Share</span>
-        </button>
+          </button>
         </div>
 
         {/* Comments Section */}
-        <div className="mt-4">
-          <h3 className="text-xl">Comments</h3>
-          {comments.length > 0 ? (
-            comments.map((comment, index) => (
-              <div key={index} className="mt-2 p-2 bg-gray-700 rounded-lg">
-                <div className="font-bold">{comment.username}</div>
-                <div>{comment.content}</div>
-                <div className="text-gray-500 text-sm">
-                  {formatTimestamp(comment.createdAt)}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No comments yet.</p>
-          )}
+<div className="mt-4">
+  <h3 className="font-bold">Comments:</h3>
+  <ul className="list-disc pl-5">
+    {comments.map((comment) => (
+      <li key={comment.id} className="mt-2">
+        <strong>{comment.username}: </strong>
+        <span>{comment.content}</span>
+        <span className="text-gray-500"> · {formatTimestamp(comment.createdAt)}</span>
+      </li>
+    ))}
+  </ul>
+  {/* New Comment Input */}
+  {currentUser && (
+    <form onSubmit={handleCommentSubmit} className="flex mt-4">
+      <input
+        type="text"
+        value={newComment}
+        onChange={(e) => setNewComment(e.target.value)}
+        className="flex-grow bg-gray-800 rounded-lg p-2"
+        placeholder="Add a comment..."
+      />
+      <button type="submit" className="ml-2 bg-purple-600 text-white rounded-lg p-2">Post</button>
+    </form>
+  )}
+</div>
 
-          {/* Comment Input */}
-          <form onSubmit={handleCommentSubmit} className="mt-4 flex drop-shadow-md">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment"
-              className="flex-1 p-2 bg-gray-700 text-white rounded-l-lg"
-            />
-            <button
-              type="submit"
-              className="bg-purple-800 active:bg-purple-500 p-2 rounded-r-lg text-white"
-            >
-              Submit
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );
