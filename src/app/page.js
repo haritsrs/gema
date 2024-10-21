@@ -1,7 +1,5 @@
 "use client";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect, useRef } from 'react';
 import { db } from '../../firebase.js';
 import { collection, getDocs, doc, updateDoc, arrayUnion, arrayRemove, orderBy, limit, startAfter, query } from 'firebase/firestore';

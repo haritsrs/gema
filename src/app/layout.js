@@ -4,8 +4,6 @@ import "./globals.css";
 import Sidebar from '../components/sidebar';
 import AuthSidebar from '../components/AuthSidebar';
 import localFont from "next/font/local";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCircle} from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 
 const geistSans = localFont({

@@ -12,11 +12,9 @@ import {
   addDoc,
   collection,
 } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth"; // Import auth listener
-import { auth } from "../../../../firebase"; // Ensure your firebase.js exports auth
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../../firebase";
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart} from "@fortawesome/free-solid-svg-icons";
 
 export default function PostPage() {
   const router = useRouter();
