@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; 
 import Image from 'next/image';
+import Camera from '../components/camera';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -72,17 +73,17 @@ export default function Posting({ onPostCreated }) {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return;
     if (!user) return;
-
+  
     setLoading(true); // Set loading to true before uploading
-
+  
     let uploadedImageUrl = '';
     if (selectedImage) {
-      uploadedImageUrl = await uploadImage(selectedImage);
+      uploadedImageUrl = await uploadImage(selectedImage); // Ensure this returns the correct URL
     }
-
+  
     const newPost = {
       content: postContent,
-      imageUrl: uploadedImageUrl,
+      imageUrl: uploadedImageUrl, // Use the correct image URL
       createdAt: Timestamp.fromDate(new Date()),
       userId: user.uid,
       username: user.displayName || user.email,
@@ -90,7 +91,7 @@ export default function Posting({ onPostCreated }) {
       likes: 0,
       comments: []
     };
-
+  
     try {
       const docRef = await addDoc(collection(db, 'posts'), newPost);
       setPostContent('');
@@ -147,7 +148,10 @@ export default function Posting({ onPostCreated }) {
           </button>
         </div>
       )}
-      
+
+      {/* Include the Camera component for capturing images */}
+      <Camera setSelectedImage={setSelectedImage} setImageUrl={setImageUrl} />
+
       <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-300 hover:text-purple-800">
         Post
       </button>
