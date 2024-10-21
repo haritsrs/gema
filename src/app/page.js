@@ -211,6 +211,17 @@ export default function Page() {
                           <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
                         </div>
                         <div>{post.content}</div>
+
+                        {/* Image display feature */}
+
+                        {post.imageUrl && ( 
+                          <img 
+                            src={post.imageUrl} 
+                            alt="Post image" 
+                            className="mt-2 w-full h-auto rounded-lg" 
+                          /> 
+                        )} 
+
                       </div>
                     </div>
                   </Link>

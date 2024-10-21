@@ -182,6 +182,13 @@ export default function PostPage() {
               {post.username || "User"}{" "}
               <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
             </div>
+            {post.imageUrl && ( 
+                          <img 
+                            src={post.imageUrl} 
+                            alt="Post image" 
+                            className="mt-2 w-full h-auto rounded-lg" 
+                          /> 
+                        )} 
             <div>{post.content}</div>
           </div>
         </div>

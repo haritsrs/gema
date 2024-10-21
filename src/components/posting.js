@@ -4,17 +4,18 @@ import { db } from '../../firebase.js';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../firebase.js'; // Adjust the path if needed
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Firebase Storage
+import { auth } from '../../firebase.js';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; 
 import Image from 'next/image';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null); // Image upload state
-  const [imageUrl, setImageUrl] = useState(''); // Image URL after upload
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
-  const maxCharacters = 280; // Set your character limit here
+  const [loading, setLoading] = useState(false); // Loading state
+  const maxCharacters = 280; // Character limit
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -24,20 +25,18 @@ export default function Posting({ onPostCreated }) {
     return () => unsubscribe();
   }, []);
 
-  // Log user info when it's updated
   useEffect(() => {
     console.log(user);
   }, [user]);
 
   const storage = getStorage();
-  
+
   const handleInputChange = (e) => {
     const input = e.target.value;
 
-    // Check if character count exceeds the limit
     if (input.length <= maxCharacters) {
       setPostContent(input);
-      setError(''); // Clear error if within the limit
+      setError('');
     } else {
       setError(`You can only enter up to ${maxCharacters} characters.`);
     }
@@ -46,40 +45,44 @@ export default function Posting({ onPostCreated }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(file); // Set the selected image
-      setImageUrl(URL.createObjectURL(file)); // Create a URL for the image preview
+      setSelectedImage(file);
+      setImageUrl(URL.createObjectURL(file));
     }
   };
 
   const handleDeleteImage = () => {
-    setSelectedImage(null); // Clear selected image
-    setImageUrl(''); // Clear the preview URL
+    setSelectedImage(null);
+    setImageUrl('');
   };
 
   const uploadImage = async (file) => {
-  const storageRef = ref(storage, 'images/' + file.name); // Create a reference to your storage location
-  try {
-    await uploadBytes(storageRef, file); // Upload the file
-    console.log('File uploaded successfully');
-  } catch (error) {
-    console.error('Error uploading file:', error);
-  }
-};
+    const storageRef = ref(storage, 'images/' + file.name);
+    try {
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setError('Failed to upload image. Please try again.'); // Display error
+      return '';
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return;
     if (!user) return;
 
-    let uploadedImageUrl = '';
+    setLoading(true); // Set loading to true before uploading
 
+    let uploadedImageUrl = '';
     if (selectedImage) {
-      uploadedImageUrl = await uploadImage(selectedImage); // Upload image and get URL
+      uploadedImageUrl = await uploadImage(selectedImage);
     }
 
     const newPost = {
       content: postContent,
-      imageUrl: uploadedImageUrl, // Save image URL to Firestore
+      imageUrl: uploadedImageUrl,
       createdAt: Timestamp.fromDate(new Date()),
       userId: user.uid,
       username: user.displayName || user.email,
@@ -90,17 +93,22 @@ export default function Posting({ onPostCreated }) {
 
     try {
       const docRef = await addDoc(collection(db, 'posts'), newPost);
-      setPostContent(''); // Clear the input after submission
-      handleDeleteImage(); // Clear image after upload
+      setPostContent('');
+      handleDeleteImage();
       onPostCreated(docRef.id);
     } catch (error) {
       console.error('Error adding document: ', error);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="mb-6">
+      {loading && <p>Loading...</p>}
+      <label htmlFor="post-content" className="sr-only">Post Content</label>
       <textarea
+        id="post-content"
         className="w-full text-black p-2 border rounded-lg outline outline-2 outline-gray-700 focus:outline-purple-800"
         rows="4"
         value={postContent}
@@ -112,8 +120,9 @@ export default function Posting({ onPostCreated }) {
         Character count: {postContent.length}/{maxCharacters}
       </div>
 
-      {/* Image upload input */}
+      <label htmlFor="image-upload" className="sr-only">Upload Image</label>
       <input
+        id="image-upload"
         type="file"
         accept="image/*"
         capture="environment"
