@@ -12,7 +12,7 @@ import Camera from '../components/camera';
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState(''); // For preview
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false); // Loading state
@@ -47,13 +47,13 @@ export default function Posting({ onPostCreated }) {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(file);
-      setImageUrl(URL.createObjectURL(file));
+      setImageUrl(URL.createObjectURL(file)); // Display image preview
     }
   };
 
   const handleDeleteImage = () => {
     setSelectedImage(null);
-    setImageUrl('');
+    setImageUrl(''); // Remove preview
   };
 
   const uploadImage = async (file) => {
@@ -61,29 +61,29 @@ export default function Posting({ onPostCreated }) {
     try {
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
+      return downloadURL; // Return the uploaded image's URL
     } catch (error) {
       console.error('Error uploading file:', error);
-      setError('Failed to upload image. Please try again.'); // Display error
+      setError('Failed to upload image. Please try again.');
       return '';
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!postContent.trim() && !selectedImage) return;
+    if (!postContent.trim() && !selectedImage) return; // Require either content or an image
     if (!user) return;
-  
-    setLoading(true); // Set loading to true before uploading
-  
+
+    setLoading(true); // Set loading state while uploading
+
     let uploadedImageUrl = '';
     if (selectedImage) {
-      uploadedImageUrl = await uploadImage(selectedImage); // Ensure this returns the correct URL
+      uploadedImageUrl = await uploadImage(selectedImage); // Upload image and get URL
     }
-  
+
     const newPost = {
       content: postContent,
-      imageUrl: uploadedImageUrl, // Use the correct image URL
+      imageUrl: uploadedImageUrl, // Attach image URL if present
       createdAt: Timestamp.fromDate(new Date()),
       userId: user.uid,
       username: user.displayName || user.email,
@@ -91,12 +91,12 @@ export default function Posting({ onPostCreated }) {
       likes: 0,
       comments: []
     };
-  
+
     try {
       const docRef = await addDoc(collection(db, 'posts'), newPost);
-      setPostContent('');
-      handleDeleteImage();
-      onPostCreated(docRef.id);
+      setPostContent(''); // Clear content
+      handleDeleteImage(); // Clear image preview
+      onPostCreated(docRef.id); // Trigger callback for new post
     } catch (error) {
       console.error('Error adding document: ', error);
     } finally {
