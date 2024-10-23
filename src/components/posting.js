@@ -131,15 +131,16 @@ export default function Posting({ onPostCreated }) {
       </div>
       
       <div className="flex space-x-2 justify-start items-center">
-        <label htmlFor="image-upload" className="sr-only">Upload Image</label>
-        <input
+        <label htmlFor="image-upload" className="sr-only">
+        </label>
+          <input
           id="image-upload"
           type="file"
           accept="image/*"
           capture="environment"
           onChange={handleImageChange}
-          className="mt-2"
-        />
+          className=""
+          />
         <button onClick={handleOpenCamera} className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-500 active:fill-purple-500 rounded-lg drop-shadow-md">
           <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
             <path d="M14.793 3c.346 0 .682.12.95.34l.11.1L17.415 5H20a2 2 0 0 1 1.995 1.85L22 7v12a2 2 0 0 1-1.85 1.995L20 21H4a2 2 0 0 1-1.995-1.85L2 19V7a2 2 0 0 1 1.85-1.995L4 5h2.586l1.56-1.56c.245-.246.568-.399.913-.433L9.207 3z" className="duoicon-secondary-layer" opacity={0.5}>
