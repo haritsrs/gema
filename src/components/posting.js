@@ -7,7 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; 
 import Image from 'next/image';
-import Camera from '../components/camera';
+import Camera from '../components/Camera';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -15,6 +15,7 @@ export default function Posting({ onPostCreated }) {
   const [imageUrl, setImageUrl] = useState(''); // For preview
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
+  const [isCameraOpen,setIsCameraOpen] = useState (false);
   const [loading, setLoading] = useState(false); // Loading state
   const maxCharacters = 280; // Character limit
 
@@ -104,6 +105,14 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
+  const handleOpenCamera = () => {
+    setIsCameraOpen(true); // Opens the camera
+  };
+
+  const handleCloseCamera = () => {
+    setIsCameraOpen(false); // Closes the camera
+  };
+
   return (
     <form onSubmit={handleSubmit} className="mb-6">
       {loading && <p>Loading...</p>}
@@ -131,6 +140,14 @@ export default function Posting({ onPostCreated }) {
           onChange={handleImageChange}
           className="mt-2"
         />
+        <button onClick={handleOpenCamera} className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-500 active:fill-purple-500 rounded-lg drop-shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
+            <path d="M14.793 3c.346 0 .682.12.95.34l.11.1L17.415 5H20a2 2 0 0 1 1.995 1.85L22 7v12a2 2 0 0 1-1.85 1.995L20 21H4a2 2 0 0 1-1.995-1.85L2 19V7a2 2 0 0 1 1.85-1.995L4 5h2.586l1.56-1.56c.245-.246.568-.399.913-.433L9.207 3z" className="duoicon-secondary-layer" opacity={0.5}>
+            </path>
+            <path d="M12 7.5c-3.849 0-6.255 4.167-4.33 7.5A5 5 0 0 0 12 17.5c3.849 0 6.255-4.167 4.33-7.5A5 5 0 0 0 12 7.5" className="duoicon-primary-layer">
+            </path>
+          </svg>
+        </button>
       </div>
 
       {imageUrl && (
@@ -153,7 +170,9 @@ export default function Posting({ onPostCreated }) {
       )}
 
       {/* Include the Camera component for capturing images */}
-      <Camera setSelectedImage={setSelectedImage} setImageUrl={setImageUrl} />
+      {isCameraOpen && (
+        <Camera setSelectedImage={setSelectedImage} setImageUrl={setImageUrl} handleCloseCamera={handleCloseCamera} isCameraActive={isCameraOpen} />
+      )}
       
 
       <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-300 hover:text-purple-800">
