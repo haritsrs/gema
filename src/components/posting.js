@@ -120,16 +120,19 @@ export default function Posting({ onPostCreated }) {
       <div className="text-gray-500">
         Character count: {postContent.length}/{maxCharacters}
       </div>
+      
+      <div className="flex space-x-2 justify-start items-center">
+        <label htmlFor="image-upload" className="sr-only">Upload Image</label>
+        <input
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleImageChange}
+          className="mt-2"
+        />
+      </div>
 
-      <label htmlFor="image-upload" className="sr-only">Upload Image</label>
-      <input
-        id="image-upload"
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleImageChange}
-        className="mt-2 text-gray-700"
-      />
       {imageUrl && (
         <div className="relative mt-2">
           <Image
@@ -137,12 +140,12 @@ export default function Posting({ onPostCreated }) {
             alt="Selected"
             width={300}
             height={200}
-            className="object-cover rounded"
+            className="object-cover rounded-md"
           />
           <button 
             type="button" 
             onClick={handleDeleteImage} 
-            className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+            className="absolute top-0 right-0 bg-red-300 bg-opacity-80 text-red-800 rounded-full p-1"
           >
             X
           </button>
@@ -151,6 +154,7 @@ export default function Posting({ onPostCreated }) {
 
       {/* Include the Camera component for capturing images */}
       <Camera setSelectedImage={setSelectedImage} setImageUrl={setImageUrl} />
+      
 
       <button type="submit" className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-300 hover:text-purple-800">
         Post
