@@ -8,6 +8,7 @@ import { auth } from '../../firebase.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; 
 import Image from 'next/image';
 import Camera from '../components/Camera';
+import * as nsfwjs from 'nsfwjs';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -92,6 +93,25 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
+  const checkImageForNSFW = async (image) => {
+    const model = await nsfwjs.load();
+    const imageElement = document.createElement('img');
+    imageElement.src = URL.createObjectURL(image);
+    
+    return new Promise((resolve) => {
+      imageElement.onload = async () => {
+        const predictions = await model.classify(imageElement);
+        const isNSFW = predictions.some(prediction => prediction.className === 'Porn' && prediction.probability > 0.8);
+        resolve(isNSFW);
+      };
+      
+      // Handle errors in loading the image
+      imageElement.onerror = () => {
+        resolve(false); // Consider it safe if the image fails to load
+      };
+    });
+  };  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return; // Require either content or an image
@@ -101,7 +121,13 @@ export default function Posting({ onPostCreated }) {
 
     let uploadedImageUrl = '';
     if (selectedImage) {
-      uploadedImageUrl = await uploadImage(selectedImage); // Upload image and get URL
+      const nsfwDetected = await checkImageForNSFW(selectedImage);
+      if (nsfwDetected) {
+        setError('NSFW content detected. Please upload a different image.');
+        setLoading(false);
+        return;
+      }
+      uploadedImageUrl = await uploadImage(selectedImage);
     }
 
     const newPost = {
