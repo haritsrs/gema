@@ -60,10 +60,31 @@ export default function Posting({ onPostCreated }) {
 
   const uploadImage = async (file) => {
     const storageRef = ref(storage, 'images/' + file.name);
+  
     try {
-      await uploadBytes(storageRef, file);
+      // Send file to Sharp API for processing
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      const response = await fetch('/api/sharp', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        setError('Image compression failed.');
+        return '';
+      }
+  
+      // Get optimized image from Sharp API
+      const optimizedImageBlob = await response.blob();
+      const optimizedFile = new File([optimizedImageBlob], file.name, { type: 'image/jpeg' });
+  
+      // Upload optimized image to Firebase Storage
+      await uploadBytes(storageRef, optimizedFile);
       const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL; // Return the uploaded image's URL
+      return downloadURL;
+  
     } catch (error) {
       console.error('Error uploading file:', error);
       setError('Failed to upload image. Please try again.');
