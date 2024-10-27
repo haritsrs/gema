@@ -202,31 +202,17 @@ export default function Page() {
   };
 
   // Optimized share functionality
-  const sharePost = async (post) => {
-    const postUrl = `${window.location.origin}/posts/${post.id}`;
-    
+  const sharePost = (post) => {
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: post.title || "Check out this post!",
-          text: post.content,
-          url: postUrl,
-        });
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Error sharing the post:', error);
-          await navigator.clipboard.writeText(postUrl);
-          alert('Post URL copied to clipboard!');
-        }
-      }
+      navigator.share({
+        title: post.title || "Check out this post!",
+        text: post.content || "Take a look at this post on our platform!",
+        url: `${window.location.origin}/posts/${postId}`,
+      })
+      .then(() => console.log('Post shared successfully'))
+      .catch((error) => console.error('Error sharing the post:', error));
     } else {
-      try {
-        await navigator.clipboard.writeText(postUrl);
-        alert('Post URL copied to clipboard!');
-      } catch (error) {
-        console.error('Failed to copy URL:', error);
-        alert('Failed to copy URL.');
-      }
+      copyToClipboard(postId);
     }
   };
 

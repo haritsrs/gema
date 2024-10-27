@@ -2,17 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../../firebase";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  addDoc,
-  collection,
-  onSnapshot,
-} from "firebase/firestore";
+import { database } from "../../../../firebase"; // Update this import to reference your realtime database
+import { ref, get, set, push, onValue, off } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
 import Link from "next/link";
@@ -29,38 +20,31 @@ export default function PostPage() {
   // Listen for authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user); // Set the logged-in user
+      setCurrentUser(user);
     });
-    return () => unsubscribe(); // Clean up the listener on component unmount
+    return () => unsubscribe();
   }, []);
 
   // Handle Like Button Click
   const handleLike = async (postId, currentLikes, likedBy = []) => {
-    if (!currentUser) return; // Ensure user is logged in
+    if (!currentUser) return;
 
-    const postRef = doc(db, "posts", postId);
+    const postRef = ref(database, `posts/${postId}`);
     const hasLiked = likedBy.includes(currentUser.uid);
 
     try {
-      if (hasLiked) {
-        await updateDoc(postRef, {
-          likes: currentLikes - 1,
-          likedBy: arrayRemove(currentUser.uid),
-        });
-      } else {
-        await updateDoc(postRef, {
-          likes: currentLikes + 1,
-          likedBy: arrayUnion(currentUser.uid),
-        });
-      }
+      const updatedLikedBy = hasLiked
+        ? likedBy.filter(uid => uid !== currentUser.uid)
+        : [...likedBy, currentUser.uid];
 
-      // Update the post state locally to reflect like/unlike
-      setPost((prevPost) => ({
+      await set(ref(database, `posts/${postId}/likes`), hasLiked ? (currentLikes - 1) : (currentLikes + 1));
+      await set(ref(database, `posts/${postId}/likedBy`), updatedLikedBy);
+
+      // Update the post state locally
+      setPost(prevPost => ({
         ...prevPost,
         likes: hasLiked ? currentLikes - 1 : currentLikes + 1,
-        likedBy: hasLiked
-          ? prevPost.likedBy.filter((uid) => uid !== currentUser.uid)
-          : [...prevPost.likedBy, currentUser.uid],
+        likedBy: updatedLikedBy,
       }));
     } catch (error) {
       console.error("Error updating likes: ", error);
@@ -71,27 +55,31 @@ export default function PostPage() {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-  
+
     try {
-      const commentRef = collection(db, "posts", postId, "comments");
-      await addDoc(commentRef, {
+      const commentsRef = ref(database, `posts/${postId}/comments`);
+      const newCommentRef = push(commentsRef);
+      
+      await set(newCommentRef, {
         userId: currentUser.uid,
         username: currentUser.displayName || "Anonymous",
         content: newComment,
-        createdAt: new Date(), // Ensure the createdAt is set here
+        createdAt: new Date().toISOString(),
       });
-      setNewComment(""); // Reset comment input after submission
+      
+      setNewComment("");
     } catch (error) {
       console.error("Error submitting comment:", error);
     }
-  }
+  };
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
+    const date = new Date(timestamp);
     const now = new Date();
-    const secondsAgo = Math.floor((now - timestamp.toDate()) / 1000);
-  
+    const secondsAgo = Math.floor((now - date) / 1000);
+
     if (secondsAgo < 60) return `${secondsAgo}s ago`;
     if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
@@ -113,7 +101,6 @@ export default function PostPage() {
     }
   };
 
-  // if Web Share API not supported
   const copyToClipboard = (postId) => {
     const postUrl = `${window.location.origin}/posts/${postId}`;
     
@@ -125,8 +112,8 @@ export default function PostPage() {
         alert('Failed to copy URL.');
       });
   };
-  
-  // Fetch post data and comments
+
+  // Get postId from URL
   useEffect(() => {
     const currentPath = window.location.pathname;
     const id = currentPath.split("/posts/")[1];
@@ -135,39 +122,48 @@ export default function PostPage() {
     }
   }, []);
 
+  // Fetch post data and listen for updates
   useEffect(() => {
     if (postId) {
-      const fetchPost = async () => {
-        try {
-          const postRef = doc(db, "posts", postId);
-          const postSnap = await getDoc(postRef);
-          if (postSnap.exists()) {
-            setPost(postSnap.data());
-          } else {
-            console.error("No such document!");
-          }
-        } catch (error) {
-          console.error("Error fetching post:", error);
-        } finally {
-          setLoading(false);
+      const postRef = ref(database, `posts/${postId}`);
+      
+      // Set up listener for post data
+      onValue(postRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const postData = snapshot.val();
+          setPost(postData);
+        } else {
+          console.error("No such post!");
         }
-      };
-      fetchPost();
+        setLoading(false);
+      });
+
+      // Clean up listener
+      return () => off(postRef);
     }
   }, [postId]);
 
-  // Use onSnapshot to listen for changes in comments
+  // Listen for comments updates
   useEffect(() => {
     if (postId) {
-      const commentsRef = collection(db, "posts", postId, "comments");
-      const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
-        const commentsData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setComments(commentsData); // Set comments data
+      const commentsRef = ref(database, `posts/${postId}/comments`);
+      
+      onValue(commentsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const commentsData = [];
+          snapshot.forEach((childSnapshot) => {
+            commentsData.push({
+              id: childSnapshot.key,
+              ...childSnapshot.val()
+            });
+          });
+          setComments(commentsData);
+        } else {
+          setComments([]);
+        }
       });
-      return () => unsubscribe(); // Clean up the listener on component unmount
+
+      return () => off(commentsRef);
     }
   }, [postId]);
 
@@ -195,7 +191,7 @@ export default function PostPage() {
                 src={post.imageUrl} 
                 alt="Post image" 
                 className="mt-2 w-full h-auto rounded-lg" 
-              /> 
+              />
             )}
             <div>{post.content}</div>
           </div>
@@ -223,32 +219,31 @@ export default function PostPage() {
         </div>
 
         {/* Comments Section */}
-<div className="mt-4">
-  <h3 className="font-bold">Comments:</h3>
-  <ul className="list-disc pl-5">
-    {comments.map((comment) => (
-      <li key={comment.id} className="mt-2">
-        <strong>{comment.username}: </strong>
-        <span>{comment.content}</span>
-        <span className="text-gray-500"> · {formatTimestamp(comment.createdAt)}</span>
-      </li>
-    ))}
-  </ul>
-  {/* New Comment Input */}
-  {currentUser && (
-    <form onSubmit={handleCommentSubmit} className="flex mt-4">
-      <input
-        type="text"
-        value={newComment}
-        onChange={(e) => setNewComment(e.target.value)}
-        className="flex-grow bg-gray-800 rounded-lg p-2"
-        placeholder="Add a comment..."
-      />
-      <button type="submit" className="ml-2 bg-purple-600 text-white rounded-lg p-2">Post</button>
-    </form>
-  )}
-</div>
-
+        <div className="mt-4">
+          <h3 className="font-bold">Comments:</h3>
+          <ul className="list-disc pl-5">
+            {comments.map((comment) => (
+              <li key={comment.id} className="mt-2">
+                <strong>{comment.username}: </strong>
+                <span>{comment.content}</span>
+                <span className="text-gray-500"> · {formatTimestamp(comment.createdAt)}</span>
+              </li>
+            ))}
+          </ul>
+          {/* New Comment Input */}
+          {currentUser && (
+            <form onSubmit={handleCommentSubmit} className="flex mt-4">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="flex-grow bg-gray-800 rounded-lg p-2"
+                placeholder="Add a comment..."
+              />
+              <button type="submit" className="ml-2 bg-purple-600 text-white rounded-lg p-2">Post</button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
