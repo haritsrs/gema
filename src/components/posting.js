@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
 import Image from 'next/image';
 import Camera from '../components/Camera';
+import LoadingOverlay from './LoadingOverlay'; // Add this import
 import * as nsfwjs from 'nsfwjs';
 
 export default function Posting({ onPostCreated }) {
@@ -163,7 +164,8 @@ export default function Posting({ onPostCreated }) {
 
   return (
     <form onSubmit={handleSubmit} className="mb-6">
-      {loading && <p>Loading...</p>}
+      <div className="relative"></div>
+      <LoadingOverlay isLoading={loading} />
       <label htmlFor="post-content" className="sr-only">Post Content</label>
       <textarea
         id="post-content"
@@ -217,7 +219,7 @@ export default function Posting({ onPostCreated }) {
         </div>
       )}
 
-      {isUploaderVisible && !isCameraOpen && (
+{isUploaderVisible && !isCameraOpen && !imageUrl && (
         <div className="flex items-center justify-center w-full mt-2">
           <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-64 border border-gray-500 rounded-lg cursor-pointer bg-gray-950 hover:border-purple-800 hover:bg-purple-300 hover:bg-opacity-30 fill-gray-400 hover:fill-purple-500 text-gray-400 hover:text-purple-500">
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
