@@ -8,6 +8,7 @@ import { auth } from '../../firebase.js';
 import localFont from "next/font/local";
 import Posting from '../components/posting';
 import Link from 'next/link';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -60,62 +61,67 @@ export default function Page() {
     return () => unsubscribe();
   }, []);
 
-  // Real-time posts listener with deduplication
-  useEffect(() => {
-    const recentPostsQuery = query(
-      postsRef.current,
-      orderByChild('createdAt'),
-      limitToLast(20)
-    );
+  // In your real-time posts listener useEffect
+useEffect(() => {
+  const recentPostsQuery = query(
+    postsRef.current,
+    orderByChild('createdAt'),
+    limitToLast(20)
+  );
 
-    const handleNewPosts = (snapshot) => {
-      if (!snapshot.exists()) return;
+  const handleNewPosts = (snapshot) => {
+    if (!snapshot.exists()) {
+      setInitialLoading(false);
+      return;
+    }
 
-      const postsData = [];
-      snapshot.forEach((childSnapshot) => {
-        postsData.unshift({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
-        });
+    const postsData = [];
+    snapshot.forEach((childSnapshot) => {
+      postsData.unshift({
+        id: childSnapshot.key,
+        ...childSnapshot.val()
       });
+    });
 
-      // Deduplicate posts
-      setPosts(prevPosts => {
-        const uniquePosts = postsData.filter(
-          newPost => !prevPosts.some(existingPost => existingPost.id === newPost.id)
-        );
-        
-        if (uniquePosts.length === 0) return prevPosts;
-        
-        const mergedPosts = [...prevPosts];
-        uniquePosts.forEach(newPost => {
-          const existingIndex = mergedPosts.findIndex(p => p.id === newPost.id);
-          if (existingIndex !== -1) {
-            mergedPosts[existingIndex] = newPost;
-          } else {
-            mergedPosts.unshift(newPost);
-          }
-        });
-
-        return sortPostsByRelevancy(mergedPosts);
+    setPosts(prevPosts => {
+      const uniquePosts = postsData.filter(
+        newPost => !prevPosts.some(existingPost => existingPost.id === newPost.id)
+      );
+      
+      if (uniquePosts.length === 0) return prevPosts;
+      
+      const mergedPosts = [...prevPosts];
+      uniquePosts.forEach(newPost => {
+        const existingIndex = mergedPosts.findIndex(p => p.id === newPost.id);
+        if (existingIndex !== -1) {
+          mergedPosts[existingIndex] = newPost;
+        } else {
+          mergedPosts.unshift(newPost);
+        }
       });
 
       setInitialLoading(false);
-      
-      const lastPost = postsData[postsData.length - 1];
-      if (lastPost) {
-        setLastVisibleTimestamp(lastPost.createdAt);
-      }
-    };
+      return sortPostsByRelevancy(mergedPosts);
+    });
+    
+    const lastPost = postsData[postsData.length - 1];
+    if (lastPost) {
+      setLastVisibleTimestamp(lastPost.createdAt);
+    }
+  };
 
-    const unsubscribe = onValue(recentPostsQuery, handleNewPosts);
-    return () => unsubscribe();
-  }, []);
+  setInitialLoading(true); 
+  const unsubscribe = onValue(recentPostsQuery, handleNewPosts);
+  return () => {
+    unsubscribe();
+    setInitialLoading(false);
+  };
+}, []);
 
   // Optimized fetch older posts function
   const fetchOlderPosts = async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
-
+  
     setLoading(true);
     try {
       const olderPostsQuery = query(
@@ -124,13 +130,14 @@ export default function Page() {
         startAt(lastVisibleTimestamp),
         limitToLast(7)
       );
-
+  
       const snapshot = await get(olderPostsQuery);
       if (!snapshot.exists()) {
         setNoMorePosts(true);
+        setLoading(false); // Make sure to set loading to false here
         return;
       }
-
+  
       const olderPosts = [];
       snapshot.forEach((childSnapshot) => {
         olderPosts.unshift({
@@ -138,7 +145,7 @@ export default function Page() {
           ...childSnapshot.val()
         });
       });
-
+  
       setPosts(prevPosts => {
         const uniqueOlderPosts = olderPosts.filter(
           newPost => !prevPosts.some(existingPost => existingPost.id === newPost.id)
@@ -148,18 +155,18 @@ export default function Page() {
           setNoMorePosts(true);
           return prevPosts;
         }
-
+  
         const lastPost = uniqueOlderPosts[uniqueOlderPosts.length - 1];
         if (lastPost) {
           setLastVisibleTimestamp(lastPost.createdAt);
         }
-
+  
         return [...prevPosts, ...uniqueOlderPosts];
       });
     } catch (error) {
       console.error("Error fetching older posts:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Make sure loading is set to false in finally block
     }
   };
 
@@ -255,6 +262,7 @@ export default function Page() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
+      <LoadingOverlay isLoading={initialLoading || loading} /> {/* Add this line here, at the top of the first div */}
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
           <div className="flex justify-between items-center">
@@ -262,10 +270,7 @@ export default function Page() {
           </div>
 
           <Posting onPostCreated={() => {}} storage={storage} />
-
-          {initialLoading ? (
-            <div className="text-white text-center py-4">Loading initial posts...</div>
-          ) : (
+         
             <ul className="space-y-4">
               {posts.map((post) => (
                 <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
@@ -328,10 +333,7 @@ export default function Page() {
                 </li>
               ))}
             </ul>
-          )}
-          
           <div ref={observerRef} className="h-px" />
-          {loading && <div className="text-white text-center py-4">Loading more posts...</div>}
           {noMorePosts && <div className="text-white text-center py-4">No more posts to load.</div>}
         </div>
       </div>
