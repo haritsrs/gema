@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { getDatabase, ref, get, query, orderByChild, limitToLast, startAt, update, onValue, off } from 'firebase/database';
+import { getDatabase, ref, get, query, orderByChild, limitToLast, startAt, endBefore, update, onValue, off } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
@@ -33,6 +33,7 @@ export default function Page() {
   const postsRef = useRef(ref(getDatabase(), 'posts'));
   const database = getDatabase();
   const storage = getStorage();
+  const POSTS_PER_PAGE = 10;
 
   // Memoized relevancy score calculator
   const calculateRelevancyScore = (post) => {
@@ -62,90 +63,98 @@ export default function Page() {
   }, []);
 
   // In your real-time posts listener useEffect
-useEffect(() => {
-  const recentPostsQuery = query(
-    postsRef.current,
-    orderByChild('createdAt'),
-    limitToLast(20)
-  );
+  useEffect(() => {
+    const recentPostsQuery = query(
+      postsRef.current,
+      orderByChild('createdAt'),
+      limitToLast(POSTS_PER_PAGE)
+    );
 
-  const handleNewPosts = (snapshot) => {
-    if (!snapshot.exists()) {
-      setInitialLoading(false);
-      return;
-    }
+    const handleNewPosts = (snapshot) => {
+      if (!snapshot.exists()) {
+        setInitialLoading(false);
+        return;
+      }
 
-    const postsData = [];
-    snapshot.forEach((childSnapshot) => {
-      postsData.unshift({
-        id: childSnapshot.key,
-        ...childSnapshot.val()
+      const postsData = [];
+      snapshot.forEach((childSnapshot) => {
+        postsData.unshift({
+          id: childSnapshot.key,
+          ...childSnapshot.val()
+        });
       });
-    });
 
-    setPosts(prevPosts => {
-      const uniquePosts = postsData.filter(
-        newPost => !prevPosts.some(existingPost => existingPost.id === newPost.id)
-      );
-      
-      if (uniquePosts.length === 0) return prevPosts;
-      
-      const mergedPosts = [...prevPosts];
-      uniquePosts.forEach(newPost => {
-        const existingIndex = mergedPosts.findIndex(p => p.id === newPost.id);
-        if (existingIndex !== -1) {
-          mergedPosts[existingIndex] = newPost;
-        } else {
-          mergedPosts.unshift(newPost);
+      setPosts(prevPosts => {
+        const uniquePosts = postsData.filter(
+          newPost => !prevPosts.some(existingPost => existingPost.id === newPost.id)
+        );
+        
+        if (uniquePosts.length === 0) return prevPosts;
+        
+        const mergedPosts = [...prevPosts];
+        uniquePosts.forEach(newPost => {
+          const existingIndex = mergedPosts.findIndex(p => p.id === newPost.id);
+          if (existingIndex !== -1) {
+            mergedPosts[existingIndex] = newPost;
+          } else {
+            mergedPosts.push(newPost);
+          }
+        });
+
+        const sortedPosts = sortPostsByRelevancy(mergedPosts);
+        
+        // Set the last visible timestamp from the oldest post
+        const oldestPost = sortedPosts[sortedPosts.length - 1];
+        if (oldestPost) {
+          setLastVisibleTimestamp(oldestPost.createdAt);
         }
+
+        setInitialLoading(false);
+        return sortedPosts;
       });
+    };
 
-      setInitialLoading(false);
-      return sortPostsByRelevancy(mergedPosts);
-    });
+    setInitialLoading(true);
+    const unsubscribe = onValue(recentPostsQuery, handleNewPosts);
     
-    const lastPost = postsData[postsData.length - 1];
-    if (lastPost) {
-      setLastVisibleTimestamp(lastPost.createdAt);
-    }
-  };
-
-  setInitialLoading(true); 
-  const unsubscribe = onValue(recentPostsQuery, handleNewPosts);
-  return () => {
-    unsubscribe();
-    setInitialLoading(false);
-  };
-}, []);
+    return () => {
+      unsubscribe();
+      setInitialLoading(false);
+    };
+  }, []);
 
   // Optimized fetch older posts function
   const fetchOlderPosts = async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
-  
+    
     setLoading(true);
     try {
       const olderPostsQuery = query(
         postsRef.current,
         orderByChild('createdAt'),
-        startAt(lastVisibleTimestamp),
-        limitToLast(7)
+        endBefore(lastVisibleTimestamp),
+        limitToLast(POSTS_PER_PAGE)
       );
-  
+      
       const snapshot = await get(olderPostsQuery);
+      
       if (!snapshot.exists()) {
         setNoMorePosts(true);
-        setLoading(false); // Make sure to set loading to false here
+        setLoading(false);
         return;
       }
-  
+
       const olderPosts = [];
       snapshot.forEach((childSnapshot) => {
-        olderPosts.unshift({
+        olderPosts.push({
           id: childSnapshot.key,
           ...childSnapshot.val()
         });
       });
-  
+
+      // Sort older posts by timestamp in descending order
+      olderPosts.sort((a, b) => b.createdAt - a.createdAt);
+
       setPosts(prevPosts => {
         const uniqueOlderPosts = olderPosts.filter(
           newPost => !prevPosts.some(existingPost => existingPost.id === newPost.id)
@@ -155,18 +164,27 @@ useEffect(() => {
           setNoMorePosts(true);
           return prevPosts;
         }
-  
-        const lastPost = uniqueOlderPosts[uniqueOlderPosts.length - 1];
-        if (lastPost) {
-          setLastVisibleTimestamp(lastPost.createdAt);
+
+        // Update the last visible timestamp to the oldest post in the new batch
+        const oldestPost = uniqueOlderPosts[uniqueOlderPosts.length - 1];
+        if (oldestPost) {
+          setLastVisibleTimestamp(oldestPost.createdAt);
         }
-  
-        return [...prevPosts, ...uniqueOlderPosts];
+
+        // Combine and sort all posts
+        const allPosts = [...prevPosts, ...uniqueOlderPosts];
+        return sortPostsByRelevancy(allPosts);
       });
+
+      // Only set noMorePosts if we got fewer posts than requested
+      if (olderPosts.length < POSTS_PER_PAGE) {
+        setNoMorePosts(true);
+      }
+
     } catch (error) {
       console.error("Error fetching older posts:", error);
     } finally {
-      setLoading(false); // Make sure loading is set to false in finally block
+      setLoading(false);
     }
   };
 
@@ -228,14 +246,14 @@ useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
         const [entry] = entries;
-        if (entry.isIntersecting && !loading && !noMorePosts) {
+        if (entry.isIntersecting && !loading && !noMorePosts && lastVisibleTimestamp) {
           fetchOlderPosts();
         }
       },
       {
         root: null,
         rootMargin: '200px',
-        threshold: 0.5,
+        threshold: 0.1,
       }
     );
 
@@ -244,7 +262,7 @@ useEffect(() => {
     }
 
     return () => observer.disconnect();
-  }, [loading, noMorePosts]);
+  }, [loading, noMorePosts, lastVisibleTimestamp]);
 
   // Timestamp formatter with memoization
   const formatTimestamp = (timestamp) => {
@@ -262,7 +280,7 @@ useEffect(() => {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
-      <LoadingOverlay isLoading={initialLoading || loading} /> {/* Add this line here, at the top of the first div */}
+      <LoadingOverlay isLoading={initialLoading || loading} />
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
           <div className="flex justify-between items-center">
@@ -271,9 +289,9 @@ useEffect(() => {
 
           <Posting onPostCreated={() => {}} storage={storage} />
          
-            <ul className="space-y-4">
-              {posts.map((post) => (
-                <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
+          <ul className="space-y-4">
+            {posts.map((post) => (
+              <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                   <Link href={`/posts/${post.id}`}>
                     <div className="flex space-x-2 cursor-pointer">
                       <img
@@ -333,8 +351,37 @@ useEffect(() => {
                 </li>
               ))}
             </ul>
-          <div ref={observerRef} className="h-px" />
-          {noMorePosts && <div className="text-white text-center py-4">No more posts to load.</div>}
+            <div className="mt-8 flex flex-col items-center space-y-4">
+            <div ref={observerRef} className="h-px" />
+            {!noMorePosts && (
+              <button
+                onClick={fetchOlderPosts}
+                disabled={loading}
+                className={`w-full max-w-md py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
+                  loading
+                    ? 'bg-gray-700 cursor-not-allowed'
+                    : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Loading...</span>
+                  </div>
+                ) : (
+                  'Load More Posts'
+                )}
+              </button>
+            )}
+            {noMorePosts && (
+              <div className="text-gray-400 text-center py-4">
+                No more posts to load
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
