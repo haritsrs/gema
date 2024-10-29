@@ -167,8 +167,8 @@ export default function PostPage() {
     }
   }, [postId]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!post) return <div>Post not found</div>;
+  if (loading) return <div>Memuat...</div>;
+  if (!post) return <div>Postingan tidak ditemukan</div>;
 
   return (
     <div className="flex-col md:flex grow w-full text-white p-4 items-center justify-center">
@@ -220,7 +220,7 @@ export default function PostPage() {
 
         {/* Comments Section */}
         <div className="mt-4">
-          <h3 className="font-bold">Comments:</h3>
+          <h3 className="font-bold">Komentar:</h3>
           <ul className="list-disc pl-5">
             {comments.map((comment) => (
               <li key={comment.id} className="mt-2">

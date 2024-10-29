@@ -1,15 +1,33 @@
 "use client";
+/*  digunakan untuk menjalankan web ini ke dalam sisi klien (client side), berguna karena beberapa fitur tidak bisa jalan bila tidak menggunakan client-side
+    seperti React Hooks Usage (useState, UseEffect, UseRef  */
 
 import { useState, useEffect, useRef } from 'react';
+/*  ReactHook yang digunakan:
+    UseState berguna untuk menambahkan state pada komponen, digunakan untuk menyimpan data yang bisa berubah secara dinamis, Digunakan untuk like
+    UseEffect berguna agar kita bisa menambahkan efek samping pada kodenya, seperti Data Fetching, Subscriptions, atau merubah DOM, Digunakan untuk authentication
+    UseRef berguna untuk memanipulasi DOM, digunakan pada observerRef
+    DOM (Document Object Model) adalah konsep penting yang digunakan untuk memanipulasi struktur dan konten website, digunakan untuk interaksi dinamis dengan user */
 import { getDatabase, ref, get, query, orderByChild, limitToLast, startAt, endBefore, update, onValue, off } from 'firebase/database';
+/*  Import untuk mengambil data dari database, mengambil referensi, mengambil data, membuat query, mengurutkan data, 
+    membatasi jumlah data, memulai dari data tertentu, mengakhiri data sebelum data tertentu, mengupdate data, 
+    mendengarkan data, dan menghentikan mendengarkan data, mengambil data dari storage*/
 import { getStorage } from 'firebase/storage';
+    /*  Import untuk mengambil data dari storage */
 import { onAuthStateChanged } from 'firebase/auth';
+    /*  Import untuk mendengarkan perubahan state dari autentikasi */
 import { auth } from '../../firebase.js';
+    /*  Import autentikasi dari firebase */
 import localFont from "next/font/local";
+    /*  Import untuk menggunakan font tersendiri */
 import Posting from '../components/posting';
+    /*  Import komponen posting dari posting.js */
 import Link from 'next/link';
+    /*  Import untuk membuat link */
 import LoadingOverlay from '../components/LoadingOverlay';
+    /*  Import komponen LoadingOverlay dari LoadingOverlay.js */
 
+// Untuk mendefinisikan font yang digunakan, kami menggunakan GeistVF dan GeistMonoVF
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -22,6 +40,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+// Fungsi Page
 export default function Page() {
   const [posts, setPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -35,7 +54,7 @@ export default function Page() {
   const storage = getStorage();
   const POSTS_PER_PAGE = 30;
 
-  // Memoized relevancy score calculator
+  // fungsi yang digunakan untuk menghitung skor relevansi untuk algoritma website
   const calculateRelevancyScore = (post) => {
     const now = Date.now();
     const postAge = (now - post.createdAt) / (1000 * 60 * 60);
@@ -45,7 +64,7 @@ export default function Page() {
     return (1 / Math.pow(postAge + 2, timeWeight)) * Math.pow(likes + 1, likeWeight);
   };
 
-  // Optimized sort function with memoization
+  // fungsi yang digunakan untuk mengurutkan postingan berdasarkan relevansi
   const sortPostsByRelevancy = (postsToSort) => {
     return [...postsToSort].sort((a, b) => {
       const scoreA = calculateRelevancyScore(a);
@@ -54,7 +73,7 @@ export default function Page() {
     });
   };
 
-  // Authentication listener
+  // fungsi yang digunakan sebagai authentication listener, untuk mendengarkan perubahan state dari autentikasi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -62,7 +81,7 @@ export default function Page() {
     return () => unsubscribe();
   }, []);
 
-  // In your real-time posts listener useEffect
+  // fungsi yang digunakan untuk mendapatkan postingan terbaru
   useEffect(() => {
     const recentPostsQuery = query(
       postsRef.current,
@@ -103,7 +122,6 @@ export default function Page() {
 
         const sortedPosts = sortPostsByRelevancy(mergedPosts);
         
-        // Set the last visible timestamp from the oldest post
         const oldestPost = sortedPosts[sortedPosts.length - 1];
         if (oldestPost) {
           setLastVisibleTimestamp(oldestPost.createdAt);
@@ -123,7 +141,7 @@ export default function Page() {
     };
   }, []);
 
-  // Optimized fetch older posts function
+  //  fungsi yang digunakan untuk mendapatkan postingan lama
   const fetchOlderPosts = async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
     
@@ -152,7 +170,6 @@ export default function Page() {
         });
       });
 
-      // Sort older posts by timestamp in descending order
       olderPosts.sort((a, b) => b.createdAt - a.createdAt);
 
       setPosts(prevPosts => {
@@ -165,18 +182,15 @@ export default function Page() {
           return prevPosts;
         }
 
-        // Update the last visible timestamp to the oldest post in the new batch
         const oldestPost = uniqueOlderPosts[uniqueOlderPosts.length - 1];
         if (oldestPost) {
           setLastVisibleTimestamp(oldestPost.createdAt);
         }
 
-        // Combine and sort all posts
         const allPosts = [...prevPosts, ...uniqueOlderPosts];
         return sortPostsByRelevancy(allPosts);
       });
 
-      // Only set noMorePosts if we got fewer posts than requested
       if (olderPosts.length < POSTS_PER_PAGE) {
         setNoMorePosts(true);
       }
@@ -188,7 +202,7 @@ export default function Page() {
     }
   };
 
-  // Optimized like handler with real-time updates
+  // fungsi yang digunakan untuk menyalin URL ke clipboard
   const handleLike = async (postId, currentLikes, likedBy = []) => {
     if (!currentUser) return;
 
@@ -203,7 +217,6 @@ export default function Page() {
           : [...likedBy, currentUser.uid]
       };
 
-      // Optimistic update
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === postId
@@ -215,7 +228,6 @@ export default function Page() {
       await update(postRef, updates);
     } catch (error) {
       console.error("Error updating likes:", error);
-      // Revert optimistic update on error
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.id === postId
@@ -226,7 +238,7 @@ export default function Page() {
     }
   };
 
-  // Optimized share functionality
+  // fungsi yang digunakan untuk menyalin URL ke clipboard, namun sedang tidak bisa berjalan
   const sharePost = (post) => {
     if (navigator.share) {
       navigator.share({
@@ -241,7 +253,9 @@ export default function Page() {
     }
   };
 
-  // Infinite scroll observer
+  /*  mengatur pengamatan elemen menggunakan IntersectionObserver, dan memanggil fungsi untuk mengambil postingan lama saat elemen terlihat di layar.
+      intersectionObserver merupakan API javascrip untuk mengamati perubahan pada layar
+      Digunakan agar bisa mengobservasi bila user scroll kebawah halaman*/
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
@@ -264,7 +278,7 @@ export default function Page() {
     return () => observer.disconnect();
   }, [loading, noMorePosts, lastVisibleTimestamp]);
 
-  // Timestamp formatter with memoization
+  // fungsi yang digunakan untuk memformat timestamp atau waktunya, seperti "Just now", "1m ago", "1h ago", "1d ago"
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
     const now = Date.now();
@@ -278,13 +292,14 @@ export default function Page() {
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
 
+  // JSX atau JavaScript XML adalah tampilan yang akan ditampilkan pada halaman
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={initialLoading || loading} />
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-white">Posts</h2>
+            <h2 className="text-xl font-bold text-white">Postingan</h2>
           </div>
 
           <Posting onPostCreated={() => {}} storage={storage} />
@@ -335,7 +350,7 @@ export default function Page() {
                           <path d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity={0.5} />
                           <path d="M17 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0" />
                         </svg>
-                        <span>Comment</span>
+                        <span>Komentar</span>
                       </button>
                     </div>
                     <button
@@ -369,7 +384,7 @@ export default function Page() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Loading...</span>
+                    <span>Memuat...</span>
                   </div>
                 ) : (
                   'Load More Posts'
@@ -378,7 +393,7 @@ export default function Page() {
             )}
             {noMorePosts && (
               <div className="text-gray-400 text-center py-4">
-                No more posts to load
+                Tidak ada lagi postingan untuk dimuat
               </div>
             )}
           </div>

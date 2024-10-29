@@ -10,7 +10,7 @@ const LoadingOverlay = ({ isLoading }) => {
           <div className="absolute inset-0 rounded-full border-4 border-t-purple-500 border-r-purple-500 border-gray-700 animate-spin"></div>
           <div className="absolute inset-2 rounded-full border-4 border-t-purple-400 border-r-purple-400 border-gray-800 animate-spin"></div>
         </div>
-        <p className="text-white text-lg font-medium">Loading...</p>
+        <p className="text-white text-lg font-medium">Sedang Memuat...</p>
       </div>
     </div>
   );

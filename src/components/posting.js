@@ -1,15 +1,22 @@
 "use client";
+//menggunakan client
 
 import { getDatabase, ref as databaseRef, push, serverTimestamp } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
+// mengimport fitur firebase yang dibutuhkan
 import Image from 'next/image';
+// mengimport fitur image dari next.js
 import Camera from '../components/Camera';
-import LoadingOverlay from './LoadingOverlay'; // Add this import
+// mengimport fitur camera dari folder components
+import LoadingOverlay from './LoadingOverlay';
+// mengimport fitur loading overlay dari folder components
 import * as nsfwjs from 'nsfwjs';
+// mengimport fitur nsfwjs untuk mengecek gambar agar tidak mengandung konten NSFW
 
+// fungsi posting
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -20,10 +27,10 @@ export default function Posting({ onPostCreated }) {
   const [isUploaderVisible, setIsUploaderVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const maxCharacters = 280;
-
   const storage = getStorage();
   const database = getDatabase();
 
+  // fungsi untuk mengecek autentikasi user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user || null);
@@ -32,6 +39,7 @@ export default function Posting({ onPostCreated }) {
     return () => unsubscribe();
   }, []);
 
+  // fungsi untuk menghandle inputan, jika inputan melebihi 280 karakter maka akan muncul larangan
   const handleInputChange = (e) => {
     const input = e.target.value;
     if (input.length <= maxCharacters) {
@@ -42,6 +50,7 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
+  // fungsi untuk menghandle perubahan gambar
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -50,11 +59,13 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
+  // fungsi untuk menghapus gambar
   const handleDeleteImage = () => {
     setSelectedImage(null);
     setImageUrl('');
   };
 
+  // fungsi untuk mengupload gambar
   const uploadImage = async (file) => {
     const imageRef = storageRef(storage, `images/${Date.now()}-${file.name}`);
     
@@ -88,6 +99,7 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
+  // fungsi untuk mengecek gambar agar tidak mengandung konten NSFW menggunakan API nsfwjs
   const checkImageForNSFW = async (image) => {
     const model = await nsfwjs.load();
     const imageElement = document.createElement('img');
@@ -106,6 +118,7 @@ export default function Posting({ onPostCreated }) {
     });
   };
 
+  // fungsi untuk menghandle submit postingan
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return;
@@ -150,30 +163,34 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
+  // fungsi untuk membuka kamera
   const handleOpenCamera = () => {
     setIsCameraOpen(true);
   };
 
+  // fungsi untuk menutup kamera
   const handleCloseCamera = () => {
     setIsCameraOpen(false);
   };
 
+  // fungsi untuk menampilkan uploader
   const showUploader = () => {
     setIsUploaderVisible(!isUploaderVisible);
   };
 
+  // tampilan form postingan
   return (
     <form onSubmit={handleSubmit} className="mb-6">
       <div className="relative"></div>
       <LoadingOverlay isLoading={loading} />
-      <label htmlFor="post-content" className="sr-only">Post Content</label>
+      <label htmlFor="post-content" className="sr-only">Konten Postingan</label>
       <textarea
         id="post-content"
         className="w-full text-black p-2 border rounded-lg outline outline-2 outline-gray-700 focus:outline-purple-800"
         rows="4"
         value={postContent}
         onChange={handleInputChange}
-        placeholder="What's on your mind?"
+        placeholder="Apa yang ada di pikiran Anda?"
       />
       {error && <div className="text-red-500">{error}</div>}
 
@@ -228,9 +245,9 @@ export default function Posting({ onPostCreated }) {
                 <path d="M18 9h-5v8a1 1 0 0 1-2 0V9H6a3.003 3.003 0 0 0-3 3v7a3.003 3.003 0 0 0 3 3h12a3.003 3.003 0 0 0 3-3v-7a3.003 3.003 0 0 0-3-3" opacity={0.5}></path>
               </svg>
               <p className="mb-2 text-sm">
-                <span className="font-semibold">Click to upload</span> or drag and drop
+                <span className="font-semibold">Klik untuk mengunggah</span> or seret dan lepas
               </p>
-              <p className="text-xs">SVG, PNG, JPG or GIF</p>
+              <p className="text-xs">SVG, PNG, JPG Atau GIF</p>
             </div>
             <input id="image-upload" type="file" accept="image/*" capture="environment" onChange={handleImageChange} className="hidden" />
           </label>

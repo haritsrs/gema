@@ -130,20 +130,20 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return <div className="text-center p-6">Loading...</div>;
+    return <div className="text-center p-6">Memuat...</div>;
   }
 
   if (!currentUser) {
-    return <div className="text-center p-6">Please log in to view your profile.</div>;
+    return <div className="text-center p-6">Silakan masuk untuk melihat profil Anda.</div>;
   }
 
   return (
     <div className="">
-      <h2 className="text-2xl font-bold mb-4 text-white">Edit Profile</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">Sunting Profil</h2>
   
       <div className="space-y-4">
         <div>
-          <label className="block mb-2 text-gray-400">Username</label>
+          <label className="block mb-2 text-gray-400">Nama Pengguna</label>
           <input
             type="text"
             name="username"
@@ -154,7 +154,7 @@ export default function ProfilePage() {
         </div>
   
         <div>
-          <label className="block mb-2 text-gray-400">Display Name</label>
+          <label className="block mb-2 text-gray-400">Nama Tampil</label>
           <input
             type="text"
             name="displayName"
@@ -176,7 +176,7 @@ export default function ProfilePage() {
         </div>
   
         <div>
-          <label className="block mb-2 text-gray-400">Birthday</label>
+          <label className="block mb-2 text-gray-400">Ulang Tahun</label>
           <input
             type="date"
             name="birthday"
@@ -187,7 +187,7 @@ export default function ProfilePage() {
         </div>
   
         <div>
-          <label className="block mb-2 text-gray-400">Profile Picture</label>
+          <label className="block mb-2 text-gray-400">Foto Profil</label>
           <div className="flex items-center">
             <label
               htmlFor="profile-picture"
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                 className="rounded-full ml-4"
               />
             ) : (
-              <p className="ml-4 text-gray-500">No profile picture available</p>
+              <p className="ml-4 text-gray-500">Tidak ada foto profil yang ditampilkan</p>
             )}
           </div>
         </div>

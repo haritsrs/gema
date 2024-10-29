@@ -98,10 +98,10 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
           <img src={image} alt="Captured" className="w-48 h-auto" />
           <div className="flex flex-col w-max">
             <button onClick={uploadImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
-              Upload
+              Unggah
             </button>
             <button onClick={discardImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
-              Discard
+              Hapus
             </button>
           </div>
         </div>

@@ -79,9 +79,9 @@ export default function AuthSidebar() {
     <div className="mx-[5%] p-4 md:mx-0 rounded-lg">
       {user ? (
         <div>
-          <h2 className="text-xl text-white">Welcome, {user.displayName || 'User'}!</h2>
+          <h2 className="text-xl text-white">Selamat Datang, {user.displayName || 'User'}!</h2>
           <button onClick={handleSignOut} className="mt-2 w-full bg-purple-800 text-white px-4 py-2 rounded-lg hover:bg-red-300 hover:text-red-700">
-            Sign Out
+            Keluar
           </button>
         </div>
       ) : (
@@ -89,22 +89,22 @@ export default function AuthSidebar() {
 
           <div className="flex-col">
             <h2 className="flex text-xl text-white py-2 md:py-0">
-              Welcome to GEMA!
+              Selamat datang di GEMA!
             </h2>
             
             <button onClick={handleGoogleLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
-              Sign in with Google
+              Masuk Dengan Google
             </button>
 
             <button onClick={handleAnonymousLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
-              Sign in Anonymously
+              Masuk Sebagai Tamu
             </button>
           </div>
 
           <div className="flex space-x-2">
             <hr className="w-full border-t border-gray-700 my-4" />
             <span className="flex text-gray-500 text-sm items-center justify-center">
-              alternatively
+              Atau
             </span>
             <hr className="w-full border-t border-gray-700 my-4" />
           </div>
@@ -113,7 +113,7 @@ export default function AuthSidebar() {
           <div className="flex-col bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
             {isSignUp && (
               <div>
-                <span className="font-white font-sm">Username</span>
+                <span className="font-white font-sm">Pengguna</span>
                 <input
                   type="text"
                   placeholder=""
@@ -134,7 +134,7 @@ export default function AuthSidebar() {
               />
             </div>
             <div>
-              <span className="font-white font-sm">Password</span>
+              <span className="font-white font-sm">Kata Sandi</span>
               <input
                 type="password"
                 placeholder=""
@@ -148,11 +148,11 @@ export default function AuthSidebar() {
               {/* Toggle between Sign In and Sign Up */}
               {isSignUp ? (
                 <button onClick={handleEmailSignUp} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
-                  Sign Up
+                  Daftar
                 </button>
               ) : (
                 <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
-                  Sign In
+                  Masuk
                 </button>
               )}
             </div>
@@ -160,11 +160,11 @@ export default function AuthSidebar() {
 
           <div className="flex space-x-2 text-white text-sm justify-center">
             <span className="text-center">
-              {isSignUp ? "Already a user?" : "New to the app?"}
+              {isSignUp ? "Sudah menjadi pengguna?" : "Baru di GEMA?"}
             </span>
 
             <button onClick={toggleAuthMode} className="bg-opacity-0 text-center text-purple-800 hover:text-white">
-              {isSignUp ? "Sign In" : "Sign Up"}
+              {isSignUp ? "Masuk" : "Daftar"}
             </button>
           </div>
         </div>
