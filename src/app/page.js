@@ -38,18 +38,44 @@ export default function Page() {
   // Memoized relevancy score calculator
   const calculateRelevancyScore = (post) => {
     const now = Date.now();
+    
     const postAge = (now - post.createdAt) / (1000 * 60 * 60);
     const likes = post.likes || 0;
-    const timeWeight = 1;
-    const likeWeight = 2;
-    return (1 / Math.pow(postAge + 2, timeWeight)) * Math.pow(likes + 1, likeWeight);
+    const comments = (post.comments?.length || 0);
+    const hasImage = post.imageUrl ? 1 : 0;
+    
+    const weights = {
+      time: 1.8,
+      likes: 1.2,
+      comments: 1.4,
+      image: 0.5
+    };
+  
+    const timeComponent = 1 / Math.pow(Math.log(postAge + 2), weights.time);
+    
+    const engagementScore = (
+      weights.likes * Math.log1p(likes) + 
+      weights.comments * Math.log1p(comments)
+    );
+    
+    const imageBonus = hasImage * weights.image;
+    
+    const score = (
+      1 + 
+      (timeComponent * engagementScore) + 
+      imageBonus
+    );
+    
+    return score;
   };
-
-  // Optimized sort function with memoization
+  
   const sortPostsByRelevancy = (postsToSort) => {
     return [...postsToSort].sort((a, b) => {
       const scoreA = calculateRelevancyScore(a);
       const scoreB = calculateRelevancyScore(b);
+      if (Math.abs(scoreB - scoreA) < 0.000001) {
+        return b.createdAt - a.createdAt;
+      }
       return scoreB - scoreA;
     });
   };
