@@ -1,83 +1,240 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import { getAuth, updateProfile, updateEmail, onAuthStateChanged } from "firebase/auth";
+import { getDatabase, ref as databaseRef, update, get } from "firebase/database";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth } from '../../../firebase';
-import localFont from "next/font/local";
-import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ProfilePage() {
-  const [userData, setUserData] = useState(null);
-  const [userPosts, setUserPosts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState({
+    username: '',
+    displayName: '',
+    profilePicture: '',
+    email: '',
+    birthday: '',
+  });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [error, setError] = useState('');
+  const storage = getStorage();
+  const database = getDatabase();
 
+  // Authentication listener
   useEffect(() => {
-    const fetchProfileData = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-
-      const database = getDatabase();
-      const userRef = ref(database, `users/${currentUser.uid}`);
-      const userSnapshot = await get(userRef);
-      
-      setUserData(userSnapshot.val());
-
-      const postsRef = query(
-        ref(database, 'posts'),
-        orderByChild('userId'),
-        equalTo(currentUser.uid)
-      );
-
-      const postsSnapshot = await get(postsRef);
-      const postsData = [];
-
-      postsSnapshot.forEach(childSnapshot => {
-        postsData.push({ id: childSnapshot.key, ...childSnapshot.val() });
-      });
-
-      setUserPosts(postsData);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
       setLoading(false);
-    };
-
-    fetchProfileData();
+    });
+    return () => unsubscribe();
   }, []);
 
+  // Load user data when currentUser changes
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        if (!currentUser) {
+          return;
+        }
+
+        // Get additional data from Realtime Database
+        const userRef = databaseRef(database, `users/${currentUser.uid}`);
+        const snapshot = await get(userRef);
+        const dbData = snapshot.exists() ? snapshot.val() : {};
+
+        // Combine auth and database data
+        setUserData({
+          username: currentUser.displayName || '',
+          displayName: currentUser.displayName || '',
+          profilePicture: currentUser.photoURL || '',
+          email: currentUser.email || '',
+          birthday: dbData.birthday || '',
+        });
+
+        // Set the image URL if there's a profile picture
+        if (currentUser.photoURL) {
+          setImageUrl(currentUser.photoURL);
+        }
+
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        setError("Failed to load user data");
+      }
+    };
+
+    loadUserData();
+  }, [currentUser, database]);
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        setSelectedImage(file);
+        const imageRef = storageRef(storage, `profile-pictures/${currentUser.uid}`);
+        await uploadBytes(imageRef, file);
+        const downloadURL = await getDownloadURL(imageRef);
+        setImageUrl(downloadURL);
+        setUserData(prev => ({ ...prev, profilePicture: downloadURL }));
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        setError("Failed to upload image");
+      }
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setUserData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleUpdateProfile = async () => {
+    const { displayName, email, birthday, profilePicture } = userData;
+
+    if (!currentUser) {
+      setError("No user logged in");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Update Auth profile
+      await updateProfile(currentUser, { 
+        displayName, 
+        photoURL: profilePicture 
+      });
+
+      // Only update email if it has changed
+      if (email !== currentUser.email) {
+        await updateEmail(currentUser, email);
+      }
+
+      // Update Realtime Database
+      const userRef = databaseRef(database, `users/${currentUser.uid}`);
+      await update(userRef, {
+        displayName,
+        birthday,
+        profilePicture,
+        email
+      });
+
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile. " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="text-center p-6">Loading...</div>;
+  }
+
+  if (!currentUser) {
+    return <div className="text-center p-6">Please log in to view your profile.</div>;
   }
 
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900 text-white`}>
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="text-center space-y-4">
-          <img
-            src={userData?.profilePicture || 'https://placehold.co/80x80'}
-            alt={`${userData?.username}'s profile`}
-            className="rounded-full w-20 h-20 mx-auto"
+    <div className="">
+      <h2 className="text-2xl font-bold mb-4 text-white">Edit Profile</h2>
+  
+      <div className="space-y-4">
+        <div>
+          <label className="block mb-2 text-gray-400">Username</label>
+          <input
+            type="text"
+            name="username"
+            value={userData.username}
+            onChange={handleInputChange}
+            className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
           />
-          <h1 className="text-2xl font-bold">{userData?.username || 'User'}</h1>
-          <p className="text-gray-400">{userData?.bio || "This user hasn't added a bio yet."}</p>
         </div>
-
-        <h2 className="text-xl font-semibold mt-6">Your Posts</h2>
-        <ul className="space-y-4 mt-4">
-          {userPosts.map((post) => (
-            <li key={post.id} className="p-4 bg-gray-800 rounded-lg">
-              <Link href={`/posts/${post.id}`}>
-                <div>
-                  <div className="font-semibold">{post.content}</div>
-                  {post.imageUrl && (
-                    <img
-                      src={post.imageUrl}
-                      alt="Post image"
-                      className="mt-2 w-full h-auto rounded-lg"
-                    />
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+  
+        <div>
+          <label className="block mb-2 text-gray-400">Display Name</label>
+          <input
+            type="text"
+            name="displayName"
+            value={userData.displayName}
+            onChange={handleInputChange}
+            className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
+          />
+        </div>
+  
+        <div>
+          <label className="block mb-2 text-gray-400">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={userData.email}
+            onChange={handleInputChange}
+            className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
+          />
+        </div>
+  
+        <div>
+          <label className="block mb-2 text-gray-400">Birthday</label>
+          <input
+            type="date"
+            name="birthday"
+            value={userData.birthday}
+            onChange={handleInputChange}
+            className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
+          />
+        </div>
+  
+        <div>
+          <label className="block mb-2 text-gray-400">Profile Picture</label>
+          <div className="flex items-center">
+            <label
+              htmlFor="profile-picture"
+              className="px-4 py-2 bg-gray-800 text-gray-400 rounded cursor-pointer hover:bg-gray-700"
+            >
+              Choose File
+            </label>
+            <input
+              id="profile-picture"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt="Profile Picture"
+                width={100}
+                height={100}
+                className="rounded-full ml-4"
+              />
+            ) : userData.profilePicture ? (
+              <Image
+                src={userData.profilePicture}
+                alt="Current Profile Picture"
+                width={100}
+                height={100}
+                className="rounded-full ml-4"
+              />
+            ) : (
+              <p className="ml-4 text-gray-500">No profile picture available</p>
+            )}
+          </div>
+        </div>
+  
+        <button
+          onClick={handleUpdateProfile}
+          disabled={loading}
+          className="w-full py-3 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
+  
+        {error && (
+          <p className="text-red-500 mt-2">{error}</p>
+        )}
       </div>
     </div>
   );
