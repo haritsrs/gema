@@ -1,5 +1,7 @@
 "use client";
+// menggunakan client side
 
+// import statement
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "../../../../firebase"; // Update this import to reference your realtime database
@@ -8,6 +10,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
 import Link from "next/link";
 
+// fungsi halaman postingan
 export default function PostPage() {
   const router = useRouter();
   const [postId, setPostId] = useState(null);
@@ -17,7 +20,7 @@ export default function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
-  // Listen for authentication state
+  // fungsi autentikasi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -25,7 +28,7 @@ export default function PostPage() {
     return () => unsubscribe();
   }, []);
 
-  // Handle Like Button Click
+  // fungsi menyukai postingan
   const handleLike = async (postId, currentLikes, likedBy = []) => {
     if (!currentUser) return;
 
@@ -40,7 +43,7 @@ export default function PostPage() {
       await set(ref(database, `posts/${postId}/likes`), hasLiked ? (currentLikes - 1) : (currentLikes + 1));
       await set(ref(database, `posts/${postId}/likedBy`), updatedLikedBy);
 
-      // Update the post state locally
+      // digunakan untuk mengupdate state postingan
       setPost(prevPost => ({
         ...prevPost,
         likes: hasLiked ? currentLikes - 1 : currentLikes + 1,
@@ -51,7 +54,7 @@ export default function PostPage() {
     }
   };
 
-  // Handle New Comment Submission
+  // fungsi mengirim komentar
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -73,7 +76,7 @@ export default function PostPage() {
     }
   };
 
-  // Format timestamp
+  // fungsi memformat timestamp
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
     const date = new Date(timestamp);
@@ -86,7 +89,7 @@ export default function PostPage() {
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
 
-  // Share post methods
+  // fungsi berbagi postingan
   const sharePost = (post) => {
     if (navigator.share) {
       navigator.share({
@@ -113,7 +116,7 @@ export default function PostPage() {
       });
   };
 
-  // Get postId from URL
+  // fungsi mendapatkan id postingan
   useEffect(() => {
     const currentPath = window.location.pathname;
     const id = currentPath.split("/posts/")[1];
@@ -122,12 +125,12 @@ export default function PostPage() {
     }
   }, []);
 
-  // Fetch post data and listen for updates
+  // fungsi mendapatkan data postingan
   useEffect(() => {
     if (postId) {
       const postRef = ref(database, `posts/${postId}`);
       
-      // Set up listener for post data
+      // digunakan untuk mendapatkan data postingan
       onValue(postRef, (snapshot) => {
         if (snapshot.exists()) {
           const postData = snapshot.val();
@@ -138,12 +141,12 @@ export default function PostPage() {
         setLoading(false);
       });
 
-      // Clean up listener
+      // digunakan untuk menghentikan listener ketika komponen di-unmount
       return () => off(postRef);
     }
   }, [postId]);
 
-  // Listen for comments updates
+  // fungsi mendapatkan komentar
   useEffect(() => {
     if (postId) {
       const commentsRef = ref(database, `posts/${postId}/comments`);
@@ -167,9 +170,11 @@ export default function PostPage() {
     }
   }, [postId]);
 
+  // menampilkan loading jika data sedang dimuat
   if (loading) return <div>Memuat...</div>;
   if (!post) return <div>Postingan tidak ditemukan</div>;
 
+  //jsx postingan
   return (
     <div className="flex-col md:flex grow w-full text-white p-4 items-center justify-center">
       <div className="w-full max-w-xl bg-gray-800 p-6 rounded-lg">

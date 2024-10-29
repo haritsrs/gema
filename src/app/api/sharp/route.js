@@ -1,20 +1,22 @@
-// gema/src/app/api/sharp/route.js
-
+// import statement
 import sharp from 'sharp';
 import { NextResponse } from 'next/server';
 
+// fungsi untuk menggunakan API sharp
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const file = formData.get('file');
+    // Mengambil buffer dari file yang diunggah
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Use Sharp to compress and resize image
+    // Mengoptimalkan gambar menggunakan sharp
     const optimizedImage = await sharp(buffer)
-      .resize({ width: 800 }) // Set max width for compression
-      .jpeg({ quality: 80 }) // Adjust quality as needed
+      .resize({ width: 800 }) // Mengubah ukuran gambar menjadi 800px lebar
+      .jpeg({ quality: 80 }) // Mengubah gambar menjadi format JPEG dengan kualitas 80%
       .toBuffer();
 
+    // Mengembalikan gambar yang telah dioptimalkan
     return new NextResponse(optimizedImage, {
       status: 200,
       headers: {

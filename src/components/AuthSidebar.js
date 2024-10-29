@@ -1,10 +1,12 @@
 "use client";
+// menggunakan client side
 
+// import statement
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithPopup, signInAnonymously, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../firebase';
 
-
+// fungsi sidebar
 export default function AuthSidebar() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -12,6 +14,7 @@ export default function AuthSidebar() {
   const [username, setUsername] = useState(''); // New state for username
   const [isSignUp, setIsSignUp] = useState(false);
 
+// fungsi authentikasi
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
@@ -19,6 +22,7 @@ export default function AuthSidebar() {
     return () => unsubscribe();
   }, []);
 
+// fungsi login dengan google
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -28,6 +32,7 @@ export default function AuthSidebar() {
     }
   };
 
+// fungsi login sebagai tamu
   const handleAnonymousLogin = async () => {
     try {
       await signInAnonymously(auth);
@@ -36,6 +41,7 @@ export default function AuthSidebar() {
     }
   };
 
+// fungsi login dengan email
   const handleEmailLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -44,6 +50,7 @@ export default function AuthSidebar() {
     }
   };
 
+// fungsi daftar dengan email
   const handleEmailSignUp = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -53,8 +60,6 @@ export default function AuthSidebar() {
         displayName: username
       });
 
-      // Optionally store the username in Firestore
-      // await firestore.collection('users').doc(user.uid).set({ username });
 
       console.log("User signed up:", user);
   } catch (error) {
@@ -62,7 +67,7 @@ export default function AuthSidebar() {
   }
 };
 
-
+// fungsi keluar
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -72,9 +77,10 @@ export default function AuthSidebar() {
   };
 
   const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp); // Toggle between sign in and sign up
+    setIsSignUp(!isSignUp);
   };
 
+// jsx authSidebar
   return (
     <div className="mx-[5%] p-4 md:mx-0 rounded-lg">
       {user ? (
@@ -109,7 +115,6 @@ export default function AuthSidebar() {
             <hr className="w-full border-t border-gray-700 my-4" />
           </div>
 
-          {/* Email and Password input fields */}
           <div className="flex-col bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
             {isSignUp && (
               <div>
@@ -145,7 +150,6 @@ export default function AuthSidebar() {
             </div>
             
             <div className="py-4 items-center justify-center">
-              {/* Toggle between Sign In and Sign Up */}
               {isSignUp ? (
                 <button onClick={handleEmailSignUp} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
                   Daftar

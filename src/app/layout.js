@@ -1,11 +1,14 @@
 "use client";
+// menggunakan client side
 
+// import statement
 import "./globals.css";
 import Sidebar from '../components/sidebar';
 import AuthSidebar from '../components/AuthSidebar';
 import localFont from "next/font/local";
 import { useState } from 'react';
 
+// font lokal yang digunakan
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -18,16 +21,17 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+// fungsi layout utama
 export default function RootLayout({ children }) {
 
-  {/* Mobile Drop-down menu visibility */}
-
+  // fungsi sidebar untuk mobile
   const [isVisible, setIsVisible] = useState(false);
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible);
   };
 
+  // jsx layout utama
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}>
@@ -66,7 +70,7 @@ export default function RootLayout({ children }) {
           </div>
          
 
-          {/* Mobile Navbar */}
+          {/* navbar untuk mobile */}
           <div className="md:hidden fixed bg-gray-900 bottom-0 left-0 w-screen h-max items-center text-white p-2 border border-t-1 border-gray-800">
             <Sidebar />
           </div> 

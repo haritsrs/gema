@@ -1,8 +1,11 @@
-// components/Camera.js
 "use client";
+// menggunakan client side
+
+// import statement
 import { useEffect, useRef, useState } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+// fungsi kamera
 export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive }) {
   const [image, setImage] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
@@ -10,19 +13,21 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
-  // Start the camera if isCameraActive becomes true
+// menghidupkan kamera bila isCameraActive bernilai true
   useEffect(() => {
     if (isCameraActive) {
       startCamera();
     }
   }, [isCameraActive]);
 
+// fungsi memulai kamera
   const startCamera = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoRef.current.srcObject = stream;
     setCameraReady(true);
   };
 
+// fungsi menghentikan kamera
   const stopCamera = () => {
     setCameraReady(false);
     if (videoRef.current && videoRef.current.srcObject) {
@@ -32,6 +37,7 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
     }
   };
 
+// fungsi mengambil gambar
   const captureImage = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
@@ -40,6 +46,7 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
     setImage(dataUrl);
   };
 
+// fungsi mengunggah gambar
   const uploadImage = async () => {
     if (!image) return;
 
@@ -57,10 +64,12 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
     }
   };
 
+// fungsi menghapus gambar
   const discardImage = () => {
     setImage(null);
   };
 
+// JSX kamera
   return (
     <div className="flex flex-col items-center">
       <div className={`flex flex-col fixed top-0 items-center justify-center w-screen h-screen z-50 bg-gray-950 ${cameraReady && !image ? 'block' : 'hidden'}`}>

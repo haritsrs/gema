@@ -1,5 +1,7 @@
 "use client";
+// menggunakan client side
 
+// import statement
 import { useState, useEffect } from 'react';
 import { getAuth, updateProfile, updateEmail, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref as databaseRef, update, get } from "firebase/database";
@@ -7,6 +9,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'fire
 import { auth } from '../../../firebase';
 import Image from 'next/image';
 
+// fungsi halaman profil
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +26,7 @@ export default function ProfilePage() {
   const storage = getStorage();
   const database = getDatabase();
 
-  // Authentication listener
+  // fungsi autentikasi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -32,7 +35,7 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  // Load user data when currentUser changes
+  // fungsi memuat data pengguna
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -40,12 +43,11 @@ export default function ProfilePage() {
           return;
         }
 
-        // Get additional data from Realtime Database
         const userRef = databaseRef(database, `users/${currentUser.uid}`);
         const snapshot = await get(userRef);
         const dbData = snapshot.exists() ? snapshot.val() : {};
 
-        // Combine auth and database data
+        // mencampurkan data pengguna dari Auth dan Realtime Database
         setUserData({
           username: currentUser.displayName || '',
           displayName: currentUser.displayName || '',
@@ -54,7 +56,7 @@ export default function ProfilePage() {
           birthday: dbData.birthday || '',
         });
 
-        // Set the image URL if there's a profile picture
+        // menampilkan foto profil pengguna
         if (currentUser.photoURL) {
           setImageUrl(currentUser.photoURL);
         }
@@ -68,6 +70,7 @@ export default function ProfilePage() {
     loadUserData();
   }, [currentUser, database]);
 
+  // fungsi mengubah gambar profil
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -85,10 +88,12 @@ export default function ProfilePage() {
     }
   };
 
+  // fungsi mengubah data pengguna
   const handleInputChange = (e) => {
     setUserData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // fungsi menyimpan perubahan profil
   const handleUpdateProfile = async () => {
     const { displayName, email, birthday, profilePicture } = userData;
 
@@ -100,18 +105,17 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       
-      // Update Auth profile
       await updateProfile(currentUser, { 
         displayName, 
         photoURL: profilePicture 
       });
 
-      // Only update email if it has changed
+      // hanya update email jika beurbah
       if (email !== currentUser.email) {
         await updateEmail(currentUser, email);
       }
 
-      // Update Realtime Database
+      // update data pengguna di Realtime Database
       const userRef = databaseRef(database, `users/${currentUser.uid}`);
       await update(userRef, {
         displayName,
@@ -129,14 +133,17 @@ export default function ProfilePage() {
     }
   };
 
+  // menampilkan pesan loading
   if (loading) {
     return <div className="text-center p-6">Memuat...</div>;
   }
 
+  // menampilkan pesan jika pengguna belum masuk
   if (!currentUser) {
     return <div className="text-center p-6">Silakan masuk untuk melihat profil Anda.</div>;
   }
 
+  // JSX halaman profil
   return (
     <div className="">
       <h2 className="text-2xl font-bold mb-4 text-white">Sunting Profil</h2>
