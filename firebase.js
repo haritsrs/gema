@@ -3,17 +3,21 @@ import { getFirestore } from "firebase/firestore"; // Firestore, not used curren
 import { getAuth, signInWithPopup, signInAnonymously, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, set, push, get, update, remove, onValue } from "firebase/database";
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDYz6CEV7dfnKkC_W8jLmt-FK2QxbctDpM",
-  authDomain: "gema-610a4.firebaseapp.com",
-  projectId: "gema-610a4",
-  storageBucket: "gema-610a4.appspot.com",
-  messagingSenderId: "275057235109",
-  appId: "1:275057235109:web:aa381697e7f3bde03fe94c",
-  measurementId: "G-DDC0R37JEM",
-  databaseURL: "https://gema-610a4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
