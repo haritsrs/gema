@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive, onUploadComplete, isUpload }) {
+export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive }) {
   const [image, setImage] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
 
@@ -51,14 +51,14 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
       const downloadURL = await getDownloadURL(snapshot.ref);
       setImageUrl(downloadURL);
       
-      // Call the onUploadComplete callback to manage camera state in parent
+      /* Call the onUploadComplete callback to manage camera state in parent
       if (onUploadComplete) {
-        onUploadComplete();
-      }
+        onUploadComplete();    //Ini gak bakal kepake jir
+      } */ 
       
       // Reset local state
       setImage(null);
-      stopCamera();
+      handleCloseCamera();
     } catch (error) {
       console.error('Error uploading image:', error);
     }
