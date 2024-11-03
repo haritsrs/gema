@@ -6,7 +6,7 @@ import { getDatabase, ref, set, get, update, remove, onValue } from "firebase/da
 import 'dotenv/config'; // Load environment variables from .env file
 
 // Log API key to check if environment variables are loaded (remove in production)
-console.log(process.env.FIREBASE_API_KEY);
+console.log(process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
 
 // Firebase configuration
 const firebaseConfig = {
