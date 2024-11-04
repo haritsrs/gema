@@ -86,12 +86,9 @@ export default function Page() {
         });
       } else {
         await navigator.clipboard.writeText(postUrl);
-        // You might want to add a toast notification here
-        // toast.success('Link copied to clipboard!');
       }
     } catch (error) {
       console.error('Error sharing post:', error);
-      // toast.error('Failed to share post');
     }
   };
 
@@ -168,10 +165,7 @@ export default function Page() {
                     <button
                       className="flex items-center space-x-1 bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md active:filter-none p-2"
                       onClick={() => {
-                        const commentSection = document.querySelector(`#comments-${post.id}`);
-                        if (commentSection) {
-                          commentSection.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        window.location.href = `/posts/${post.id}`;
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
