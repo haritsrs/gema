@@ -37,6 +37,11 @@ export default function Page() {
     triggerSort
   } = usePostSystem();
 
+  // Sorting algorithm
+  useEffect(() => {
+    triggerSort();
+  }, [triggerSort]);
+
   // Authentication listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -45,10 +50,7 @@ export default function Page() {
     return () => unsubscribe();
   }, []);
 
-  // Call sorting Algorithm
-  useEffect(() => {
-    triggerSort();
-  }, [triggerSort]);
+
 
   // Infinite scroll observer
   useEffect(() => {

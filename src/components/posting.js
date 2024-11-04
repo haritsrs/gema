@@ -8,7 +8,7 @@ import { auth } from '../../firebase.js';
 import Image from 'next/image';
 import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay'; // Add this import
-import * as nsfwjs from 'nsfwjs';
+//import * as nsfwjs from 'nsfwjs';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -57,26 +57,26 @@ export default function Posting({ onPostCreated }) {
 
   const uploadImage = async (file) => {
     const imageRef = storageRef(storage, `images/${Date.now()}-${file.name}`);
-    
+
     try {
       // Send file to Sharp API for processing
       const formData = new FormData();
       formData.append('file', file);
-  
+
       const response = await fetch('/api/sharp', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
         setError('Image compression failed.');
         return '';
       }
-  
+
       // Get optimized image from Sharp API
       const optimizedImageBlob = await response.blob();
       const optimizedFile = new File([optimizedImageBlob], file.name, { type: 'image/jpeg' });
-  
+
       // Upload optimized image to Firebase Storage
       const snapshot = await uploadBytes(imageRef, optimizedFile);
       const downloadURL = await getDownloadURL(snapshot.ref);
@@ -88,7 +88,7 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
-  const checkImageForNSFW = async (image) => {
+  {/*const checkImageForNSFW = async (image) => {
     const model = await nsfwjs.load();
     const imageElement = document.createElement('img');
     imageElement.src = URL.createObjectURL(image);
@@ -105,6 +105,7 @@ export default function Posting({ onPostCreated }) {
       };
     });
   };
+  */}
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -138,7 +139,7 @@ export default function Posting({ onPostCreated }) {
 
       const postsRef = databaseRef(database, 'posts');
       await push(postsRef, newPost);
-      
+
       setPostContent('');
       handleDeleteImage();
       if (onPostCreated) onPostCreated();
@@ -209,9 +210,9 @@ export default function Posting({ onPostCreated }) {
             height={200}
             className="object-cover rounded-md"
           />
-          <button 
-            type="button" 
-            onClick={handleDeleteImage} 
+          <button
+            type="button"
+            onClick={handleDeleteImage}
             className="absolute top-0 right-0 bg-red-300 bg-opacity-80 text-red-800 rounded-full p-1"
           >
             X
@@ -219,7 +220,7 @@ export default function Posting({ onPostCreated }) {
         </div>
       )}
 
-{isUploaderVisible && !isCameraOpen && !imageUrl && (
+      {isUploaderVisible && !isCameraOpen && !imageUrl && (
         <div className="flex items-center justify-center w-full mt-2">
           <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-64 border border-gray-500 rounded-lg cursor-pointer bg-gray-950 hover:border-purple-800 hover:bg-purple-300 hover:bg-opacity-30 fill-gray-400 hover:fill-purple-500 text-gray-400 hover:text-purple-500">
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -238,16 +239,16 @@ export default function Posting({ onPostCreated }) {
       )}
 
       {isCameraOpen && (
-        <Camera 
-          setSelectedImage={setSelectedImage} 
-          setImageUrl={setImageUrl} 
-          handleCloseCamera={handleCloseCamera} 
-          isCameraActive={isCameraOpen} 
+        <Camera
+          setSelectedImage={setSelectedImage}
+          setImageUrl={setImageUrl}
+          handleCloseCamera={handleCloseCamera}
+          isCameraActive={isCameraOpen}
         />
       )}
 
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         className="mt-2 px-12 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-300 hover:text-purple-800"
         disabled={loading || (!postContent.trim() && !selectedImage)}
       >
