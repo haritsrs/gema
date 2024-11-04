@@ -5,7 +5,7 @@ import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, upd
 
 const POSTS_PER_PAGE = 30;
 const TIME_WEIGHT = 1;
-const LIKE_WEIGHT = 2
+const LIKE_WEIGHT = 2;
 const CACHE_EXPIRY = 5 * 60 * 1000;
 const SORT_DELAY = 500;
 
@@ -38,7 +38,7 @@ export function usePostSystem() {
   const [lastVisibleTimestamp, setLastVisibleTimestamp] = useState(null);
   const [noMorePosts, setNoMorePosts] = useState(false);
   const [shouldSort, setShouldSort] = useState(false);
-  
+
   const postsCache = useRef(createPostsCache());
   const postsRef = useRef(null);
   const sortTimeoutRef = useRef(null);
@@ -48,7 +48,7 @@ export function usePostSystem() {
   const calculateRelevancyScore = useCallback((post) => {
     const cacheKey = `relevancy-${post.id}-${post.likes}-${post.createdAt}`;
     const cachedScore = postsCache.current.get(cacheKey);
-    
+
     if (cachedScore && Date.now() - cachedScore.timestamp < CACHE_EXPIRY) {
       return cachedScore.value;
     }
@@ -56,10 +56,10 @@ export function usePostSystem() {
     const now = Date.now();
     const postAge = (now - post.createdAt) / (1000 * 60 * 60);
     const likes = post.likes || 0;
-    
+
     const score = (1 / Math.pow(postAge + 2, TIME_WEIGHT)) * Math.pow(likes + 1, LIKE_WEIGHT);
     postsCache.current.set(cacheKey, score);
-    
+
     return score;
   }, []);
 
@@ -78,7 +78,7 @@ export function usePostSystem() {
       if (sortTimeoutRef.current) {
         clearTimeout(sortTimeoutRef.current);
       }
-      
+
       sortTimeoutRef.current = setTimeout(() => {
         setPosts(prevPosts => sortPostsByRelevancy(prevPosts));
         setShouldSort(false);
@@ -96,12 +96,12 @@ export function usePostSystem() {
   const batchUpdatePosts = useCallback((newPosts) => {
     setPosts(prevPosts => {
       const postsMap = new Map(prevPosts.map(post => [post.id, post]));
-      
+
       // Update existing posts and add new ones
       newPosts.forEach(post => {
         postsMap.set(post.id, post);
       });
-      
+
       const updatedPosts = Array.from(postsMap.values());
       return sortPostsByRelevancy(updatedPosts);
     });
@@ -110,7 +110,7 @@ export function usePostSystem() {
   // Optimized fetch older posts with immediate sorting
   const fetchOlderPosts = useCallback(async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
-    
+
     setLoading(true);
     try {
       const olderPostsQuery = query(
@@ -119,9 +119,9 @@ export function usePostSystem() {
         endBefore(lastVisibleTimestamp),
         limitToLast(POSTS_PER_PAGE)
       );
-      
+
       const snapshot = await get(olderPostsQuery);
-      
+
       if (!snapshot.exists()) {
         setNoMorePosts(true);
         return;
@@ -141,7 +141,7 @@ export function usePostSystem() {
       }
 
       batchUpdatePosts(olderPosts);
-      
+
       // Update last visible timestamp
       const oldestPost = olderPosts[0];
       if (oldestPost) {
@@ -186,7 +186,7 @@ export function usePostSystem() {
       });
 
       batchUpdatePosts(postsData);
-      
+
       const oldestPost = postsData[0];
       if (oldestPost) {
         setLastVisibleTimestamp(oldestPost.createdAt);
@@ -198,7 +198,7 @@ export function usePostSystem() {
     const unsubscribe = onValue(recentPostsQuery, handleNewPosts, {
       onlyOnce: false
     });
-    
+
     return () => {
       unsubscribe();
       postsCache.current.clear();
