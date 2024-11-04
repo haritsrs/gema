@@ -88,24 +88,23 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
-  {/*const checkImageForNSFW = async (image) => {
+  const checkImageForNSFW = async (image) => {
     const model = await nsfwjs.load();
     const imageElement = document.createElement('img');
     imageElement.src = URL.createObjectURL(image);
-    
+
     return new Promise((resolve) => {
       imageElement.onload = async () => {
         const predictions = await model.classify(imageElement);
         const isNSFW = predictions.some(prediction => prediction.className === 'Porn' && prediction.probability > 0.8);
         resolve(isNSFW);
       };
-      
+
       imageElement.onerror = () => {
         resolve(false);
       };
     });
   };
-  */}
 
   const handleSubmit = async (e) => {
     e.preventDefault();
