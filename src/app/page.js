@@ -26,15 +26,21 @@ export default function Page() {
   const [currentUser, setCurrentUser] = useState(null);
   const storage = getStorage();
   const observerRef = useRef();
-  
+
   const {
     posts,
     loading,
     initialLoading,
     noMorePosts,
     fetchOlderPosts,
-    handleLike
+    handleLike,
+    triggerSort
   } = usePostSystem();
+
+  // Sorting algorithm 
+  useEffect(() => {
+    fetchOlderPosts();         //Kok nempelnya kesini bjir
+  }, [fetchOlderPosts]);
 
   // Authentication listener
   useEffect(() => {
@@ -70,7 +76,7 @@ export default function Page() {
   // Share functionality
   const handleShare = async (post) => {
     const postUrl = `${window.location.origin}/posts/${post.id}`;
-    
+
     try {
       if (navigator.share) {
         await navigator.share({
@@ -92,7 +98,7 @@ export default function Page() {
   // Timestamp formatter
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
-    
+
     const now = Date.now();
     const postDate = new Date(timestamp);
     const secondsAgo = Math.floor((now - postDate) / 1000);
@@ -107,15 +113,15 @@ export default function Page() {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={initialLoading || loading} />
-      
+
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold text-white">Posts</h2>
           </div>
 
-          <Posting onPostCreated={() => {}} storage={storage} />
-         
+          <Posting onPostCreated={() => { }} storage={storage} />
+
           <ul className="space-y-4">
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
@@ -143,24 +149,23 @@ export default function Page() {
                     </div>
                   </div>
                 </Link>
-                
+
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
                     <button
                       onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
-                        post.likedBy?.includes(currentUser?.uid)
-                          ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                          : 'bg-gray-700 fill-gray-500'
-                      }`}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
+                        ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
+                        : 'bg-gray-700 fill-gray-500'
+                        }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
                         <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
                       </svg>
                       <span>{post.likes || 0}</span>
                     </button>
-                    
-                    <button 
+
+                    <button
                       className="flex items-center space-x-1 bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md active:filter-none p-2"
                       onClick={() => {
                         const commentSection = document.querySelector(`#comments-${post.id}`);
@@ -176,7 +181,7 @@ export default function Page() {
                       <span>Comment</span>
                     </button>
                   </div>
-                  
+
                   <button
                     className="flex items-center cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 rounded-3xl drop-shadow-lg p-2 mr-2"
                     onClick={() => handleShare(post)}
@@ -190,18 +195,17 @@ export default function Page() {
               </li>
             ))}
           </ul>
-          
+
           <div className="mt-8 flex flex-col items-center space-y-4">
             <div ref={observerRef} className="h-px" />
             {!noMorePosts && (
               <button
                 onClick={fetchOlderPosts}
                 disabled={loading}
-                className={`w-full max-w-md py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
-                  loading
-                    ? 'bg-gray-700 cursor-not-allowed'
-                    : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
-                }`}
+                className={`w-full max-w-md py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${loading
+                  ? 'bg-gray-700 cursor-not-allowed'
+                  : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center space-x-2">

@@ -50,14 +50,8 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
       const snapshot = await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(snapshot.ref);
       setImageUrl(downloadURL);
-      
-      /* Call the onUploadComplete callback to manage camera state in parent
-      if (onUploadComplete) {
-        onUploadComplete();    //Ini gak bakal kepake jir
-      } */ 
-      
+
       // Reset local state
-      setImage(null);
       handleCloseCamera();
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -99,7 +93,7 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
         <div className="flex mt-4 space-x-4">
           <img src={image} alt="Captured" className="w-48 h-auto" />
           <div className="flex flex-col w-max">
-            <button onClick={uploadImage } className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
+            <button onClick={uploadImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
               Upload
             </button>
             <button onClick={discardImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
