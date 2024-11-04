@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { getAuth, signInWithPopup, signInAnonymously, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../firebase';
 
-
 export default function AuthSidebar() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState(''); // New state for username
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [username, setUsername] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,24 @@ export default function AuthSidebar() {
     }
   };
 
+  const validatePasswords = () => {
+    if (password !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return false;
+    }
+    if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters long');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
   const handleEmailSignUp = async () => {
+    if (!validatePasswords()) {
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -53,15 +71,12 @@ export default function AuthSidebar() {
         displayName: username
       });
 
-      // Optionally store the username in Firestore
-      // await firestore.collection('users').doc(user.uid).set({ username });
-
       console.log("User signed up:", user);
-  } catch (error) {
-    console.error("Error signing up with Email: ", error);
-  }
-};
-
+    } catch (error) {
+      console.error("Error signing up with Email: ", error);
+      setPasswordError(error.message);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -72,7 +87,10 @@ export default function AuthSidebar() {
   };
 
   const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp); // Toggle between sign in and sign up
+    setIsSignUp(!isSignUp);
+    setPasswordError('');
+    setPassword('');
+    setConfirmPassword('');
   };
 
   return (
@@ -86,7 +104,6 @@ export default function AuthSidebar() {
         </div>
       ) : (
         <div className="flex-col space-y-10 py-10">
-
           <div className="flex-col">
             <h2 className="flex text-xl text-white py-2 md:py-0">
               Welcome to GEMA!
@@ -109,7 +126,6 @@ export default function AuthSidebar() {
             <hr className="w-full border-t border-gray-700 my-4" />
           </div>
 
-          {/* Email and Password input fields */}
           <div className="flex-col bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
             {isSignUp && (
               <div>
@@ -139,13 +155,34 @@ export default function AuthSidebar() {
                 type="password"
                 placeholder=""
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError('');
+                }}
                 className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
               />
             </div>
             
+            {isSignUp && (
+              <div>
+                <span className="font-white font-sm">Confirm Password</span>
+                <input
+                  type="password"
+                  placeholder=""
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
+                />
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
+              </div>
+            )}
+            
             <div className="py-4 items-center justify-center">
-              {/* Toggle between Sign In and Sign Up */}
               {isSignUp ? (
                 <button onClick={handleEmailSignUp} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
                   Sign Up
