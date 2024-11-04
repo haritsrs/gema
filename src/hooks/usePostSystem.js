@@ -1,4 +1,3 @@
-// hooks/usePostSystem.js
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -6,8 +5,9 @@ import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, upd
 
 const POSTS_PER_PAGE = 30;
 const TIME_WEIGHT = 1;
-const LIKE_WEIGHT = 2;
+const LIKE_WEIGHT = 2
 const CACHE_EXPIRY = 5 * 60 * 1000;
+const SORT_DELAY = 500;
 
 // Utility functions
 const createPostsCache = () => {
@@ -37,9 +37,11 @@ export function usePostSystem() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [lastVisibleTimestamp, setLastVisibleTimestamp] = useState(null);
   const [noMorePosts, setNoMorePosts] = useState(false);
+  const [shouldSort, setShouldSort] = useState(false);
   
   const postsCache = useRef(createPostsCache());
   const postsRef = useRef(null);
+  const sortTimeoutRef = useRef(null);
   const database = getDatabase();
 
   // Memoized relevancy score calculator
@@ -70,7 +72,27 @@ export function usePostSystem() {
     });
   }, [calculateRelevancyScore]);
 
-  // Batch update handler for better performance
+  // Effect to handle delayed sorting
+  useEffect(() => {
+    if (shouldSort) {
+      if (sortTimeoutRef.current) {
+        clearTimeout(sortTimeoutRef.current);
+      }
+      
+      sortTimeoutRef.current = setTimeout(() => {
+        setPosts(prevPosts => sortPostsByRelevancy(prevPosts));
+        setShouldSort(false);
+      }, SORT_DELAY);
+
+      return () => {
+        if (sortTimeoutRef.current) {
+          clearTimeout(sortTimeoutRef.current);
+        }
+      };
+    }
+  }, [shouldSort, sortPostsByRelevancy]);
+
+  // Modified batch update handler that always sorts
   const batchUpdatePosts = useCallback((newPosts) => {
     setPosts(prevPosts => {
       const postsMap = new Map(prevPosts.map(post => [post.id, post]));
@@ -85,53 +107,7 @@ export function usePostSystem() {
     });
   }, [sortPostsByRelevancy]);
 
-  // Optimized real-time posts listener
-  useEffect(() => {
-    if (!postsRef.current) {
-      postsRef.current = ref(database, 'posts');
-    }
-
-    const recentPostsQuery = query(
-      postsRef.current,
-      orderByChild('createdAt'),
-      limitToLast(POSTS_PER_PAGE)
-    );
-
-    const handleNewPosts = (snapshot) => {
-      if (!snapshot.exists()) {
-        setInitialLoading(false);
-        return;
-      }
-
-      const postsData = [];
-      snapshot.forEach((childSnapshot) => {
-        postsData.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
-        });
-      });
-
-      batchUpdatePosts(postsData);
-      
-      const oldestPost = postsData[0];
-      if (oldestPost) {
-        setLastVisibleTimestamp(oldestPost.createdAt);
-      }
-
-      setInitialLoading(false);
-    };
-
-    const unsubscribe = onValue(recentPostsQuery, handleNewPosts, {
-      onlyOnce: false
-    });
-    
-    return () => {
-      unsubscribe();
-      postsCache.current.clear();
-    };
-  }, [database, batchUpdatePosts]);
-
-  // Optimized fetch older posts with debouncing
+  // Optimized fetch older posts with immediate sorting
   const fetchOlderPosts = useCallback(async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
     
@@ -183,7 +159,56 @@ export function usePostSystem() {
     }
   }, [loading, noMorePosts, lastVisibleTimestamp, batchUpdatePosts]);
 
-  // Optimized like handler with optimistic updates
+  // Optimized real-time posts listener
+  useEffect(() => {
+    if (!postsRef.current) {
+      postsRef.current = ref(database, 'posts');
+    }
+
+    const recentPostsQuery = query(
+      postsRef.current,
+      orderByChild('createdAt'),
+      limitToLast(POSTS_PER_PAGE)
+    );
+
+    const handleNewPosts = (snapshot) => {
+      if (!snapshot.exists()) {
+        setInitialLoading(false);
+        return;
+      }
+
+      const postsData = [];
+      snapshot.forEach((childSnapshot) => {
+        postsData.push({
+          id: childSnapshot.key,
+          ...childSnapshot.val()
+        });
+      });
+
+      batchUpdatePosts(postsData);
+      
+      const oldestPost = postsData[0];
+      if (oldestPost) {
+        setLastVisibleTimestamp(oldestPost.createdAt);
+      }
+
+      setInitialLoading(false);
+    };
+
+    const unsubscribe = onValue(recentPostsQuery, handleNewPosts, {
+      onlyOnce: false
+    });
+    
+    return () => {
+      unsubscribe();
+      postsCache.current.clear();
+      if (sortTimeoutRef.current) {
+        clearTimeout(sortTimeoutRef.current);
+      }
+    };
+  }, [database, batchUpdatePosts]);
+
+  // Modified handleLike that doesn't trigger immediate sort
   const handleLike = useCallback(async (postId, currentLikes, likedBy = [], userId) => {
     if (!userId) return;
 
@@ -194,15 +219,14 @@ export function usePostSystem() {
       ? likedBy.filter(uid => uid !== userId)
       : [...likedBy, userId];
 
-    // Optimistic update
-    setPosts(prevPosts => {
-      const updatedPosts = prevPosts.map(post =>
+    // Update without sorting
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
         post.id === postId
           ? { ...post, likes: newLikes, likedBy: newLikedBy }
           : post
-      );
-      return sortPostsByRelevancy(updatedPosts);
-    });
+      )
+    );
 
     try {
       await update(postRef, {
@@ -211,17 +235,21 @@ export function usePostSystem() {
       });
     } catch (error) {
       console.error("Error updating likes:", error);
-      // Revert optimistic update
-      setPosts(prevPosts => {
-        const revertedPosts = prevPosts.map(post =>
+      // Revert update without sorting
+      setPosts(prevPosts =>
+        prevPosts.map(post =>
           post.id === postId
             ? { ...post, likes: currentLikes, likedBy }
             : post
-        );
-        return sortPostsByRelevancy(revertedPosts);
-      });
+        )
+      );
     }
-  }, [database, sortPostsByRelevancy]);
+  }, [database]);
+
+  // Function to manually trigger sorting
+  const triggerSort = useCallback(() => {
+    setShouldSort(true);
+  }, []);
 
   return {
     posts,
@@ -229,6 +257,7 @@ export function usePostSystem() {
     initialLoading,
     noMorePosts,
     fetchOlderPosts,
-    handleLike
+    handleLike,
+    triggerSort
   };
 }
