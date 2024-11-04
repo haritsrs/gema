@@ -55,8 +55,6 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
       handleCloseCamera();
     } catch (error) {
       console.error('Error uploading image:', error);
-    } finally {
-      setImageUrl(null);
     }
   };
 

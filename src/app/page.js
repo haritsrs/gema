@@ -37,10 +37,10 @@ export default function Page() {
     triggerSort
   } = usePostSystem();
 
-  // Sorting algorithm
+  // Sorting algorithm 
   useEffect(() => {
-    triggerSort();
-  }, [triggerSort]);
+    fetchOlderPosts();         //Kok nempelnya kesini bjir
+  }, [fetchOlderPosts]);
 
   // Authentication listener
   useEffect(() => {
@@ -49,8 +49,6 @@ export default function Page() {
     });
     return () => unsubscribe();
   }, []);
-
-
 
   // Infinite scroll observer
   useEffect(() => {
