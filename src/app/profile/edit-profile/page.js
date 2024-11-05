@@ -120,7 +120,11 @@ export default function ProfilePage() {
         email
       });
 
-      alert("Profile updated successfully!");
+      // Show a simple success message instead of an alert
+      setError("Profile updated successfully!");
+      setTimeout(() => {
+        setError("");
+      }, 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile. " + error.message);
@@ -233,9 +237,11 @@ export default function ProfilePage() {
         </button>
   
         {error && (
-          <p className="text-red-500 mt-2">{error}</p>
-        )}
-      </div>
+        <p className={`text-white bg-green-500 p-3 rounded mt-4 ${error ? 'block' : 'hidden'}`}>
+          {error}
+        </p>
+      )}
     </div>
+  </div>
   );
 }
