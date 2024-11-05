@@ -83,7 +83,7 @@ export default function NotificationsPage() {
       content: 'liked your post "Building a React Component Library"',
       timestamp: 'Just now',
       read: false,
-      userImage: '/api/placeholder/40/40'
+      userImage: 'https://placehold.co/40x40'
     },
     {
       id: 2,
@@ -92,7 +92,7 @@ export default function NotificationsPage() {
       content: 'commented on your post: "This is exactly what I was looking for!"',
       timestamp: '5m ago',
       read: false,
-      userImage: '/api/placeholder/40/40'
+      userImage: 'https://placehold.co/40x40'
     },
     {
       id: 3,
@@ -101,7 +101,7 @@ export default function NotificationsPage() {
       content: 'started following you',
       timestamp: '1h ago',
       read: true,
-      userImage: '/api/placeholder/40/40'
+      userImage: 'https://placehold.co/40x40'
     },
     {
       id: 4,
@@ -110,7 +110,7 @@ export default function NotificationsPage() {
       content: 'mentioned you in a comment: "@username Great explanation!"',
       timestamp: '2h ago',
       read: true,
-      userImage: '/api/placeholder/40/40'
+      userImage: 'https://placehold.co/40x40'
     },
     {
       id: 5,
@@ -119,7 +119,7 @@ export default function NotificationsPage() {
       content: 'and 5 others liked your post',
       timestamp: '3h ago',
       read: true,
-      userImage: '/api/placeholder/40/40'
+      userImage: 'https://placehold.co/40x40'
     }
   ];
 

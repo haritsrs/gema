@@ -8,7 +8,7 @@ import { auth } from '../../firebase.js';
 import Image from 'next/image';
 import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay'; // Add this import
-//import * as nsfwjs from 'nsfwjs';
+import * as nsfwjs from 'nsfwjs';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');

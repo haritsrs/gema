@@ -10,6 +10,7 @@ import Posting from '../../components/posting';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
 import PostDropdown from '../../components/PostDropdown';
+import { usePostSystem } from '@/hooks/usePostSystem.js';
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -28,6 +29,7 @@ function useChronologicalPosts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const database = getDatabase();
+  const { handleLike, handleDeletePost} = usePostSystem();
 
   useEffect(() => {
     const postsRef = ref(database, 'posts');
@@ -55,58 +57,6 @@ function useChronologicalPosts() {
     const unsubscribe = onValue(postsQuery, handlePosts);
     return () => unsubscribe();
   }, [database]);
-
-  const handleLike = async (postId, currentLikes, likedBy = [], userId) => {
-    if (!userId) return;
-
-    const postRef = ref(database, `posts/${postId}`);
-    const hasLiked = likedBy.includes(userId);
-    const newLikes = hasLiked ? currentLikes - 1 : currentLikes + 1;
-    const newLikedBy = hasLiked
-      ? likedBy.filter(uid => uid !== userId)
-      : [...likedBy, userId];
-
-    setPosts(prevPosts =>
-      prevPosts.map(post =>
-        post.id === postId
-          ? { ...post, likes: newLikes, likedBy: newLikedBy }
-          : post
-      )
-    );
-
-    try {
-      await update(postRef, {
-        likes: newLikes,
-        likedBy: newLikedBy
-      });
-    } catch (error) {
-      console.error("Error updating likes:", error);
-      setPosts(prevPosts =>
-        prevPosts.map(post =>
-          post.id === postId
-            ? { ...post, likes: currentLikes, likedBy }
-            : post
-        )
-      );
-    }
-  };
-
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm('Are you sure you want to delete this post?')) {
-      return;
-    }
-
-    const database = getDatabase();
-    const postRef = ref(database, `posts/${postId}`);
-
-    try {
-      await remove(postRef);
-      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      alert('Failed to delete post. Please try again.');
-    }
-  };
 
   return {
     posts,
@@ -206,7 +156,7 @@ export default function ProfilePage() {
         <div className="max-w-2xl mx-auto px-4 relative">
           <div className="absolute -bottom-24 flex flex-col items-center w-full h-16">
             <img
-              src={currentUser.photoURL || '/default-avatar.png'}
+              src={currentUser.photoURL || 'https://placehold.co/40x40'}
               alt="Profile picture"
               className="w-32 h-32 rounded-full border-4 border-gray-900"
             />
@@ -230,7 +180,7 @@ export default function ProfilePage() {
       {/* Profile Content */}
       <div className="max-w-2xl mx-auto px-4 mt-8">
         {/* User Stats */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-6">
+        <div className="bg-gray-800 rounded-lg p-4 mb-6 justify-center items-center flex">
           <div className="flex space-x-6">
             <div className="text-center">
               <div className="text-xl font-bold text-white">{userPosts.length}</div>
@@ -293,14 +243,12 @@ export default function ProfilePage() {
                 {/* Post Actions */}
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
-                    {/* Like Button */}
                     <button
                       onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
-                        post.likedBy?.includes(currentUser?.uid)
-                          ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                          : 'bg-gray-700 fill-gray-500'
-                      }`}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
+                        ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
+                        : 'bg-gray-700 fill-gray-500'
+                        }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
                         <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
@@ -308,7 +256,6 @@ export default function ProfilePage() {
                       <span>{post.likes || 0}</span>
                     </button>
 
-                    {/* Comment Button */}
                     <button
                       className="flex items-center space-x-1 bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md active:filter-none p-2"
                       onClick={() => {
@@ -321,18 +268,17 @@ export default function ProfilePage() {
                       </svg>
                       <span>Comment</span>
                     </button>
-
-                    {/* Share Button */}
-                    <button
-                      className="flex items-center cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 rounded-3xl drop-shadow-lg p-2 mr-2"
-                      onClick={() => handleShare(post)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
-                        <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
-                        <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
-                      </svg>
-                    </button>
                   </div>
+
+                  <button
+                    className="flex items-center cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 rounded-3xl drop-shadow-lg p-2 mr-2"
+                    onClick={() => handleShare(post)}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
+                      <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
+                      <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </div>
               </li>
             ))}
