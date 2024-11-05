@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, update, onValue } from 'firebase/database';
+import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, update, onValue, remove } from 'firebase/database';
 
 const POSTS_PER_PAGE = 30;
 const TIME_WEIGHT = 1;
@@ -91,6 +91,42 @@ export function usePostSystem() {
       };
     }
   }, [shouldSort, sortPostsByRelevancy]);
+
+  // Add handleDeletePost function
+  const handleDeletePost = useCallback(async (postId) => {
+    if (!postId) return;
+  
+    try {
+      const postRef = ref(database, `posts/${postId}`);
+      
+      // Optimistically update UI
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  
+      // Delete from Firebase
+      await remove(postRef);
+      
+      // Just clear the entire cache since we don't have a method to iterate keys
+      postsCache.current.clear();
+  
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      
+      // Revert the optimistic update if delete fails
+      try {
+        const postRef = ref(database, `posts/${postId}`);
+        const snapshot = await get(postRef);
+        if (snapshot.exists()) {
+          const post = { id: snapshot.key, ...snapshot.val() };
+          setPosts(prevPosts => {
+            const updatedPosts = [...prevPosts, post];
+            return sortPostsByRelevancy(updatedPosts);
+          });
+        }
+      } catch (rollbackError) {
+        console.error("Error rolling back delete:", rollbackError);
+      }
+    }
+  }, [database, sortPostsByRelevancy]);
 
   // Modified batch update handler that always sorts
   const batchUpdatePosts = useCallback((newPosts) => {
@@ -258,6 +294,7 @@ export function usePostSystem() {
     noMorePosts,
     fetchOlderPosts,
     handleLike,
-    triggerSort
+    triggerSort,
+    handleDeletePost
   };
 }

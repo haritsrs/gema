@@ -6,8 +6,10 @@ import { getDatabase, ref, query, orderByChild, onValue } from 'firebase/databas
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../firebase.js';
 import localFont from "next/font/local";
+import Posting from '../../components/posting';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
+import PostDropdown from '../../components/PostDropdown';
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -89,10 +91,29 @@ function useChronologicalPosts() {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    const database = getDatabase();
+    const postRef = ref(database, `posts/${postId}`);
+
+    try {
+      await remove(postRef);
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Failed to delete post. Please try again.');
+    }
+  };
+
   return {
     posts,
     loading,
     handleLike,
+    handleDeletePost,
+    setPosts 
   };
 }
 
@@ -105,6 +126,8 @@ export default function ProfilePage() {
     posts,
     loading,
     handleLike,
+    handleDeletePost,
+    setPosts
   } = useChronologicalPosts();
 
   // Authentication listener
@@ -156,6 +179,11 @@ export default function ProfilePage() {
     }
   };
 
+  const handlePostCreated = (newPost) => {
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+    setUserPosts(prevUserPosts => [newPost, ...prevUserPosts]);
+  };
+
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -187,22 +215,20 @@ export default function ProfilePage() {
               <p className="text-gray-300">@{currentUser.email?.split('@')[0]}</p>
             </div>
             <Link 
-  href="/profile/edit-profile"
-  className="absolute right bottom bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 relative "
->
-  {/* SVG Icon */}
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-  </svg>
-  <span>Edit Profile</span>
-</Link>
-
+              href="/profile/edit-profile"
+              className="absolute right bottom bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 relative"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+              <span>Edit Profile</span>
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="max-w-2xl mx-auto px-4 mt-10">
+      <div className="max-w-2xl mx-auto px-4 mt-8">
         {/* User Stats */}
         <div className="bg-gray-800 rounded-lg p-4 mb-6">
           <div className="flex space-x-6">
@@ -217,6 +243,11 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* Posting Component */}
+        <div className="mb-6">
+          <Posting onPostCreated={handlePostCreated} storage={storage} />
+        </div>
+
         {/* User Posts */}
         <h2 className="text-xl font-bold text-white mb-4">Your Posts</h2>
         {userPosts.length === 0 ? (
@@ -227,18 +258,25 @@ export default function ProfilePage() {
           <ul className="space-y-4">
             {userPosts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
-                <Link href={`/posts/${post.id}`}>
-                  <div className="flex space-x-2">
-                    <img
-                      src={post.profilePicture || currentUser.photoURL || '/default-avatar.png'}
-                      alt="Profile picture"
-                      className="rounded-full w-10 h-10 object-cover"
-                    />
-                    <div className="flex-1">
+                <div className="flex space-x-2">
+                  <img
+                    src={post.profilePicture || currentUser.photoURL || '/default-avatar.png'}
+                    alt="Profile picture"
+                    className="rounded-full w-10 h-10 object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
                       <div className="font-bold">
                         {post.username || currentUser.displayName || 'User'}{' '}
                         <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
                       </div>
+                      <PostDropdown 
+                        post={post}
+                        currentUser={currentUser}
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                    <Link href={`/posts/${post.id}`}>
                       <div>{post.content}</div>
                       {post.imageUrl && (
                         <img
@@ -248,12 +286,14 @@ export default function ProfilePage() {
                           loading="lazy"
                         />
                       )}
-                    </div>
+                    </Link>
                   </div>
-                </Link>
+                </div>
 
+                {/* Post Actions */}
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
+                    {/* Like Button */}
                     <button
                       onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
                       className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
@@ -268,6 +308,7 @@ export default function ProfilePage() {
                       <span>{post.likes || 0}</span>
                     </button>
 
+                    {/* Comment Button */}
                     <button
                       className="flex items-center space-x-1 bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md active:filter-none p-2"
                       onClick={() => {
@@ -281,15 +322,16 @@ export default function ProfilePage() {
                       <span>Comment</span>
                     </button>
 
+                    {/* Share Button */}
                     <button
-                    className="flex items-center cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 rounded-3xl drop-shadow-lg p-2 mr-2"
-                    onClick={() => handleShare(post)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
-                      <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
-                      <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                      className="flex items-center cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 rounded-3xl drop-shadow-lg p-2 mr-2"
+                      onClick={() => handleShare(post)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
+                        <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
+                        <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </li>

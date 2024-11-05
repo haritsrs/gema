@@ -9,6 +9,7 @@ import Posting from '../components/posting';
 import Link from 'next/link';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { usePostSystem } from '../hooks/usePostSystem';
+import PostDropdown from '../components/PostDropdown';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,7 +35,8 @@ export default function Page() {
     noMorePosts,
     fetchOlderPosts,
     handleLike,
-    triggerSort
+    triggerSort,
+    handleDeletePost
   } = usePostSystem();
 
   // Sorting algorithm 
@@ -122,30 +124,37 @@ export default function Page() {
           <ul className="space-y-4">
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
-                <Link href={`/posts/${post.id}`}>
-                  <div className="flex space-x-2 cursor-pointer">
-                    <img
-                      src={post.profilePicture || '/default-avatar.png'}
-                      alt={`${post.username || 'User'}'s profile`}
-                      className="rounded-full w-10 h-10 object-cover"
-                    />
-                    <div className="flex-1">
+              <Link href={`/posts/${post.id}`}>
+                <div className="flex space-x-2 cursor-pointer">
+                  <img
+                    src={post.profilePicture || '/default-avatar.png'}
+                    alt={`${post.username || 'User'}'s profile`}
+                    className="rounded-full w-10 h-10 object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
                       <div className="font-bold">
                         {post.username || 'User'}{' '}
                         <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
                       </div>
-                      <div>{post.content}</div>
-                      {post.imageUrl && (
-                        <img
-                          src={post.imageUrl}
-                          alt="Post image"
-                          className="mt-2 w-full h-auto rounded-lg"
-                          loading="lazy"
-                        />
-                      )}
+                      <PostDropdown 
+                        post={post}
+                        currentUser={currentUser}
+                        onDelete={handleDeletePost}
+                      />
                     </div>
+                    <div>{post.content}</div>
+                    {post.imageUrl && (
+                      <img
+                        src={post.imageUrl}
+                        alt="Post image"
+                        className="mt-2 w-full h-auto rounded-lg"
+                        loading="lazy"
+                      />
+                    )}
                   </div>
-                </Link>
+                </div>
+              </Link>
 
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
