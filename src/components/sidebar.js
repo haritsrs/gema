@@ -26,10 +26,10 @@ const Sidebar = () => {
           <span className="md:hidden">Search</span>
         </div>
       </Link>
-      <Link href="/messages" passHref>
+      <Link href="/notifications" passHref>
         <div className="flex flex-col items-center justify-center mb-0 md:mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="white" fillRule="evenodd" d="M2 6a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7.333L4 21.5c-.824.618-2 .03-2-1z" className="duoicon-secondary-layer" opacity={0.3}></path><path fill="white" fillRule="evenodd" d="M8 12a1 1 0 1 0 0 2h3a1 1 0 1 0 0-2zM7 9a1 1 0 0 1 1-1h8a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1" className="duoicon-primary-layer"></path></svg>
-          <span className="md:hidden text-center">Message</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="m20 18.667l.4.533a.5.5 0 0 1-.4.8H4a.5.5 0 0 1-.4-.8l.4-.533V10a8 8 0 1 1 16 0zM9.5 21h5a2.5 2.5 0 0 1-5 0"/></svg>
+          <span className="md:hidden text-center">Notifications</span>
         </div>
       </Link>
       <Link href="/profile" passHref>

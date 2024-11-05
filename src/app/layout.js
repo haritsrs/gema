@@ -56,9 +56,9 @@ export default function RootLayout({ children }) {
 
         <div className="flex min-h-screen">
 
-          <div className="hidden md:block fixed top-16 h-full w-max items-center justify-center bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 text-white px-4">
-              <Sidebar />
-          </div>
+        <div className="hidden md:block fixed top-16 h-full w-max items-center justify-center bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 text-white px-4 z-30">
+            <Sidebar />
+        </div>
           
 
           <div className="flex flex-col grow items-center py-16 justify-center overflow-y-auto md:pb-0">
