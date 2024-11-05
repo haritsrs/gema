@@ -1,15 +1,14 @@
-"use client";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, startAfter, update, onValue, remove } from 'firebase/database';
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, update, onValue, remove } from 'firebase/database';
-
-const POSTS_PER_PAGE = 30;
+const POSTS_PER_PAGE = 20;
 const TIME_WEIGHT = 1;
 const LIKE_WEIGHT = 2;
 const CACHE_EXPIRY = 5 * 60 * 1000;
 const SORT_DELAY = 500;
+const INITIAL_FETCH_LIMIT = 500;
 
-// Utility functions
+// Utility function for creating posts cache with automatic cleanup
 const createPostsCache = () => {
   const cache = new Map();
   const lastCleanup = Date.now();
@@ -32,17 +31,20 @@ const createPostsCache = () => {
 };
 
 export function usePostSystem() {
+  // State management
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [lastVisibleTimestamp, setLastVisibleTimestamp] = useState(null);
+  const [lastVisibleScore, setLastVisibleScore] = useState(null);
   const [noMorePosts, setNoMorePosts] = useState(false);
-  const [shouldSort, setShouldSort] = useState(false);
+  const [shouldSort, setShouldSort] = useState(true);
 
+  // Refs
   const postsCache = useRef(createPostsCache());
   const postsRef = useRef(null);
   const sortTimeoutRef = useRef(null);
   const database = getDatabase();
+  const allFetchedPosts = useRef(new Map());
 
   // Memoized relevancy score calculator
   const calculateRelevancyScore = useCallback((post) => {
@@ -63,16 +65,124 @@ export function usePostSystem() {
     return score;
   }, []);
 
-  // Optimized sort function with memoization
+  // Optimized sort function
   const sortPostsByRelevancy = useCallback((postsToSort) => {
-    return [...postsToSort].sort((a, b) => {
+    const sortedPosts = [...postsToSort].sort((a, b) => {
       const scoreA = calculateRelevancyScore(a);
       const scoreB = calculateRelevancyScore(b);
       return scoreB - scoreA;
     });
+
+    // Update last visible score for pagination
+    if (sortedPosts.length > 0) {
+      const lastPost = sortedPosts[sortedPosts.length - 1];
+      setLastVisibleScore(calculateRelevancyScore(lastPost));
+    }
+
+    return sortedPosts;
   }, [calculateRelevancyScore]);
 
-  // Effect to handle delayed sorting
+  // Initial fetch with larger limit
+  const fetchInitialPosts = useCallback(async () => {
+    if (!postsRef.current) {
+      postsRef.current = ref(database, 'posts');
+    }
+
+    setInitialLoading(true);
+    try {
+      const initialQuery = query(
+        postsRef.current,
+        orderByChild('createdAt'),
+        limitToLast(INITIAL_FETCH_LIMIT)
+      );
+
+      const snapshot = await get(initialQuery);
+
+      if (!snapshot.exists()) {
+        setInitialLoading(false);
+        return;
+      }
+
+      const fetchedPosts = [];
+      snapshot.forEach((childSnapshot) => {
+        const post = {
+          id: childSnapshot.key,
+          ...childSnapshot.val()
+        };
+        fetchedPosts.push(post);
+        allFetchedPosts.current.set(post.id, post);
+      });
+
+      // Sort by relevancy and take top POSTS_PER_PAGE posts
+      const sortedPosts = sortPostsByRelevancy(fetchedPosts);
+      setPosts(sortedPosts.slice(0, POSTS_PER_PAGE));
+
+      if (fetchedPosts.length < INITIAL_FETCH_LIMIT) {
+        setNoMorePosts(true);
+      }
+    } catch (error) {
+      console.error("Error fetching initial posts:", error);
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [database, sortPostsByRelevancy]);
+
+  // Fetch older posts
+  const fetchOlderPosts = useCallback(async () => {
+    if (loading || noMorePosts || !lastVisibleScore) return;
+
+    setLoading(true);
+    try {
+      const timeThreshold = Date.now() - (90 * 24 * 60 * 60 * 1000); // 90 days ago
+      const olderPostsQuery = query(
+        postsRef.current,
+        orderByChild('createdAt'),
+        startAfter(timeThreshold),
+        limitToLast(POSTS_PER_PAGE * 2) // Fetch more to ensure we get high relevancy posts
+      );
+
+      const snapshot = await get(olderPostsQuery);
+
+      if (!snapshot.exists()) {
+        setNoMorePosts(true);
+        setLoading(false);
+        return;
+      }
+
+      const newPosts = [];
+      snapshot.forEach((childSnapshot) => {
+        const post = {
+          id: childSnapshot.key,
+          ...childSnapshot.val()
+        };
+        if (!allFetchedPosts.current.has(post.id)) {
+          newPosts.push(post);
+          allFetchedPosts.current.set(post.id, post);
+        }
+      });
+
+      if (newPosts.length === 0) {
+        setNoMorePosts(true);
+        setLoading(false);
+        return;
+      }
+
+      // Combine with existing posts and sort by relevancy
+      const allPosts = Array.from(allFetchedPosts.current.values());
+      const sortedPosts = sortPostsByRelevancy(allPosts);
+      setPosts(sortedPosts);
+
+      if (newPosts.length < POSTS_PER_PAGE) {
+        setNoMorePosts(true);
+      }
+    } catch (error) {
+      console.error("Error fetching older posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, noMorePosts, lastVisibleScore, sortPostsByRelevancy]);
+
+  // Delayed sorting effect
   useEffect(() => {
     if (shouldSort) {
       if (sortTimeoutRef.current) {
@@ -92,26 +202,24 @@ export function usePostSystem() {
     }
   }, [shouldSort, sortPostsByRelevancy]);
 
-  // Add handleDeletePost function
+  // Post deletion handler with optimistic updates
   const handleDeletePost = useCallback(async (postId) => {
     if (!postId) return;
-  
+
     try {
       const postRef = ref(database, `posts/${postId}`);
-      
-      // Optimistically update UI
+
+      // Optimistic UI update
       setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-  
+
       // Delete from Firebase
       await remove(postRef);
-      
-      // Just clear the entire cache since we don't have a method to iterate keys
       postsCache.current.clear();
-  
+
     } catch (error) {
       console.error("Error deleting post:", error);
-      
-      // Revert the optimistic update if delete fails
+
+      // Rollback on failure
       try {
         const postRef = ref(database, `posts/${postId}`);
         const snapshot = await get(postRef);
@@ -128,8 +236,8 @@ export function usePostSystem() {
     }
   }, [database, sortPostsByRelevancy]);
 
-  // Modified batch update handler that always sorts
-  const batchUpdatePosts = useCallback((newPosts) => {
+  // Batch update handler
+  {/*const batchUpdatePosts = useCallback((newPosts) => {
     setPosts(prevPosts => {
       const postsMap = new Map(prevPosts.map(post => [post.id, post]));
 
@@ -141,99 +249,33 @@ export function usePostSystem() {
       const updatedPosts = Array.from(postsMap.values());
       return sortPostsByRelevancy(updatedPosts);
     });
+  }, [sortPostsByRelevancy]);*/}
+
+  //Real-time updates handler
+
+  const handleRealtimeUpdate = useCallback((snapshot) => {
+    if (!snapshot.exists()) return;
+
+    const updatedPost = {
+      id: snapshot.key,
+      ...snapshot.val()
+    };
+
+    allFetchedPosts.current.set(updatedPost.id, updatedPost);
+    const allPosts = Array.from(allFetchedPosts.current.values());
+    const sortedPosts = sortPostsByRelevancy(allPosts);
+    setPosts(sortedPosts);
   }, [sortPostsByRelevancy]);
 
-  // Optimized fetch older posts with immediate sorting
-  const fetchOlderPosts = useCallback(async () => {
-    if (loading || noMorePosts || !lastVisibleTimestamp) return;
-
-    setLoading(true);
-    try {
-      const olderPostsQuery = query(
-        postsRef.current,
-        orderByChild('createdAt'),
-        endBefore(lastVisibleTimestamp),
-        limitToLast(POSTS_PER_PAGE)
-      );
-
-      const snapshot = await get(olderPostsQuery);
-
-      if (!snapshot.exists()) {
-        setNoMorePosts(true);
-        return;
-      }
-
-      const olderPosts = [];
-      snapshot.forEach((childSnapshot) => {
-        olderPosts.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
-        });
-      });
-
-      if (olderPosts.length === 0) {
-        setNoMorePosts(true);
-        return;
-      }
-
-      batchUpdatePosts(olderPosts);
-
-      // Update last visible timestamp
-      const oldestPost = olderPosts[0];
-      if (oldestPost) {
-        setLastVisibleTimestamp(oldestPost.createdAt);
-      }
-
-      if (olderPosts.length < POSTS_PER_PAGE) {
-        setNoMorePosts(true);
-      }
-
-    } catch (error) {
-      console.error("Error fetching older posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, noMorePosts, lastVisibleTimestamp, batchUpdatePosts]);
-
-  // Optimized real-time posts listener
+  // Initialize and set up real-time listeners
   useEffect(() => {
     if (!postsRef.current) {
       postsRef.current = ref(database, 'posts');
     }
 
-    const recentPostsQuery = query(
-      postsRef.current,
-      orderByChild('createdAt'),
-      limitToLast(POSTS_PER_PAGE)
-    );
+    fetchInitialPosts();
 
-    const handleNewPosts = (snapshot) => {
-      if (!snapshot.exists()) {
-        setInitialLoading(false);
-        return;
-      }
-
-      const postsData = [];
-      snapshot.forEach((childSnapshot) => {
-        postsData.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
-        });
-      });
-
-      batchUpdatePosts(postsData);
-
-      const oldestPost = postsData[0];
-      if (oldestPost) {
-        setLastVisibleTimestamp(oldestPost.createdAt);
-      }
-
-      setInitialLoading(false);
-    };
-
-    const unsubscribe = onValue(recentPostsQuery, handleNewPosts, {
-      onlyOnce: false
-    });
+    const unsubscribe = onValue(postsRef.current, handleRealtimeUpdate);
 
     return () => {
       unsubscribe();
@@ -242,9 +284,9 @@ export function usePostSystem() {
         clearTimeout(sortTimeoutRef.current);
       }
     };
-  }, [database, batchUpdatePosts]);
+  }, [database, fetchInitialPosts, handleRealtimeUpdate]);
 
-  // Modified handleLike that doesn't trigger immediate sort
+  // Like handler with optimistic updates
   const handleLike = useCallback(async (postId, currentLikes, likedBy = [], userId) => {
     if (!userId) return;
 
@@ -255,7 +297,7 @@ export function usePostSystem() {
       ? likedBy.filter(uid => uid !== userId)
       : [...likedBy, userId];
 
-    // Update without sorting
+    // Optimistic update
     setPosts(prevPosts =>
       prevPosts.map(post =>
         post.id === postId
@@ -271,7 +313,7 @@ export function usePostSystem() {
       });
     } catch (error) {
       console.error("Error updating likes:", error);
-      // Revert update without sorting
+      // Revert on failure
       setPosts(prevPosts =>
         prevPosts.map(post =>
           post.id === postId
@@ -282,7 +324,7 @@ export function usePostSystem() {
     }
   }, [database]);
 
-  // Function to manually trigger sorting
+  // Manual sort trigger
   const triggerSort = useCallback(() => {
     setShouldSort(true);
   }, []);

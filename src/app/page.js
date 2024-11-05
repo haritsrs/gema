@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
@@ -35,14 +35,10 @@ export default function Page() {
     noMorePosts,
     fetchOlderPosts,
     handleLike,
-    triggerSort,
     handleDeletePost
   } = usePostSystem();
 
-  // Sorting algorithm 
-  useEffect(() => {
-    fetchOlderPosts();         //Kok nempelnya kesini bjir
-  }, [fetchOlderPosts]);
+  const loadMoreRef = useRef(null);
 
   // Authentication listener
   useEffect(() => {
@@ -53,27 +49,28 @@ export default function Page() {
   }, []);
 
   // Infinite scroll observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        const [entry] = entries;
-        if (entry.isIntersecting && !loading && !noMorePosts) {
-          fetchOlderPosts();
-        }
-      },
-      {
-        root: null,
-        rootMargin: '200px',
-        threshold: 0.1,
-      }
-    );
-
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+  const handleObserver = useCallback((entries) => {
+    const target = entries[0];
+    if (target.isIntersecting && !loading && !noMorePosts) {
+      fetchOlderPosts();
     }
-
-    return () => observer.disconnect();
   }, [loading, noMorePosts, fetchOlderPosts]);
+
+  // Set up intersection observer
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+
+    return () => {
+      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+    };
+  }, [handleObserver]);
 
   // Share functionality
   const handleShare = async (post) => {
@@ -124,37 +121,37 @@ export default function Page() {
           <ul className="space-y-4">
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
-              <Link href={`/posts/${post.id}`}>
-                <div className="flex space-x-2 cursor-pointer">
-                  <img
-                    src={post.profilePicture || '/default-avatar.png'}
-                    alt={`${post.username || 'User'}'s profile`}
-                    className="rounded-full w-10 h-10 object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div className="font-bold">
-                        {post.username || 'User'}{' '}
-                        <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
+                <Link href={`/posts/${post.id}`}>
+                  <div className="flex space-x-2 cursor-pointer">
+                    <img
+                      src={post.profilePicture || '/default-avatar.png'}
+                      alt={`${post.username || 'User'}'s profile`}
+                      className="rounded-full w-10 h-10 object-cover"
+                    />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div className="font-bold">
+                          {post.username || 'User'}{' '}
+                          <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
+                        </div>
+                        <PostDropdown
+                          post={post}
+                          currentUser={currentUser}
+                          onDelete={handleDeletePost}
+                        />
                       </div>
-                      <PostDropdown 
-                        post={post}
-                        currentUser={currentUser}
-                        onDelete={handleDeletePost}
-                      />
+                      <div>{post.content}</div>
+                      {post.imageUrl && (
+                        <img
+                          src={post.imageUrl}
+                          alt="Post image"
+                          className="mt-2 w-full h-auto rounded-lg"
+                          loading="lazy"
+                        />
+                      )}
                     </div>
-                    <div>{post.content}</div>
-                    {post.imageUrl && (
-                      <img
-                        src={post.imageUrl}
-                        alt="Post image"
-                        className="mt-2 w-full h-auto rounded-lg"
-                        loading="lazy"
-                      />
-                    )}
                   </div>
-                </div>
-              </Link>
+                </Link>
 
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
