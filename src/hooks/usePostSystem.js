@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, startAfter, update, onValue, remove } from 'firebase/database';
 
-const POSTS_PER_PAGE = 7;
+const POSTS_PER_PAGE = 30;
 const TIME_WEIGHT = 1;
 const LIKE_WEIGHT = 2;
 const CACHE_EXPIRY = 5 * 60 * 1000;
