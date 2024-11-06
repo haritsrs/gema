@@ -1,8 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical, X } from 'lucide-react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getDatabase, ref, get, update } from 'firebase/database';
 
-const DeleteDialog = ({ isOpen, onClose, onConfirm }) => {
+const DeleteDialog = ({ isOpen, onClose, onConfirm, currentUser, post }) => {
   if (!isOpen) return null;
+
+  const isAdmin = currentUser?.admin === 'yes';
+  const isOwnPost = currentUser?.uid === post.userId;
+
+  const handleConfirm = () => {
+    if (isAdmin || isOwnPost) {
+      onConfirm(post.id);
+    } else {
+      // Show an error message or do nothing
+      alert('You do not have permission to delete this post.');
+    }
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -37,10 +52,7 @@ const DeleteDialog = ({ isOpen, onClose, onConfirm }) => {
             Cancel
           </button>
           <button
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
+            onClick={handleConfirm}
             className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
           >
             Delete
@@ -54,11 +66,27 @@ const DeleteDialog = ({ isOpen, onClose, onConfirm }) => {
 const PostDropdown = ({ post, currentUser, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userData, setUserData] = useState(null);
   const dropdownRef = useRef(null);
 
+  const isAdmin = userData?.admin === 'yes';
   const isOwnPost = currentUser?.uid === post.userId;
 
   useEffect(() => {
+    const auth = getAuth();
+    const database = getDatabase();
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val();
+        setUserData(userData);
+      } else {
+        setUserData(null);
+      }
+    });
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -66,10 +94,13 @@ const PostDropdown = ({ post, currentUser, onDelete }) => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      unsubscribe();
+    };
   }, []);
 
-  if (!isOwnPost) return null;
+  if (!isAdmin && !isOwnPost) return null;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -105,7 +136,9 @@ const PostDropdown = ({ post, currentUser, onDelete }) => {
       <DeleteDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
-        onConfirm={() => onDelete(post.id)}
+        onConfirm={onDelete}
+        currentUser={userData}
+        post={post}
       />
     </div>
   );
