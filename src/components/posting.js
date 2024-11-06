@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay'; // Add this import
 import * as nsfwjs from 'nsfwjs';
+import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -110,10 +111,16 @@ export default function Posting({ onPostCreated }) {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return;
     if (!user) return;
-
+  
     setLoading(true);
-
+  
     try {
+      if (isSensitiveContentPresent(postContent)) {
+        setError('Your post contains sensitive content. Please remove it and try again.');
+        setLoading(false);
+        return;
+      }
+  
       let uploadedImageUrl = '';
       if (selectedImage) {
         const nsfwDetected = await checkImageForNSFW(selectedImage);
@@ -124,7 +131,7 @@ export default function Posting({ onPostCreated }) {
         }
         uploadedImageUrl = await uploadImage(selectedImage);
       }
-
+  
       const newPost = {
         content: postContent.trim(),
         imageUrl: uploadedImageUrl,
@@ -135,10 +142,10 @@ export default function Posting({ onPostCreated }) {
         likes: 0,
         likedBy: []
       };
-
+  
       const postsRef = databaseRef(database, 'posts');
       await push(postsRef, newPost);
-
+  
       setPostContent('');
       handleDeleteImage();
       if (onPostCreated) onPostCreated();

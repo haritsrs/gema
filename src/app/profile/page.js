@@ -154,9 +154,35 @@ export default function ProfilePage() {
     );
   }
 
-  return (
+return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={loading} />
+
+      {/* Profile Header */}
+      <div className="w-full h-72 bg-gradient-to-r from-purple-600 to-blue-600">
+        <div className="max-w-2xl mx-auto px-4 relative">
+          <div className="absolute -bottom-24 flex flex-col items-center w-full h-16">
+            <img
+              src={currentUser.photoURL || 'https://placehold.co/40x40'}
+              alt="Profile picture"
+              className="w-32 h-32 rounded-full border-4 border-gray-900"
+            />
+            <div className="mt-4 text-center">
+              <h1 className="text-2xl font-bold text-white">{currentUser.displayName || 'User'}</h1>
+              <p className="text-gray-300">@{currentUser.email?.split('@')[0]}</p>
+            </div>
+            <Link 
+              href="/settings/edit-profile"
+              className="absolute right bottom bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 relative"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+              <span>Edit Profile</span>
+            </Link>
+          </div>
+        </div>
+      </div>
 
    {/* Profile Content */}
        <div className="max-w-2xl mx-auto px-4 mt-8">
