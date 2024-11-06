@@ -26,7 +26,7 @@ const geistMono = localFont({
 export default function Page() {
   const [currentUser, setCurrentUser] = useState(null);
   const storage = getStorage();
-  const observerRef = useRef();
+  const loadMoreRef = useRef(null);
 
   const {
     posts,
@@ -38,8 +38,6 @@ export default function Page() {
     handleDeletePost
   } = usePostSystem();
 
-  const loadMoreRef = useRef(null);
-
   // Authentication listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -48,34 +46,38 @@ export default function Page() {
     return () => unsubscribe();
   }, []);
 
-  // Infinite scroll observer
+  // Intersection Observer callback
   const handleObserver = useCallback((entries) => {
-    const target = entries[0];
-    if (target.isIntersecting && !loading && !noMorePosts) {
+    const [entry] = entries;
+    if (entry.isIntersecting && !loading && !noMorePosts) {
       fetchOlderPosts();
     }
   }, [loading, noMorePosts, fetchOlderPosts]);
 
-  // Set up intersection observer
+  // Set up Intersection Observer
   useEffect(() => {
-    const option = {
+    const observer = new IntersectionObserver(handleObserver, {
       root: null,
-      rootMargin: "20px",
-      threshold: 0
-    };
+      rootMargin: '20px',
+      threshold: 0.1
+    });
 
-    const observer = new IntersectionObserver(handleObserver, option);
-    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+    const currentLoadMoreRef = loadMoreRef.current;
+    
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
+    }
 
     return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+      if (currentLoadMoreRef) {
+        observer.unobserve(currentLoadMoreRef);
+      }
     };
   }, [handleObserver]);
 
-  // Share functionality
+  // Rest of your existing functions
   const handleShare = async (post) => {
     const postUrl = `${window.location.origin}/posts/${post.id}`;
-
     try {
       if (navigator.share) {
         await navigator.share({
@@ -91,10 +93,8 @@ export default function Page() {
     }
   };
 
-  // Timestamp formatter
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
-
     const now = Date.now();
     const postDate = new Date(timestamp);
     const secondsAgo = Math.floor((now - postDate) / 1000);
@@ -108,7 +108,7 @@ export default function Page() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
-      <LoadingOverlay isLoading={initialLoading || loading} />
+      <LoadingOverlay isLoading={initialLoading} />
 
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
@@ -121,6 +121,7 @@ export default function Page() {
           <ul className="space-y-4">
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
+                {/* Your existing post rendering code */}
                 <Link href={`/posts/${post.id}`}>
                   <div className="flex space-x-2 cursor-pointer">
                     <img
@@ -154,13 +155,14 @@ export default function Page() {
                 </Link>
 
                 <div className="flex items-center justify-between text-gray-300 mt-2">
-                  <div className="flex mx-2">
+                <div className="flex mx-2">
                     <button
                       onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
-                        ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                        : 'bg-gray-700 fill-gray-500'
-                        }`}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
+                        post.likedBy?.includes(currentUser?.uid)
+                          ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
+                          : 'bg-gray-700 fill-gray-500'
+                      }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
                         <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
@@ -197,7 +199,7 @@ export default function Page() {
           </ul>
 
           <div className="mt-8 flex flex-col items-center space-y-4">
-            <div ref={observerRef} className="h-px" />
+            <div ref={loadMoreRef} className="h-px" />
             {!noMorePosts && (
               <button
                 onClick={fetchOlderPosts}
@@ -207,27 +209,22 @@ export default function Page() {
                   : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
                   }`}
               >
-                {loading ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Loading...</span>
-                  </div>
-                ) : (
-                  'Load More Posts'
-                )}
-              </button>
-            )}
-            {noMorePosts && (
-              <div className="text-gray-400 text-center py-4">
-                No more posts to load
+                      {loading ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span className="text-white">Loading more posts...</span>
+                        </div>
+                      ) : (
+                        'Load More Posts'
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+        );
+      }
