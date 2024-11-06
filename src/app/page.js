@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { getStorage } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
@@ -27,6 +27,7 @@ export default function Page() {
   const [currentUser, setCurrentUser] = useState(null);
   const storage = getStorage();
   const loadMoreRef = useRef(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
 
   const {
     posts,
@@ -46,36 +47,49 @@ export default function Page() {
     return () => unsubscribe();
   }, []);
 
-  // Intersection Observer callback
-  const handleObserver = useCallback((entries) => {
-    const [entry] = entries;
-    if (entry.isIntersecting && !loading && !noMorePosts) {
-      fetchOlderPosts();
-    }
-  }, [loading, noMorePosts, fetchOlderPosts]);
-
-  // Set up Intersection Observer
+  // Load more posts when shouldLoad is true
   useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: '20px',
-      threshold: 0.1
-    });
-
-    const currentLoadMoreRef = loadMoreRef.current;
-    
-    if (currentLoadMoreRef) {
-      observer.observe(currentLoadMoreRef);
+    if (shouldLoad && !loading && !noMorePosts) {
+      fetchOlderPosts();
+      setShouldLoad(false);
     }
+  }, [shouldLoad, loading, noMorePosts, fetchOlderPosts]);
 
-    return () => {
-      if (currentLoadMoreRef) {
-        observer.unobserve(currentLoadMoreRef);
+  // Set up intersection observer using useLayoutEffect
+  useLayoutEffect(() => {
+    let observer = null;
+
+    const handleIntersect = (entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && !loading && !noMorePosts) {
+        setShouldLoad(true);
       }
     };
-  }, [handleObserver]);
 
-  // Rest of your existing functions
+    const setupObserver = () => {
+      if (loadMoreRef.current) {
+        observer = new IntersectionObserver(handleIntersect, {
+          root: null,
+          rootMargin: '100px',
+          threshold: 0
+        });
+
+        observer.observe(loadMoreRef.current);
+      }
+    };
+
+    // Initial setup
+    setupObserver();
+
+    // Cleanup
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [loading, noMorePosts]); // Dependencies that affect observation
+
+  // Share function
   const handleShare = async (post) => {
     const postUrl = `${window.location.origin}/posts/${post.id}`;
     try {
@@ -155,14 +169,13 @@ export default function Page() {
                 </Link>
 
                 <div className="flex items-center justify-between text-gray-300 mt-2">
-                <div className="flex mx-2">
+                  <div className="flex mx-2">
                     <button
                       onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
-                        post.likedBy?.includes(currentUser?.uid)
-                          ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                          : 'bg-gray-700 fill-gray-500'
-                      }`}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
+                        ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
+                        : 'bg-gray-700 fill-gray-500'
+                        }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
                         <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
@@ -209,22 +222,22 @@ export default function Page() {
                   : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
                   }`}
               >
-                      {loading ? (
-                        <div className="flex items-center justify-center space-x-2">
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <span className="text-white">Loading more posts...</span>
-                        </div>
-                      ) : (
-                        'Load More Posts'
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="text-white">Loading more posts...</span>
+                  </div>
+                ) : (
+                  'Load More Posts'
+                )}
+              </button>
+            )}
           </div>
-        );
-      }
+        </div>
+      </div>
+    </div>
+  );
+}
