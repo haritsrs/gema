@@ -273,15 +273,23 @@ export function usePostSystem() {
   }, [database, sortPostsByRelevancy]);
 
   const handleLike = useCallback(async (postId, currentLikes, likedBy = [], userId) => {
-    if (!userId || !postId) return;
+  if (!userId || !postId) return;
+  
+  const postRef = ref(database, `posts/${postId}`);
+  const hasLiked = likedBy.includes(userId);
+  const newLikes = hasLiked ? currentLikes - 1 : currentLikes + 1;
+  const newLikedBy = hasLiked
+    ? likedBy.filter(uid => uid !== userId)
+    : [...likedBy, userId];
 
-    const postRef = ref(database, `posts/${postId}`);
-    const hasLiked = likedBy.includes(userId);
-    const newLikes = hasLiked ? currentLikes - 1 : currentLikes + 1;
-    const newLikedBy = hasLiked
-      ? likedBy.filter(uid => uid !== userId)
-      : [...likedBy, userId];
-
+  try {
+    // Update Firebase first
+    await update(postRef, {
+      likes: newLikes,
+      likedBy: newLikedBy
+    });
+    
+    // Then update local state after success
     setPosts(prevPosts =>
       prevPosts.map(post =>
         post.id === postId
@@ -289,25 +297,10 @@ export function usePostSystem() {
           : post
       )
     );
-
-    try {
-      await update(postRef, {
-        likes: newLikes,
-        likedBy: newLikedBy
-      });
-    } catch (error) {
-      console.error("Error updating likes:", error);
-      if (isMounted.current) {
-        setPosts(prevPosts =>
-          prevPosts.map(post =>
-            post.id === postId
-              ? { ...post, likes: currentLikes, likedBy }
-              : post
-          )
-        );
-      }
-    }
-  }, [database]);
+  } catch (error) {
+    console.error("Error updating likes:", error);
+  }
+}, [database]);
 
   useEffect(() => {
     isMounted.current = true;

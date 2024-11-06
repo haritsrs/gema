@@ -5,9 +5,6 @@ import { getAuth, signInWithPopup, signInAnonymously, GoogleAuthProvider, signOu
 import { getDatabase, ref, set, get, update, remove, onValue } from "firebase/database";
 import 'dotenv/config'; // Load environment variables from .env file
 
-// Log API key to check if environment variables are loaded (remove in production)
-console.log(process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
-
 // Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
