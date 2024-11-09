@@ -1,5 +1,4 @@
 const LoadingOverlay = ({ isLoading }) => {
-  console.log('LoadingOverlay render:', isLoading); // Add this line
   if (!isLoading) return null;
 
   return (

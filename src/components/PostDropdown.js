@@ -1,18 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical, X } from 'lucide-react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getDatabase, ref, get, update } from 'firebase/database';
 
-const DeleteDialog = ({ isOpen, onClose, onConfirm }) => {
+const DeleteDialog = ({ isOpen, onClose, onConfirm, userData, post }) => {
   if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    const isAdmin = userData?.admin === true;
+    const isOwnPost = userData?.uid === post.userId;
+    
+    if (isAdmin || isOwnPost) {
+      onConfirm(post.id);
+    } else {
+      alert('You do not have permission to delete this post.');
+    }
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       />
       
-      {/* Dialog */}
       <div className="relative bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
         <button
           onClick={onClose}
@@ -37,10 +49,7 @@ const DeleteDialog = ({ isOpen, onClose, onConfirm }) => {
             Cancel
           </button>
           <button
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
+            onClick={handleConfirm}
             className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
           >
             Delete
@@ -54,11 +63,32 @@ const DeleteDialog = ({ isOpen, onClose, onConfirm }) => {
 const PostDropdown = ({ post, currentUser, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userData, setUserData] = useState(null);
   const dropdownRef = useRef(null);
 
-  const isOwnPost = currentUser?.uid === post.userId;
-
   useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUser?.uid) return;
+
+      const database = getDatabase();
+      try {
+        const userRef = ref(database, `users/${currentUser.uid}`);
+        const snapshot = await get(userRef);
+        const data = snapshot.val();
+        
+        // Combine Firebase auth data with database data
+        const combinedUserData = {
+          ...data,
+          uid: currentUser.uid  // Ensure we have the uid
+        };
+        
+        setUserData(combinedUserData);
+      } catch (error) {
+      }
+    };
+
+    fetchUserData();
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -67,9 +97,14 @@ const PostDropdown = ({ post, currentUser, onDelete }) => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [currentUser]);
 
-  if (!isOwnPost) return null;
+  // Check if user should see the dropdown
+  const isAdmin = userData?.admin === true;
+  const isOwnPost = currentUser?.uid === post.userId;
+  const shouldShowDropdown = isAdmin || isOwnPost;
+
+  if (!shouldShowDropdown) return null;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -105,7 +140,9 @@ const PostDropdown = ({ post, currentUser, onDelete }) => {
       <DeleteDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
-        onConfirm={() => onDelete(post.id)}
+        onConfirm={onDelete}
+        userData={userData}
+        post={post}
       />
     </div>
   );
