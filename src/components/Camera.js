@@ -9,7 +9,6 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
-  // Start the camera if isCameraActive becomes true
   useEffect(() => {
     if (isCameraActive) {
       startCamera();
@@ -17,9 +16,26 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
   }, [isCameraActive]);
 
   const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = stream;
-    setCameraReady(true);
+    try {
+      const constraints = {
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      videoRef.current.srcObject = stream;
+      setCameraReady(true);
+
+      // Set canvas size after video metadata is loaded
+      videoRef.current.onloadedmetadata = () => {
+        const { videoWidth, videoHeight } = videoRef.current;
+        canvasRef.current.width = videoWidth;
+        canvasRef.current.height = videoHeight;
+      };
+    } catch (error) {
+      console.error('Error starting camera:', error);
+    }
   };
 
   const stopCamera = () => {
@@ -32,10 +48,24 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
   };
 
   const captureImage = () => {
+    const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg');
+    
+    // Use video dimensions for canvas
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Flip horizontally if needed (since video is mirrored)
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
+    
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Reset transform
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
     setImage(dataUrl);
   };
 
@@ -50,8 +80,6 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
       const snapshot = await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(snapshot.ref);
       setImageUrl(downloadURL);
-
-      // Reset local state
       handleCloseCamera();
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -60,14 +88,17 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
 
   const discardImage = () => {
     setImage(null);
-    // Optional: restart camera or manage state as needed
   };
 
   return (
     <div className="flex flex-col items-center">
       <div className={`flex flex-col fixed top-0 items-center justify-center w-screen h-screen z-50 bg-gray-950 ${cameraReady && !image ? 'block' : 'hidden'}`}>
-        <video ref={videoRef} autoPlay className="m-4 transform -scale-x-100 rounded-xl"></video>
-        <canvas ref={canvasRef} width={screen.width} height={screen.height} className="hidden"></canvas>
+        <video 
+          ref={videoRef} 
+          autoPlay 
+          className="max-h-[80vh] w-auto transform -scale-x-100 rounded-xl"
+        ></video>
+        <canvas ref={canvasRef} className="hidden"></canvas>
         <div className="flex flex-center p-2 space-x-4 m-2 items-center">
           <button className="mt-2 fill fill-gray-500 active:fill-purple-800 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 drop-shadow-md w-max h-max rounded-3xl">
             <svg xmlns="http://www.w3.org/2000/svg" width="2rem" height="2rem" viewBox="0 0 24 24" className="drop-shadow-md m-2">
@@ -91,7 +122,11 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
       </div>
       {image && (
         <div className="flex mt-4 space-x-4">
-          <img src={image} alt="Captured" className="w-48 h-auto" />
+          <img 
+            src={image} 
+            alt="Captured" 
+            className="max-w-[80vw] max-h-[60vh] w-auto h-auto object-contain rounded-xl"
+          />
           <div className="flex flex-col w-max">
             <button onClick={uploadImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
               Upload
