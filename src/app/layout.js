@@ -2,7 +2,7 @@
 
 import "./globals.css";
 import Sidebar from '../components/sidebar';
-import AuthSidebar from '../components/AuthSidebar';
+import AuthSidebar from '../components/auth';
 import localFont from "next/font/local";
 import { useState } from 'react';
 

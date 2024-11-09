@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { getAuth, signInWithPopup, signInAnonymously, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../firebase';
 
 export default function AuthSidebar() {
@@ -29,11 +29,12 @@ export default function AuthSidebar() {
     }
   };
 
-  const handleAnonymousLogin = async () => {
+  const handleFacebookLogin = async () => {
+    const provider = new FacebookAuthProvider();
     try {
-      await signInAnonymously(auth);
+      await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error("Error signing in anonymously: ", error);
+      console.error("Error signing in with Facebook: ", error);
     }
   };
 
@@ -113,8 +114,8 @@ export default function AuthSidebar() {
               Sign in with Google
             </button>
 
-            <button onClick={handleAnonymousLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
-              Sign in Anonymously
+            <button onClick={handleFacebookLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
+              Sign in with Facebook
             </button>
           </div>
 
