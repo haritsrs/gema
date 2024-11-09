@@ -1,10 +1,13 @@
-"use client";
+"use client"; 
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell, Lock, User, Eye, Globe, Shield, Volume2, PaintBucket, Moon } from 'lucide-react';
 import { Switch } from '../../components/ui/switch';
 
 const SettingsPage = () => {
+  const router = useRouter(); 
+
   const [notifications, setNotifications] = useState({
     emailNotifs: true,
     pushNotifs: true,
@@ -25,6 +28,14 @@ const SettingsPage = () => {
     reducedMotion: false,
     highContrast: false
   });
+
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+
+  const handleFeatureNotImplemented = () => {
+    setShowModal(true); // Show modal when feature is not implemented
+  };
+
+  const closeModal = () => setShowModal(false); // Hide modal when closed
 
   const SettingsSection = ({ icon: Icon, title, children }) => (
     <div className="bg-gray-800 rounded-lg p-6 space-y-4">
@@ -57,11 +68,17 @@ const SettingsPage = () => {
           {/* Account Settings */}
           <SettingsSection icon={User} title="Account Settings">
             <div className="space-y-4">
-              <button className="w-full bg-gray-700 hover:bg-gray-600 text-left px-4 py-3 rounded-lg transition">
+              <button 
+                className="w-full bg-gray-700 hover:bg-gray-600 text-left px-4 py-3 rounded-lg transition"
+                onClick={() => router.push('/settings/edit-profile')} 
+              >
                 <p className="font-medium">Edit Profile</p>
                 <p className="text-sm text-gray-400">Update your profile information and photo</p>
               </button>
-              <button className="w-full bg-gray-700 hover:bg-gray-600 text-left px-4 py-3 rounded-lg transition">
+              <button 
+                className="w-full bg-gray-700 hover:bg-gray-600 text-left px-4 py-3 rounded-lg transition"
+                onClick={handleFeatureNotImplemented} // Show modal on click
+              >
                 <p className="font-medium">Change Password</p>
                 <p className="text-sm text-gray-400">Update your password and security settings</p>
               </button>
@@ -77,8 +94,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={notifications.emailNotifs}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({...prev, emailNotifs: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
 
@@ -88,8 +104,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={notifications.pushNotifs}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({...prev, pushNotifs: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
 
@@ -99,8 +114,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={notifications.mentionNotifs}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({...prev, mentionNotifs: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
             </div>
@@ -115,8 +129,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={privacy.privateAccount}
-                  onCheckedChange={(checked) => 
-                    setPrivacy(prev => ({...prev, privateAccount: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
 
@@ -126,8 +139,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={privacy.showOnline}
-                  onCheckedChange={(checked) => 
-                    setPrivacy(prev => ({...prev, showOnline: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
 
@@ -137,8 +149,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={privacy.allowMessages}
-                  onCheckedChange={(checked) => 
-                    setPrivacy(prev => ({...prev, allowMessages: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
             </div>
@@ -153,8 +164,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={appearance.darkMode}
-                  onCheckedChange={(checked) => 
-                    setAppearance(prev => ({...prev, darkMode: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
 
@@ -164,8 +174,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={appearance.reducedMotion}
-                  onCheckedChange={(checked) => 
-                    setAppearance(prev => ({...prev, reducedMotion: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
 
@@ -175,8 +184,7 @@ const SettingsPage = () => {
               >
                 <Switch 
                   checked={appearance.highContrast}
-                  onCheckedChange={(checked) => 
-                    setAppearance(prev => ({...prev, highContrast: checked}))}
+                  onCheckedChange={() => handleFeatureNotImplemented()} // Show modal on switch toggle
                 />
               </SettingsRow>
             </div>
@@ -186,16 +194,36 @@ const SettingsPage = () => {
           <div className="bg-red-900/20 border border-red-800 rounded-lg p-6">
             <h3 className="text-red-400 font-semibold mb-4">Danger Zone</h3>
             <div className="space-y-4">
-              <button className="w-full bg-red-800 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition">
+              <button 
+                className="w-full bg-red-800 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition"
+                onClick={handleFeatureNotImplemented} // Show modal on click
+              >
                 Deactivate Account
               </button>
-              <button className="w-full bg-red-900 hover:bg-red-800 text-white px-4 py-3 rounded-lg transition">
+              <button 
+                className="w-full bg-red-900 hover:bg-red-800 text-white px-4 py-3 rounded-lg transition"
+                onClick={handleFeatureNotImplemented} // Show modal on click
+              >
                 Delete Account
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-gray-800 text-white p-4 rounded-lg shadow-lg space-y-4 max-w-xs w-full">
+            <p className="text-center">This feature is not implemented yet, try again later.</p>
+            <button 
+              onClick={closeModal} 
+              className="w-full bg-purple-500 hover:bg-purple-400 py-2 rounded-lg transition">
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
