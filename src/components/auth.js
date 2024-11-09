@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { ref, set, getDatabase } from 'firebase/database';
 import { auth } from '../../firebase';
 
 export default function AuthSidebar() {
@@ -12,6 +13,25 @@ export default function AuthSidebar() {
   const [passwordError, setPasswordError] = useState('');
   const [username, setUsername] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  
+  const db = getDatabase();
+
+  // Function to add user to database
+  const addUserToDatabase = (user) => {
+    const userRef = ref(db, `users/${user.uid}`);
+    const userData = {
+      email: user.email,
+      displayName: user.displayName || username || 'Anonymous',
+      profilePicture: user.photoURL || '',
+      admin: false, // Default admin status to false
+      createdAt: new Date().toISOString()
+    };
+    
+    set(userRef, userData)
+      .catch((error) => {
+        console.error("Error adding user to database: ", error);
+      });
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -23,7 +43,8 @@ export default function AuthSidebar() {
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      addUserToDatabase(result.user);
     } catch (error) {
       console.error("Error signing in with Google: ", error);
     }
@@ -32,7 +53,8 @@ export default function AuthSidebar() {
   const handleFacebookLogin = async () => {
     const provider = new FacebookAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      addUserToDatabase(result.user);
     } catch (error) {
       console.error("Error signing in with Facebook: ", error);
     }
@@ -40,7 +62,8 @@ export default function AuthSidebar() {
 
   const handleEmailLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      addUserToDatabase(result.user);
     } catch (error) {
       console.error("Error signing in with Email: ", error);
     }
@@ -72,6 +95,8 @@ export default function AuthSidebar() {
         displayName: username
       });
 
+      addUserToDatabase(user);
+      
       console.log("User signed up:", user);
     } catch (error) {
       console.error("Error signing up with Email: ", error);
@@ -93,7 +118,7 @@ export default function AuthSidebar() {
     setPassword('');
     setConfirmPassword('');
   };
-
+  
   return (
     <div className="mx-[5%] p-4 md:mx-0 rounded-lg">
       {user ? (
