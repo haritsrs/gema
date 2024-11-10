@@ -244,14 +244,14 @@ export default function Posting({ onPostCreated }) {
         </div>
       )}
 
-      {isCameraOpen && (
-        <Camera
-          setSelectedImage={setSelectedImage}
-          setImageUrl={setImageUrl}
-          handleCloseCamera={handleCloseCamera}
-          isCameraActive={isCameraOpen}
-        />
-      )}
+{isCameraOpen && (
+  <Camera
+    setSelectedImage={setSelectedImage}  // Make sure this prop is passed
+    setImageUrl={setImageUrl}
+    handleCloseCamera={handleCloseCamera}
+    isCameraActive={isCameraOpen}
+  />
+)}
 
       <button
         type="submit"

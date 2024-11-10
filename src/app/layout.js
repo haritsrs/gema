@@ -40,7 +40,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}>
         <div className="fixed w-screen top-0 p-4 flex items-center justify-between bg-gray-950 border border-b-1 border-gray-800 z-40">
+        <a href="/profile">
           <img src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
+          </a>
 
           <div className="flex items-center space-x-4">
             {/* Display logout/login button and profile picture */}

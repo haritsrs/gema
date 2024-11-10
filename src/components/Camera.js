@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive }) {
+export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive, setSelectedImage }) {
   const [image, setImage] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [availableCameras, setAvailableCameras] = useState([]);
@@ -79,6 +79,10 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive 
     if (!image) return;
 
     const blob = await (await fetch(image)).blob();
+    // Create a File object from the blob
+    const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
+    setSelectedImage(file);  // Add this line to set the selectedImage
+
     const storage = getStorage();
     const storageRef = ref(storage, `images/${Date.now()}.jpg`);
 
