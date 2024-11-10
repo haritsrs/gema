@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
           </a>
 
           <button onClick={() => setIsVisible(true)}
-            className="flex items-center rounded-lg hover:bg-purple-500 fill-gray-100 hover:fill-purple-900">
+            className="flex items-center rounded-lg hover:bg-purple-500 fill-gray-400 hover:fill-purple-900">
             {/* Display logout/login button and profile picture */}
             <div className="w-max h-max mx-2">
               {currentUser ? (
@@ -73,7 +73,7 @@ export default function RootLayout({ children }) {
           <div className="fixed flex z-50 h-screen w-screen bg-gray-950 bg-opacity-85 text-white p-4 justify-center">
             <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
               <button className="absolute top-2 right-2" onClick={toggleVisibility}>
-                <CloseIcon className="fill-gray-100 hover:fill-purple-900 text-xl" />
+                <CloseIcon className="fill-gray-400 hover:fill-purple-900 text-xl" />
               </button>
               <AuthSidebar />
             </div>

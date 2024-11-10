@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "../../../../firebase"; // Update this import to reference your realtime database
-import { ref, get, set, push, onValue, off } from "firebase/database";
+import { ref, set, push, onValue, off } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
-import Link from "next/link";
+import { HeartIcon, CommentIcon, ShareIcon } from "@/icons";
+
 
 export default function PostPage() {
-  const router = useRouter();
   const [postId, setPostId] = useState(null);
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,6 @@ export default function PostPage() {
   const handleLike = async (postId, currentLikes, likedBy = []) => {
     if (!currentUser) return;
 
-    const postRef = ref(database, `posts/${postId}`);
     const hasLiked = likedBy.includes(currentUser.uid);
 
     try {
@@ -201,9 +200,7 @@ export default function PostPage() {
             className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 w-full items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`}
             onClick={() => handleLike(postId, post.likes, post.likedBy || [])}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
-              <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663"></path>
-            </svg>
+            <HeartIcon className="w-5 h-5" />
             <span>{post.likes || 0}</span>
           </button>
 
@@ -211,9 +208,7 @@ export default function PostPage() {
             className="flex cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md p-2 mr-2 w-full space-x-1 items-center justify-center" 
             onClick={() => sharePost(post)}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 6.627 5.373 12 12 12 6.627 0 12-5.373 12-12S18.627 0 12 0zm-2 17.536V14h-2v-2h2v-2l3 3-3 3zm8-5h-2V5h2v7.536z"></path>
-            </svg>
+            <ShareIcon className="w-5 h-5" />
             <span>Share</span>
           </button>
         </div>
@@ -237,10 +232,10 @@ export default function PostPage() {
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="flex-grow bg-gray-800 rounded-lg p-2"
+                className="flex-grow bg-gray-700 rounded-lg p-2"
                 placeholder="Add a comment..."
               />
-              <button type="submit" className="ml-2 bg-purple-600 text-white rounded-lg p-2">Post</button>
+              <button type="submit" className="ml-2 bg-gray-700 active:bg-purple-400 text-white active:text-purple-900 rounded-lg p-2">Post</button>
             </form>
           )}
         </div>
