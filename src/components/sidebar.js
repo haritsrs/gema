@@ -14,35 +14,35 @@ const Sidebar = () => {
   return (
     <div className= "flex justify-between pl-4 pr-4 text-white text-sm items-center md:flex-col md:pl-0 md:pr-0 md:p-4 fill-gray-400">
       <Link href="/" passHref>
-        <div className="flex flex-col md:flex-col-0 items-center justify-center mb-0 md:mb-6 active:bg-purple-400 rounded-lg">
-          <HomeIcon className="w-8 h-8 hover:fill-purple-800" />
-          <span className="md:hidden">Home</span>
+        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 active:fill-purple-800 rounded-lg">
+          <HomeIcon className="w-6 h-6 md:w-8 md:h-8 hover:fill-purple-800" />
+          <span className="md:hidden m-1 active:text-purple-900">Home</span>
         </div>
       </Link>
       <Link href="/search" passHref>
-        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 rounded-lg">
-          <SearchIcon className="w-8 h-8 stroke-gray-400 hover:stroke-purple-800" />
-          <span className="md:hidden">Search</span>
+        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 active:fill-purple-800 rounded-lg">
+          <SearchIcon className="w-6 h-6 md:w-8 md:h-8 stroke-gray-400 hover:stroke-purple-800" />
+          <span className="md:hidden m-1 active:text-purple-900">Search</span>
         </div>
       </Link>
       <Link href="/notifications" passHref>
-        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 rounded-lg">
-          <NotificationsIcon className="w-8 h-8 hover:fill-purple-800" />
-          <span className="md:hidden text-center">Notifications</span>
+        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 active:fill-purple-800 rounded-lg">
+          <NotificationsIcon className="w-6 h-6 md:w-8 md:h-8 hover:fill-purple-800" />
+          <span className="md:hidden m-1 active:text-purple-900">Notifications</span>
         </div>
       </Link>
       <Link href="/profile" passHref>
-        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 rounded-lg">
-          <ProfileIcon className="w-8 h-8 hover:fill-purple-800" />
-          <span className="md:hidden text-center">
+        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 active:fill-purple-800 rounded-lg">
+          <ProfileIcon className="w-6 h-6 md:w-8 md:h-8 hover:fill-purple-800" />
+          <span className="md:hidden m-1 active:text-purple-900">
             Profile
           </span>
         </div>
       </Link>
       <Link href="/settings" passHref>
-        <div className="flex flex-col items-center justify-center mb-0 md:mb-6  active:bg-purple-400 rounded-lg">
-          <SettingsIcon className="w-8 h-8 hover:fill-purple-800" />
-          <span className="md:hidden">
+        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 active:bg-purple-400 active:fill-purple-800 rounded-lg">
+          <SettingsIcon className="w-6 h-6 md:w-8 md:h-8 hover:fill-purple-800" />
+          <span className="md:hidden m-1 active:text-purple-900">
             Settings
           </span>
         </div>

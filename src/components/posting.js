@@ -10,6 +10,7 @@ import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay';
 import * as nsfwjs from 'nsfwjs';
 import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js';
+import { GalleryIcon, CameraIcon } from '@/icons';
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -193,22 +194,14 @@ export default function Posting({ onPostCreated }) {
             onClick={showUploader}
             className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
-              <path d="M13.5 9a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3" opacity={0.25}></path>
-              <path d="M19 2H5a3.01 3.01 0 0 0-3 3v8.86l3.88-3.88a3.075 3.075 0 0 1 4.24 0l2.871 2.887l.888-.888a3.01 3.01 0 0 1 4.242 0L22 15.86V5a3.01 3.01 0 0 0-3-3m-5.5 7a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3" opacity={0.5}></path>
-              <path d="M10.12 9.98a3.075 3.075 0 0 0-4.24 0L2 13.86V19a3.01 3.01 0 0 0 3 3h14a3 3 0 0 0 2.16-.92z"></path>
-              <path d="m22 15.858l-3.879-3.879a3.01 3.01 0 0 0-4.242 0l-.888.888l8.165 8.209c.542-.555.845-1.3.844-2.076z" opacity={0.25}></path>
-            </svg>
+            <GalleryIcon className="w-6 h-6 m-2 stroke-none" />
           </button>
           <button
             type="button" // Add type="button"
             onClick={handleOpenCamera}
             className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
-              <path d="M14.793 3c.346 0 .682.12.95.34l.11.1L17.415 5H20a2 2 0 0 1 1.995 1.85L22 7v12a2 2 0 0 1-1.85 1.995L20 21H4a2 2 0 0 1-1.995-1.85L2 19V7a2 2 0 0 1 1.85-1.995L4 5h2.586l1.56-1.56c.245-.246.568-.399.913-.433L9.207 3z" className="duoicon-secondary-layer" opacity={0.5}></path>
-              <path d="M12 7.5c-3.849 0-6.255 4.167-4.33 7.5A5 5 0 0 0 12 17.5c3.849 0 6.255-4.167 4.33-7.5A5 5 0 0 0 12 7.5" className="duoicon-primary-layer"></path>
-            </svg>
+            <CameraIcon className="w-6 h-6 m-2" />
           </button>
         </div>
 

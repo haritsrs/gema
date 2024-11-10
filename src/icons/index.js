@@ -12,3 +12,5 @@ export { default as SearchIcon } from './svgs/search.svg';
 export { default as NotificationsIcon } from './svgs/notif.svg';
 export { default as ProfileIcon } from './svgs/profile.svg';
 export { default as SettingsIcon } from './svgs/settings.svg';
+export { default as GalleryIcon } from './svgs/gallery.svg';
+export { default as CameraIcon } from './svgs/camera.svg';
