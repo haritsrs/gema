@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { ref, set, getDatabase } from 'firebase/database';
+import { ref, set, get, getDatabase } from 'firebase/database';
 import { auth } from '../../firebase';
 
 export default function AuthSidebar() {
@@ -17,20 +17,28 @@ export default function AuthSidebar() {
   const db = getDatabase();
 
   // Function to add user to database
-  const addUserToDatabase = (user) => {
+  const addUserToDatabase = async (user) => {
     const userRef = ref(db, `users/${user.uid}`);
-    const userData = {
-      email: user.email,
-      displayName: user.displayName || username || 'Anonymous',
-      profilePicture: user.photoURL || '',
-      admin: false, // Default admin status to false
-      createdAt: new Date().toISOString()
-    };
     
-    set(userRef, userData)
-      .catch((error) => {
-        console.error("Error adding user to database: ", error);
-      });
+    try {
+      // First, check if the user already exists
+      const snapshot = await get(userRef);
+      const existingData = snapshot.val();
+      
+      const userData = {
+        email: user.email,
+        displayName: user.displayName || username || 'Anonymous',
+        profilePicture: user.photoURL || '',
+        // If user exists, keep their admin status, otherwise set to false
+        admin: existingData ? existingData.admin : false,
+        // Only set createdAt if it's a new user
+        ...(existingData ? {} : { createdAt: new Date().toISOString() })
+      };
+      
+      await set(userRef, userData);
+    } catch (error) {
+      console.error("Error managing user in database: ", error);
+    }
   };
 
   useEffect(() => {
