@@ -8,7 +8,7 @@ import { auth } from '../../firebase.js';
 import Image from 'next/image';
 import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay';
-import * as nsfwjs from 'nsfwjs';
+//import * as nsfwjs from 'nsfwjs';
 import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js';
 
 export default function Posting({ onPostCreated }) {
@@ -111,16 +111,16 @@ export default function Posting({ onPostCreated }) {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return;
     if (!user) return;
-  
+
     setLoading(true);
-  
+
     try {
       if (isSensitiveContentPresent(postContent)) {
         setError('Your post contains sensitive content. Please remove it and try again.');
         setLoading(false);
         return;
       }
-  
+
       let uploadedImageUrl = '';
       if (selectedImage) {
         const nsfwDetected = await checkImageForNSFW(selectedImage);
@@ -131,7 +131,7 @@ export default function Posting({ onPostCreated }) {
         }
         uploadedImageUrl = await uploadImage(selectedImage);
       }
-  
+
       const newPost = {
         content: postContent.trim(),
         imageUrl: uploadedImageUrl,
@@ -142,10 +142,10 @@ export default function Posting({ onPostCreated }) {
         likes: 0,
         likedBy: []
       };
-  
+
       const postsRef = databaseRef(database, 'posts');
       await push(postsRef, newPost);
-  
+
       setPostContent('');
       handleDeleteImage();
       if (onPostCreated) onPostCreated();
@@ -188,9 +188,9 @@ export default function Posting({ onPostCreated }) {
 
       <div className="flex items-center justify-between mx-1">
         <div className="flex space-x-2 justify-start items-center">
-          <button 
+          <button
             type="button" // Add type="button"
-            onClick={showUploader} 
+            onClick={showUploader}
             className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
@@ -200,9 +200,9 @@ export default function Posting({ onPostCreated }) {
               <path d="m22 15.858l-3.879-3.879a3.01 3.01 0 0 0-4.242 0l-.888.888l8.165 8.209c.542-.555.845-1.3.844-2.076z" opacity={0.25}></path>
             </svg>
           </button>
-          <button 
+          <button
             type="button" // Add type="button"
-            onClick={handleOpenCamera} 
+            onClick={handleOpenCamera}
             className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
@@ -254,14 +254,14 @@ export default function Posting({ onPostCreated }) {
         </div>
       )}
 
-{isCameraOpen && (
-  <Camera
-    setSelectedImage={setSelectedImage}  // Make sure this prop is passed
-    setImageUrl={setImageUrl}
-    handleCloseCamera={handleCloseCamera}
-    isCameraActive={isCameraOpen}
-  />
-)}
+      {isCameraOpen && (
+        <Camera
+          setSelectedImage={setSelectedImage}  // Make sure this prop is passed
+          setImageUrl={setImageUrl}
+          handleCloseCamera={handleCloseCamera}
+          isCameraActive={isCameraOpen}
+        />
+      )}
 
       <button
         type="submit"
