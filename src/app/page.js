@@ -36,7 +36,8 @@ export default function Page() {
     noMorePosts,
     fetchOlderPosts,
     handleLike,
-    handleDeletePost
+    handleDeletePost,
+    handlePostDeleted
   } = usePostSystem();
 
   // Authentication listener
@@ -150,6 +151,7 @@ export default function Page() {
                         post={post}
                         currentUser={currentUser}
                         onDelete={handleDeletePost}
+                        onPostDeleted={handlePostDeleted}
                       />
                     </div>
                     

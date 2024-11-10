@@ -107,6 +107,14 @@ export function usePostSystem() {
     });
   }, [sortPostsByRelevancy]);
 
+  const handlePostDeleted = (deletedPostId) => {
+    // Update the local state by filtering out the deleted post
+    setPosts((currentPosts) => 
+      currentPosts.filter(post => post.id !== deletedPostId)
+    );
+
+  };
+
   // Optimized fetch older posts with immediate sorting
   const fetchOlderPosts = useCallback(async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
@@ -258,6 +266,7 @@ export function usePostSystem() {
     noMorePosts,
     fetchOlderPosts,
     handleLike,
-    triggerSort
+    triggerSort,
+    handlePostDeleted
   };
 }
