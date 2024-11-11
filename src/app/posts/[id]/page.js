@@ -7,6 +7,7 @@ import { ref, get, set, push, onValue, off } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function PostPage() {
   const router = useRouter();
@@ -175,23 +176,27 @@ export default function PostPage() {
       <div className="w-full max-w-xl bg-gray-800 p-6 rounded-lg">
         {/* Post Display */}
         <div className="flex space-x-2">
-          <image
-            src={post.profilePicture || "https://placehold.co/40x40"}
-            alt={`${post.username || "User"}'s profile`}
-            className="rounded-full"
-            style={{ width: "40px", height: "40px" }}
-          />
+        <div className="rounded-full overflow-hidden" style={{ width: "40px", height: "40px" }}>
+  <Image
+    src={post.profilePicture || "https://placehold.co/40x40"}
+    alt={`${post.username || "User"}'s profile`}
+    layout="fill"
+    objectFit="cover"
+  />
+</div>
           <div>
             <div className="font-bold">
               {post.username || "User"}{" "}
               <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
             </div>
             {post.imageUrl && (
-              <image 
-                src={post.imageUrl} 
-                alt="Post image" 
-                className="mt-2 w-full h-auto rounded-lg" 
+              <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
+              <Image
+                src={post.imageUrl}
+                alt="Post image"
+                layout="responsive"
               />
+            </div>
             )}
             <div>{post.content}</div>
           </div>

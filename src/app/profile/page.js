@@ -5,10 +5,12 @@ import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, query, orderByChild, onValue } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../firebase.js';
+import AuthSidebar from '../../components/auth';
 import localFont from "next/font/local";
 import Posting from '../../components/posting';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
+import Image from 'next/image.js';
 import PostDropdown from '../../components/PostDropdown';
 import { usePostSystem } from '@/hooks/usePostSystem.js';
 
@@ -69,6 +71,7 @@ function useChronologicalPosts() {
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
+  const [showAuthSidebar, setShowAuthSidebar] = useState(false);
   const storage = getStorage();
 
   const {
@@ -146,9 +149,12 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-white text-center">
           <h2 className="text-xl font-bold mb-4">Please sign in to view your profile</h2>
-          <Link href="/login" className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg">
+          <button
+            onClick={() => setShowAuthSidebar(true)}
+            className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg"
+          >
             Sign In
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -158,15 +164,24 @@ return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={loading} />
 
+      {showAuthSidebar && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-75">
+          <AuthSidebar onClose={() => setShowAuthSidebar(false)} />
+        </div>
+      )}
+      
       {/* Profile Header */}
       <div className="w-full h-72 bg-gradient-to-r from-purple-600 to-blue-600">
         <div className="max-w-2xl mx-auto px-4 relative">
           <div className="absolute -bottom-24 flex flex-col items-center w-full h-16">
-            <image
-              src={currentUser.photoURL || 'https://placehold.co/40x40'}
-              alt="Profile picture"
-              className="w-32 h-32 rounded-full border-4 border-gray-900"
-            />
+          <div className="w-32 h-32 rounded-full border-4 border-gray-900 overflow-hidden">
+  <Image
+    src={currentUser.photoURL || 'https://placehold.co/40x40'}
+    alt="Profile picture"
+    layout="fill"
+    objectFit="cover"
+  />
+</div>
             <div className="mt-4 text-center">
               <h1 className="text-2xl font-bold text-white">{currentUser.displayName || 'User'}</h1>
               <p className="text-gray-300">@{currentUser.email?.split('@')[0]}</p>
@@ -211,21 +226,22 @@ return (
        <h2 className="text-xl font-bold text-white mb-4">Your Posts</h2>
        {userPosts.length === 0 ? (
          <div className="text-gray-400 text-center py-8">
-           You haven't made any posts yet
+           You haven&apos;t made any posts yet
          </div>
        ) : (
          <ul className="space-y-4">
            {userPosts.map((post) => (
              <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 bg-gray-800 rounded-lg">
                <div className="flex space-x-2">
-                 <image
-                   src={post.profilePicture || currentUser?.photoURL || '/default-avatar.png'}
-                   alt="Profile picture"
-                   className="rounded-full w-10 h-10 object-cover"
-                   onError={(e) => {
-                     e.target.src = '/default-avatar.png';
-                   }}
-                 />
+               <div className="rounded-full w-10 h-10 overflow-hidden">
+  <Image
+    src={post.profilePicture || currentUser?.photoURL || '/default-avatar.png'}
+    alt="Profile picture"
+    layout="fill"
+    objectFit="cover"
+    onError={(e) => e.target.src = '/default-avatar.png'}
+  />
+</div>
                  <div className="flex-1">
                    <div className="flex justify-between items-start">
                      <div className="font-bold">
@@ -241,15 +257,15 @@ return (
                    <Link href={`/posts/${post.id}`}>
                      <div>{post.content}</div>
                      {post.imageUrl && (
-                       <image
+                       <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
+                       <Image
                          src={post.imageUrl}
                          alt="Post image"
-                         className="mt-2 w-full h-auto rounded-lg"
+                         layout="responsive"
                          loading="lazy"
-                         onError={(e) => {
-                           e.target.src = '/placeholder-image.png';
-                         }}
+                         onError={(e) => e.target.src = '/placeholder-image.png'}
                        />
+                     </div>                     
                      )}
                    </Link>
                  </div>

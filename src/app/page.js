@@ -7,6 +7,7 @@ import { auth } from '../../firebase.js';
 import localFont from "next/font/local";
 import Posting from '../components/posting';
 import Link from 'next/link';
+import Image from 'next/image';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { usePostSystem } from '../hooks/usePostSystem';
 import PostDropdown from '../components/PostDropdown';
@@ -136,11 +137,15 @@ export default function Page() {
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                 <div className="flex space-x-2">
-                  <image
-                    src={post.profilePicture || '/default-avatar.png'}
-                    alt={`${post.username || 'User'}'s profile`}
-                    className="rounded-full w-10 h-10 object-cover"
-                  />
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+  <Image
+    src={post.profilePicture || '/default-avatar.png'}
+    alt={`${post.username || 'User'}'s profile`}
+    width={40} // 10 * 4 = 40px
+    height={40}
+    objectFit="cover"
+  />
+</div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="font-bold">
@@ -159,12 +164,15 @@ export default function Page() {
                       <div className="cursor-pointer">
                         <div>{post.content}</div>
                         {post.imageUrl && (
-                          <image
-                            src={post.imageUrl}
-                            alt="Post image"
-                            className="mt-2 w-full h-auto rounded-lg"
-                            loading="lazy"
-                          />
+                         <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
+                         <Image
+                           src={post.imageUrl}
+                           alt="Post image"
+                           layout="responsive"
+                           loading="lazy"
+                         />
+                       </div>
+                       
                         )}
                       </div>
                     </Link>

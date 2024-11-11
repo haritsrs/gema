@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 import localFont from "next/font/local";
 
 const geistSans = localFont({
@@ -56,11 +56,14 @@ const NotificationItem = ({ type, user, content, timestamp, read, userImage }) =
 
   return (
     <div className={`flex items-start space-x-4 p-4 ${read ? 'bg-gray-800' : 'bg-gray-800 border-l-4 border-purple-500'} rounded-lg transition-all duration-200 hover:bg-gray-700`}>
-      <image
-        src={userImage || '/default-avatar.png'}
-        alt={`${user}'s profile`}
-        className="w-10 h-10 rounded-full object-cover"
-      />
+      <div className="w-10 h-10 rounded-full overflow-hidden">
+  <Image
+    src={userImage || '/default-avatar.png'}
+    alt={`${user}'s profile`}
+    layout="fill"
+    objectFit="cover"
+  />
+</div>
       {getNotificationIcon()}
       <div className="flex-1 min-w-0">
         <p className="text-white">

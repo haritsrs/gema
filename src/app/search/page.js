@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import localFont from "next/font/local";
 import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
+import Image from 'next/image.js';
 import PostDropdown from '../../components/PostDropdown';
 
 const geistSans = localFont({
@@ -168,20 +169,23 @@ export default function SearchPage() {
           </div>
         ) : searchResults.length === 0 ? (
           <div className="text-gray-400 text-center py-8">
-            No posts found matching "{searchTerm}"
+            No posts found matching &quot;{searchTerm}&quot;
           </div>
         ) : (
           <div>
-            <h2 className="text-white text-xl mb-4">Search Results for "{searchTerm}"</h2>
+            <h2 className="text-white text-xl mb-4">Search Results for &quot;{searchTerm}&quot;</h2>
             <ul className="space-y-4">
               {searchResults.map((post) => (
                 <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                   <div className="flex space-x-2">
-                    <image
-                      src={post.profilePicture || '/default-avatar.png'}
-                      alt="Profile picture"
-                      className="rounded-full w-10 h-10 object-cover"
-                    />
+                  <div className="rounded-full w-10 h-10 overflow-hidden">
+  <Image
+    src={post.profilePicture || '/default-avatar.png'}
+    alt="Profile picture"
+    layout="fill"
+    objectFit="cover"
+  />
+</div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div className="font-bold">
@@ -198,12 +202,14 @@ export default function SearchPage() {
                       <Link href={`/posts/${post.id}`}>
                         <div>{post.content}</div>
                         {post.imageUrl && (
-                          <image
+                          <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
+                          <Image
                             src={post.imageUrl}
                             alt="Post image"
-                            className="mt-2 w-full h-auto rounded-lg"
+                            layout="responsive"
                             loading="lazy"
                           />
+                        </div>                        
                         )}
                       </Link>
                     </div>

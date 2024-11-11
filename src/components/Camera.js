@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import Image from 'next/image';
 
 export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive, setSelectedImage }) {
   const [image, setImage] = useState(null);
@@ -125,11 +126,15 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
         </div>
       </div>
       <div className={`flex flex-col fixed top-0 items-center justify-center w-screen h-screen z-50 bg-gray-950 ${image ? 'block' : 'hidden'}`}>
-        <image
-          src={image}
-          alt="Captured"
-          className="w-auto max-h-[80vh] object-contain rounded-xl"
-        />
+      <div className="w-auto max-h-[80vh] overflow-hidden rounded-xl">
+  <Image
+    src={image}
+    alt="Captured"
+    layout="intrinsic"
+    objectFit="contain"
+  />
+</div>
+
         <div className="flex items-center justify-center space-x-2 w-max">
           <button onClick={uploadImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
             Upload
