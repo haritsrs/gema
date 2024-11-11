@@ -178,9 +178,10 @@ export default function PostPage() {
         <div className="flex space-x-2">
         <div className="rounded-full overflow-hidden" style={{ width: "40px", height: "40px" }}>
   <Image
-    src={post.profilePicture || "https://placehold.co/40x40"}
-    alt={`${post.username || "User"}'s profile`}
-    layout="fill"
+    src={post.profilePicture || '/default-avatar.png'}
+    alt={`${post.username || 'User'}'s profile`}
+    width={40} 
+    height={40}
     objectFit="cover"
   />
 </div>
@@ -192,10 +193,11 @@ export default function PostPage() {
             {post.imageUrl && (
               <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
               <Image
-                src={post.imageUrl}
-                alt="Post image"
-                layout="responsive"
-              />
+                           src={post.imageUrl}
+                           alt="Post image"
+                           layout="responsive"
+                           loading="lazy"
+                         />
             </div>
             )}
             <div>{post.content}</div>

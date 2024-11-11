@@ -138,7 +138,7 @@ export default function Posting({ onPostCreated }) {
         createdAt: serverTimestamp(),
         userId: user.uid,
         username: user.displayName || user.email,
-        profilePicture: user.photoURL || 'https://placehold.co/40x40',
+        profilePicture: user.photoURL || '/img/placehold.png',
         likes: 0,
         likedBy: []
       };
@@ -249,7 +249,7 @@ export default function Posting({ onPostCreated }) {
               </p>
               <p className="text-xs">SVG, PNG, JPG or GIF</p>
             </div>
-            <input id="image-upload" type="file" accept="image/*" capture="environment" onChange={handleImageChange} className="hidden" />
+            <input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
           </label>
         </div>
       )}

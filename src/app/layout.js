@@ -43,12 +43,10 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}>
         <div className="fixed w-screen top-0 p-4 flex items-center justify-between bg-gray-950 border border-b-1 border-gray-800 z-40">
         <Link href="/">
-        <div className="w-50 h-8">
-          <Image src="/img/logo.png" alt="GEMA Logo" layout="fill" objectFit="contain" />
-          </div>
+          <Image src="/img/logo.png" alt="GEMA Logo" objectFit="contain" width = {220} height = {32}/>
           </Link>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 mr-4">
             {/* Display logout/login button and profile picture */}
             <button className="text-white text-3xl hover:text-purple-800" onClick={() => setIsVisible(true)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
@@ -64,10 +62,11 @@ export default function RootLayout({ children }) {
   onClick={() => setIsVisible(true)}
 >
   <Image
-    src={currentUser ? currentUser.photoURL : "https://placehold.co/40x40"}
+    src={currentUser ? currentUser.photoURL : "/img/placehold.png"}
     alt="User Profile"
-    layout="fill"
     objectFit="cover"
+    width = {32}
+    height = {32}
   />
 </div>
           </div>

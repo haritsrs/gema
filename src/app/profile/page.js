@@ -169,17 +169,18 @@ return (
           <AuthSidebar onClose={() => setShowAuthSidebar(false)} />
         </div>
       )}
-      
+
       {/* Profile Header */}
       <div className="w-full h-72 bg-gradient-to-r from-purple-600 to-blue-600">
         <div className="max-w-2xl mx-auto px-4 relative">
           <div className="absolute -bottom-24 flex flex-col items-center w-full h-16">
           <div className="w-32 h-32 rounded-full border-4 border-gray-900 overflow-hidden">
   <Image
-    src={currentUser.photoURL || 'https://placehold.co/40x40'}
+    src={currentUser.photoURL || '/img/placehold.png'}
     alt="Profile picture"
-    layout="fill"
     objectFit="cover"
+    width={128}
+    height={128}
   />
 </div>
             <div className="mt-4 text-center">
@@ -234,12 +235,12 @@ return (
              <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 bg-gray-800 rounded-lg">
                <div className="flex space-x-2">
                <div className="rounded-full w-10 h-10 overflow-hidden">
-  <Image
-    src={post.profilePicture || currentUser?.photoURL || '/default-avatar.png'}
-    alt="Profile picture"
-    layout="fill"
+               <Image
+    src={post.profilePicture || '/default-avatar.png'}
+    alt={`${post.username || 'User'}'s profile`}
+    width={40} 
+    height={40}
     objectFit="cover"
-    onError={(e) => e.target.src = '/default-avatar.png'}
   />
 </div>
                  <div className="flex-1">
@@ -259,12 +260,11 @@ return (
                      {post.imageUrl && (
                        <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
                        <Image
-                         src={post.imageUrl}
-                         alt="Post image"
-                         layout="responsive"
-                         loading="lazy"
-                         onError={(e) => e.target.src = '/placeholder-image.png'}
-                       />
+                           src={post.imageUrl}
+                           alt="Post image"
+                           layout="responsive"
+                           loading="lazy"
+                         />
                      </div>                     
                      )}
                    </Link>

@@ -179,11 +179,12 @@ export default function SearchPage() {
                 <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                   <div className="flex space-x-2">
                   <div className="rounded-full w-10 h-10 overflow-hidden">
-  <Image
-    src={post.profilePicture || '/default-avatar.png'}
+                  <Image
+    src={currentUser.photoURL || '/img/placehold.png'}
     alt="Profile picture"
-    layout="fill"
     objectFit="cover"
+    width={128}
+    height={128}
   />
 </div>
                     <div className="flex-1">
@@ -204,11 +205,11 @@ export default function SearchPage() {
                         {post.imageUrl && (
                           <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
                           <Image
-                            src={post.imageUrl}
-                            alt="Post image"
-                            layout="responsive"
-                            loading="lazy"
-                          />
+                           src={post.imageUrl}
+                           alt="Post image"
+                           layout="responsive"
+                           loading="lazy"
+                         />
                         </div>                        
                         )}
                       </Link>
