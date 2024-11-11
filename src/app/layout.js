@@ -41,17 +41,17 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}>
         <div className="fixed w-screen top-0 p-4 flex items-center justify-between bg-gray-950 border border-b-1 border-gray-800 z-40">
         <link href="/">
-          <img src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
+          <image src="/img/logo.png" alt="GEMA Logo" className="w-50 h-8" />
           </link>
 
           <div className="flex items-center space-x-4">
             {/* Display logout/login button and profile picture */}
             <button className="text-white text-3xl hover:text-purple-800" onClick={() => setIsVisible(true)}>
-              <img src="/icons/LogoutIcon.svg" alt="Logout Icon" width="32em" height="32em" />
+              <image src="/icons/LogoutIcon.svg" alt="Logout Icon" width="32em" height="32em" />
             </button>
 
             {/* Profile picture or placeholder */}
-            <img 
+            <image 
               src={currentUser ? currentUser.photoURL : "https://placehold.co/40x40"} // Use placeholder when logged out
               alt="User Profile" 
               className="w-8 h-8 rounded-full cursor-pointer"
@@ -64,7 +64,7 @@ export default function RootLayout({ children }) {
           <div className="fixed flex z-50 h-screen w-screen bg-gray-950 bg-opacity-85 text-white p-4 justify-center">
             <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
               <button className="absolute top-2 right-2" onClick={toggleVisibility}>
-                <img src="/icons/closeIcon.svg" alt="Close Icon" width="24" height="24" />  
+                <image src="/icons/closeIcon.svg" alt="Close Icon" width="24" height="24" />  
               </button>
               <AuthSidebar />
             </div>

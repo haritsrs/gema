@@ -136,7 +136,7 @@ export default function Page() {
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                 <div className="flex space-x-2">
-                  <img
+                  <image
                     src={post.profilePicture || '/default-avatar.png'}
                     alt={`${post.username || 'User'}'s profile`}
                     className="rounded-full w-10 h-10 object-cover"
@@ -159,7 +159,7 @@ export default function Page() {
                       <div className="cursor-pointer">
                         <div>{post.content}</div>
                         {post.imageUrl && (
-                          <img
+                          <image
                             src={post.imageUrl}
                             alt="Post image"
                             className="mt-2 w-full h-auto rounded-lg"

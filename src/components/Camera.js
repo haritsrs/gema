@@ -125,7 +125,7 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
         </div>
       </div>
       <div className={`flex flex-col fixed top-0 items-center justify-center w-screen h-screen z-50 bg-gray-950 ${image ? 'block' : 'hidden'}`}>
-        <img
+        <image
           src={image}
           alt="Captured"
           className="w-auto max-h-[80vh] object-contain rounded-xl"

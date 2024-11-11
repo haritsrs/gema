@@ -162,7 +162,7 @@ return (
       <div className="w-full h-72 bg-gradient-to-r from-purple-600 to-blue-600">
         <div className="max-w-2xl mx-auto px-4 relative">
           <div className="absolute -bottom-24 flex flex-col items-center w-full h-16">
-            <img
+            <image
               src={currentUser.photoURL || 'https://placehold.co/40x40'}
               alt="Profile picture"
               className="w-32 h-32 rounded-full border-4 border-gray-900"
@@ -218,7 +218,7 @@ return (
            {userPosts.map((post) => (
              <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 bg-gray-800 rounded-lg">
                <div className="flex space-x-2">
-                 <img
+                 <image
                    src={post.profilePicture || currentUser?.photoURL || '/default-avatar.png'}
                    alt="Profile picture"
                    className="rounded-full w-10 h-10 object-cover"
@@ -241,7 +241,7 @@ return (
                    <Link href={`/posts/${post.id}`}>
                      <div>{post.content}</div>
                      {post.imageUrl && (
-                       <img
+                       <image
                          src={post.imageUrl}
                          alt="Post image"
                          className="mt-2 w-full h-auto rounded-lg"

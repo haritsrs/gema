@@ -56,7 +56,7 @@ const NotificationItem = ({ type, user, content, timestamp, read, userImage }) =
 
   return (
     <div className={`flex items-start space-x-4 p-4 ${read ? 'bg-gray-800' : 'bg-gray-800 border-l-4 border-purple-500'} rounded-lg transition-all duration-200 hover:bg-gray-700`}>
-      <img
+      <image
         src={userImage || '/default-avatar.png'}
         alt={`${user}'s profile`}
         className="w-10 h-10 rounded-full object-cover"

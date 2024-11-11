@@ -175,7 +175,7 @@ export default function PostPage() {
       <div className="w-full max-w-xl bg-gray-800 p-6 rounded-lg">
         {/* Post Display */}
         <div className="flex space-x-2">
-          <img
+          <image
             src={post.profilePicture || "https://placehold.co/40x40"}
             alt={`${post.username || "User"}'s profile`}
             className="rounded-full"
@@ -187,7 +187,7 @@ export default function PostPage() {
               <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
             </div>
             {post.imageUrl && (
-              <img 
+              <image 
                 src={post.imageUrl} 
                 alt="Post image" 
                 className="mt-2 w-full h-auto rounded-lg" 
