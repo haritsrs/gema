@@ -7,10 +7,12 @@ import { auth } from '../../firebase.js';
 import localFont from "next/font/local";
 import Posting from '../components/posting';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { usePostSystem } from '../hooks/usePostSystem';
 import PostDropdown from '../components/PostDropdown';
+import { useImageDimensions } from '../hooks/useImageDimensions';
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +31,9 @@ export default function Page() {
   const storage = getStorage();
   const loadMoreRef = useRef(null);
   const [shouldLoad, setShouldLoad] = useState(false);
+  const { imageDimensions, handleImageLoad } = useImageDimensions();
+
+
 
   const {
     posts,
@@ -137,15 +142,15 @@ export default function Page() {
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                 <div className="flex space-x-2">
-                <div className="w-10 h-10 rounded-full overflow-hidden">
-  <Image
-    src={post.profilePicture || '/default-avatar.png'}
-    alt={`${post.username || 'User'}'s profile`}
-    width={40} // 10 * 4 = 40px
-    height={40}
-    objectFit="cover"
-  />
-</div>
+                  <div className="w-10 h-10 rounded-full overflow-hidden">
+                    <Image
+                      src={post.profilePicture || '/default-avatar.png'}
+                      alt={`${post.username || 'User'}'s profile`}
+                      width={40} // 10 * 4 = 40px
+                      height={40}
+                      objectFit="cover"
+                    />
+                  </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="font-bold">
@@ -159,20 +164,22 @@ export default function Page() {
                         onPostDeleted={handlePostDeleted}
                       />
                     </div>
-                    
+
                     <Link href={`/posts/${post.id}`} className="block">
                       <div className="cursor-pointer">
                         <div>{post.content}</div>
                         {post.imageUrl && (
-                         <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
-                         <Image
-                           src={post.imageUrl}
-                           alt="Post image"
-                           layout="responsive"
-                           loading="lazy"
-                         />
-                       </div>
-                       
+                          <div className="mt-2 w-full h-auto overflow-hidden">
+                            <Image
+                              src={post.imageUrl}
+                              alt="Post image"
+                              loading="lazy"
+                              width={imageDimensions[post.id]?.width || 500}
+                              height={imageDimensions[post.id]?.height || 300}
+                              onLoadingComplete={(result) => handleImageLoad(post.id, result)}
+                              className="rounded-lg"
+                            />
+                          </div>
                         )}
                       </div>
                     </Link>
@@ -186,11 +193,10 @@ export default function Page() {
                         e.preventDefault();
                         handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid);
                       }}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
-                        post.likedBy?.includes(currentUser?.uid)
-                          ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                          : 'bg-gray-700 fill-gray-500'
-                      }`}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
+                        ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
+                        : 'bg-gray-700 fill-gray-500'
+                        }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
                         <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
@@ -235,11 +241,10 @@ export default function Page() {
               <button
                 onClick={fetchOlderPosts}
                 disabled={loading}
-                className={`w-full max-w-md py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
-                  loading
-                    ? 'bg-gray-700 cursor-not-allowed'
-                    : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
-                }`}
+                className={`w-full max-w-md py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${loading
+                  ? 'bg-gray-700 cursor-not-allowed'
+                  : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center space-x-2">

@@ -5,7 +5,7 @@ import { getAuth, updateProfile, updateEmail, onAuthStateChanged } from "firebas
 import { getDatabase, ref as databaseRef, update, get } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth } from '../../../../firebase';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);

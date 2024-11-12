@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive, setSelectedImage }) {
   const [image, setImage] = useState(null);

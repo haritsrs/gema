@@ -7,16 +7,18 @@ import { ref, get, set, push, onValue, off } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "next/legacy/image";
+import { useImageDimensions } from '../../../hooks/useImageDimensions'
 
 export default function PostPage() {
-  const router = useRouter();
   const [postId, setPostId] = useState(null);
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const { imageDimensions, handleImageLoad } = useImageDimensions();
+
 
   // Listen for authentication state
   useEffect(() => {
@@ -60,14 +62,14 @@ export default function PostPage() {
     try {
       const commentsRef = ref(database, `posts/${postId}/comments`);
       const newCommentRef = push(commentsRef);
-      
+
       await set(newCommentRef, {
         userId: currentUser.uid,
         username: currentUser.displayName || "Anonymous",
         content: newComment,
         createdAt: new Date().toISOString(),
       });
-      
+
       setNewComment("");
     } catch (error) {
       console.error("Error submitting comment:", error);
@@ -95,8 +97,8 @@ export default function PostPage() {
         text: post.content || "Take a look at this post on our platform!",
         url: `${window.location.origin}/posts/${postId}`,
       })
-      .then(() => console.log('Post shared successfully'))
-      .catch((error) => console.error('Error sharing the post:', error));
+        .then(() => console.log('Post shared successfully'))
+        .catch((error) => console.error('Error sharing the post:', error));
     } else {
       copyToClipboard(postId);
     }
@@ -104,7 +106,7 @@ export default function PostPage() {
 
   const copyToClipboard = (postId) => {
     const postUrl = `${window.location.origin}/posts/${postId}`;
-    
+
     navigator.clipboard.writeText(postUrl)
       .then(() => {
         alert('Post URL copied to clipboard!');
@@ -127,7 +129,7 @@ export default function PostPage() {
   useEffect(() => {
     if (postId) {
       const postRef = ref(database, `posts/${postId}`);
-      
+
       // Set up listener for post data
       onValue(postRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -148,7 +150,7 @@ export default function PostPage() {
   useEffect(() => {
     if (postId) {
       const commentsRef = ref(database, `posts/${postId}/comments`);
-      
+
       onValue(commentsRef, (snapshot) => {
         if (snapshot.exists()) {
           const commentsData = [];
@@ -176,15 +178,15 @@ export default function PostPage() {
       <div className="w-full max-w-xl bg-gray-800 p-6 rounded-lg">
         {/* Post Display */}
         <div className="flex space-x-2">
-        <div className="rounded-full overflow-hidden" style={{ width: "40px", height: "40px" }}>
-  <Image
-    src={post.profilePicture || '/default-avatar.png'}
-    alt={`${post.username || 'User'}'s profile`}
-    width={40} 
-    height={40}
-    objectFit="cover"
-  />
-</div>
+          <div className="rounded-full overflow-hidden" style={{ width: "40px", height: "40px" }}>
+            <Image
+              src={post.profilePicture || '/default-avatar.png'}
+              alt={`${post.username || 'User'}'s profile`}
+              width={40}
+              height={40}
+              objectFit="cover"
+            />
+          </div>
           <div>
             <div className="font-bold">
               {post.username || "User"}{" "}
@@ -192,13 +194,17 @@ export default function PostPage() {
             </div>
             {post.imageUrl && (
               <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
-              <Image
-                           src={post.imageUrl}
-                           alt="Post image"
-                           layout="responsive"
-                           loading="lazy"
-                         />
-            </div>
+                <Image
+                  src={post.imageUrl}
+                  alt="Post image"
+                  layout="responsive"
+                  loading="lazy"
+                  width={imageDimensions[post.id]?.width || 500}
+                  height={imageDimensions[post.id]?.height || 300}
+                  onLoadingComplete={(result) => handleImageLoad(post.id, result)}
+                  className="rounded-lg"
+                />
+              </div>
             )}
             <div>{post.content}</div>
           </div>
@@ -214,8 +220,8 @@ export default function PostPage() {
             <span>{post.likes || 0}</span>
           </button>
 
-          <button 
-            className="flex cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md p-2 mr-2 w-full space-x-1 items-center justify-center" 
+          <button
+            className="flex cursor-pointer bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md p-2 mr-2 w-full space-x-1 items-center justify-center"
             onClick={() => sharePost(post)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">

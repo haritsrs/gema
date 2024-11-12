@@ -1,8 +1,25 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+export default {
   images: {
-    domains: ['firebasestorage.googleapis.com', 'lh3.googleusercontent.com'], // Add the Google User Image domain here
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 };
-
-export default nextConfig;

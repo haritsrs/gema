@@ -6,7 +6,7 @@ import AuthSidebar from '../components/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../firebase.js';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import localFont from "next/font/local";
 import { useState, useEffect } from 'react';
 
