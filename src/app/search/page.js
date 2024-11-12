@@ -9,6 +9,7 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
 import Image from 'next/image.js';
 import PostDropdown from '../../components/PostDropdown';
+import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -82,6 +83,8 @@ function useSearchPosts() {
 
 export default function SearchPage() {
   const [currentUser, setCurrentUser] = useState(null);
+  const { imageDimensions, handleImageLoad } = useImageDimensions();
+
   const {
     loading,
     searchResults,
@@ -178,15 +181,16 @@ export default function SearchPage() {
               {searchResults.map((post) => (
                 <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                   <div className="flex space-x-2">
-                  <div className="rounded-full w-10 h-10 overflow-hidden">
-                  <Image
-    src={currentUser.photoURL || '/img/placehold.png'}
-    alt="Profile picture"
-    objectFit="cover"
-    width={128}
-    height={128}
-  />
-</div>
+                    <div className="overflow-hidden">
+                      <Image
+                        src={post.profilePicture || '/img/placehold.png'}
+                        alt="Profile picture"
+                        objectFit="cover"
+                        width={40}
+                        height={40}
+                        className='rounded-full'
+                      />
+                    </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div className="font-bold">
@@ -194,7 +198,7 @@ export default function SearchPage() {
                           <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
                         </div>
                         {currentUser?.uid === post.userId && (
-                          <PostDropdown 
+                          <PostDropdown
                             post={post}
                             currentUser={currentUser}
                           />
@@ -203,14 +207,17 @@ export default function SearchPage() {
                       <Link href={`/posts/${post.id}`}>
                         <div>{post.content}</div>
                         {post.imageUrl && (
-                          <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
-                          <Image
-                           src={post.imageUrl}
-                           alt="Post image"
-                           layout="responsive"
-                           loading="lazy"
-                         />
-                        </div>                        
+                          <div className="mt-2 w-full h-auto overflow-hidden">
+                            <Image
+                              src={post.imageUrl}
+                              alt="Post image"
+                              loading="lazy"
+                              width={imageDimensions[post.id]?.width || 500}
+                              height={imageDimensions[post.id]?.height || 300}
+                              onLoadingComplete={(result) => handleImageLoad(post.id, result)}
+                              className="rounded-lg"
+                            />
+                          </div>
                         )}
                       </Link>
                     </div>
@@ -240,18 +247,18 @@ export default function SearchPage() {
                         </svg>
                         <span>Comment</span>
                       </button>
-
-                      {/* Share Button */}
-                      <button
-                        className="flex items-center bg-gray-700 rounded-lg p-2"
-                        onClick={() => handleShare(post)}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24" className="fill-gray-400">
-                          <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
-                          <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
-                        </svg>
-                      </button>
                     </div>
+
+                    {/* Share Button */}
+                    <button
+                      className="flex items-center bg-gray-700 rounded-full p-2"
+                      onClick={() => handleShare(post)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24" className="fill-gray-400">
+                        <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
+                        <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
+                      </svg>
+                    </button>
                   </div>
                 </li>
               ))}
@@ -259,6 +266,6 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }

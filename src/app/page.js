@@ -33,8 +33,6 @@ export default function Page() {
   const [shouldLoad, setShouldLoad] = useState(false);
   const { imageDimensions, handleImageLoad } = useImageDimensions();
 
-
-
   const {
     posts,
     loading,
