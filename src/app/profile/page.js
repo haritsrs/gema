@@ -5,14 +5,14 @@ import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, query, orderByChild, onValue } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../firebase.js';
-import AuthSidebar from '../../components/auth';
 import localFont from "next/font/local";
 import Posting from '../../components/posting';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
 import Image from 'next/image.js';
 import PostDropdown from '../../components/PostDropdown';
-import { usePostSystem } from '@/hooks/usePostSystem.js';
+import { usePostSystem } from '../../hooks/usePostSystem';
+import { useImageDimensions } from '../../hooks/useImageDimensions.js'
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -64,7 +64,7 @@ function useChronologicalPosts() {
     loading,
     handleLike,
     handleDeletePost,
-    setPosts 
+    setPosts
   };
 }
 
@@ -73,6 +73,9 @@ export default function ProfilePage() {
   const [userPosts, setUserPosts] = useState([]);
   const [showAuthSidebar, setShowAuthSidebar] = useState(false);
   const storage = getStorage();
+  const { imageDimensions, handleImageLoad } = useImageDimensions();
+
+
 
   const {
     posts,
@@ -107,7 +110,7 @@ export default function ProfilePage() {
       likes: 0,
       likedBy: [],
     };
-    
+
     setPosts(prevPosts => [enhancedPost, ...prevPosts]);
   }, [currentUser, setPosts]);
 
@@ -143,10 +146,10 @@ export default function ProfilePage() {
       console.error('Error sharing post:', error);
     }
   };
-  
+
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full w-full bg-gray-900 flex items-center justify-center">
         <div className="text-white text-center">
           <h2 className="text-xl font-bold mb-4">Please sign in to view your profile</h2>
           <button
@@ -160,39 +163,34 @@ export default function ProfilePage() {
     );
   }
 
-return (
+  return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={loading} />
-
-      {showAuthSidebar && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-75">
-          <AuthSidebar onClose={() => setShowAuthSidebar(false)} />
-        </div>
-      )}
-
       {/* Profile Header */}
-      <div className="w-full h-72 bg-gradient-to-r from-purple-600 to-blue-600">
-        <div className="max-w-2xl mx-auto px-4 relative">
-          <div className="absolute -bottom-24 flex flex-col items-center w-full h-16">
-          <div className="w-32 h-32 rounded-full border-4 border-gray-900 overflow-hidden">
-  <Image
-    src={currentUser.photoURL || '/img/placehold.png'}
-    alt="Profile picture"
-    objectFit="cover"
-    width={128}
-    height={128}
-  />
-</div>
+      <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="flex flex-col items-center justify-center w-full space-y-2">
+            <div className="overflow-hidden">
+              <Image
+                src={currentUser.photoURL || '/default-avatar.png'}
+                alt={`${currentUser.displayName || 'User'}'s Profile`}
+                width={100}
+                height={100}
+                className="rounded-full"
+                objectFit="cover"
+              />
+            </div>
+
             <div className="mt-4 text-center">
               <h1 className="text-2xl font-bold text-white">{currentUser.displayName || 'User'}</h1>
               <p className="text-gray-300">@{currentUser.email?.split('@')[0]}</p>
             </div>
-            <Link 
+            <Link
               href="/settings/edit-profile"
-              className="absolute right bottom bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 relative"
+              className="absolute right bottom bg-purple-100 hover:bg-purple-700 text-bold text-purple-700 hover:text-white px-4 py-2 rounded-xl flex items-center space-x-2 relative"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
               </svg>
               <span>Edit Profile</span>
             </Link>
@@ -200,94 +198,97 @@ return (
         </div>
       </div>
 
-   {/* Profile Content */}
-       <div className="max-w-2xl mx-auto px-4 mt-8">
-       {/* User Stats */}
-       <div className="bg-gray-800 rounded-lg p-4 mb-6 justify-center items-center flex">
-         <div className="flex space-x-6">
-           <div className="text-center">
-             <div className="text-xl font-bold text-white">{userPosts.length}</div>
-             <div className="text-gray-400">Posts</div>
-           </div>
-           <div className="text-center">
-             <div className="text-xl font-bold text-white">
-               {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
-             </div>
-             <div className="text-gray-400">Total Likes</div>
-           </div>
-         </div>
-       </div>
+      {/* Profile Content */}
+      <div className="max-w-2xl mx-auto px-4 mt-8">
+        {/* User Stats */}
+        <div className="bg-gray-800 rounded-lg p-4 mb-6 justify-center items-center flex">
+          <div className="flex space-x-6">
+            <div className="text-center">
+              <div className="text-xl font-bold text-white">{userPosts.length}</div>
+              <div className="text-gray-400">Posts</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-white">
+                {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
+              </div>
+              <div className="text-gray-400">Total Likes</div>
+            </div>
+          </div>
+        </div>
 
-       {/* Posting Component */}
-       <div className="mb-6">
-         <Posting onPostCreated={handlePostCreated} storage={storage} />
-       </div>
+        {/* Posting Component */}
+        <div className="mb-6">
+          <Posting onPostCreated={handlePostCreated} storage={storage} />
+        </div>
 
-       {/* User Posts */}
-       <h2 className="text-xl font-bold text-white mb-4">Your Posts</h2>
-       {userPosts.length === 0 ? (
-         <div className="text-gray-400 text-center py-8">
-           You haven&apos;t made any posts yet
-         </div>
-       ) : (
-         <ul className="space-y-4">
-           {userPosts.map((post) => (
-             <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 bg-gray-800 rounded-lg">
-               <div className="flex space-x-2">
-               <div className="rounded-full w-10 h-10 overflow-hidden">
-               <Image
-    src={post.profilePicture || '/default-avatar.png'}
-    alt={`${post.username || 'User'}'s profile`}
-    width={40} 
-    height={40}
-    objectFit="cover"
-  />
-</div>
-                 <div className="flex-1">
-                   <div className="flex justify-between items-start">
-                     <div className="font-bold">
-                       {post.username || currentUser?.displayName || 'User'}{' '}
-                       <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
-                     </div>
-                     <PostDropdown 
-                       post={post}
-                       currentUser={currentUser}
-                       onDelete={handleDeletePost}
-                     />
-                   </div>
-                   <Link href={`/posts/${post.id}`}>
-                     <div>{post.content}</div>
-                     {post.imageUrl && (
-                       <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
-                       <Image
-                           src={post.imageUrl}
-                           alt="Post image"
-                           layout="responsive"
-                           loading="lazy"
-                         />
-                     </div>                     
-                     )}
-                   </Link>
-                 </div>
-               </div>
+        {/* User Posts */}
+        <h2 className="text-xl font-bold text-white mb-4">Your Posts</h2>
+        {userPosts.length === 0 ? (
+          <div className="text-gray-400 text-center py-8">
+            You haven&apos;t made any posts yet
+          </div>
+        ) : (
+          <ul className="space-y-4">
+            {userPosts.map((post) => (
+              <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 bg-gray-800 rounded-lg">
+                <div className="flex space-x-2">
+                  <div className="rounded-full w-10 h-10 overflow-hidden">
+                    <Image
+                      src={post.profilePicture || '/default-avatar.png'}
+                      alt={`${post.username || 'User'}'s profile`}
+                      width={40}
+                      height={40}
+                      objectFit="cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div className="font-bold">
+                        {post.username || currentUser?.displayName || 'User'}{' '}
+                        <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
+                      </div>
+                      <PostDropdown
+                        post={post}
+                        currentUser={currentUser}
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                    <Link href={`/posts/${post.id}`}>
+                      <div>{post.content}</div>
+                      {post.imageUrl && (
+                        <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
+                          <Image
+                            src={post.imageUrl}
+                            alt="Post image"
+                            loading="lazy"
+                            width={imageDimensions[post.id]?.width || 500}
+                            height={imageDimensions[post.id]?.height || 300}
+                            onLoadingComplete={(result) => handleImageLoad(post.id, result)}
+                            className="rounded-lg"
 
-               {/* Post Actions */}
-               <div className="flex items-center justify-between text-gray-300 mt-2">
-                 <div className="flex mx-2">
-                   <button
-                     onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
-                     className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
-                       post.likedBy?.includes(currentUser?.uid)
-                         ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                         : 'bg-gray-700 fill-gray-500'
-                     }`}
-                   >
-                     <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
-                       <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
-                     </svg>
-                     <span>{post.likes || 0}</span>
-                   </button>
-                   <button
+                          />
+                        </div>
+                      )}
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Post Actions */}
+                <div className="flex items-center justify-between text-gray-300 mt-2">
+                  <div className="flex mx-2">
+                    <button
+                      onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
+                        ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
+                        : 'bg-gray-700 fill-gray-500'
+                        }`}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
+                        <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663" />
+                      </svg>
+                      <span>{post.likes || 0}</span>
+                    </button>
+                    <button
                       className="flex items-center space-x-1 bg-gray-700 fill-gray-400 active:bg-purple-300 active:bg-opacity-50 active:fill-purple-800 active:text-purple-800 rounded-lg drop-shadow-md active:filter-none p-2"
                       onClick={() => {
                         window.location.href = `/posts/${post.id}`;
