@@ -8,7 +8,7 @@ import { auth } from '../../firebase.js';
 import Image from "next/legacy/image";
 import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay';
-import * as nsfwjs from 'nsfwjs';
+//import * as nsfwjs from 'nsfwjs';
 import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js';
 
 export default function Posting({ onPostCreated }) {

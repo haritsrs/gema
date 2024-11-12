@@ -6,7 +6,6 @@ import { database } from "../../../../firebase"; // Update this import to refere
 import { ref, get, set, push, onValue, off } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
-import Link from "next/link";
 import Image from "next/legacy/image";
 import { useImageDimensions } from '../../../hooks/useImageDimensions'
 
@@ -18,7 +17,6 @@ export default function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const { imageDimensions, handleImageLoad } = useImageDimensions();
-
 
   // Listen for authentication state
   useEffect(() => {
@@ -174,41 +172,45 @@ export default function PostPage() {
   if (!post) return <div>Post not found</div>;
 
   return (
-    <div className="flex-col md:flex grow w-full text-white p-4 items-center justify-center">
-      <div className="w-full max-w-xl bg-gray-800 p-6 rounded-lg">
+    <div className="flex w-full text-white p-4 items-center justify-center">
+      <div className="flex-col w-full max-w-xl bg-gray-800 p-5 rounded-xl">
         {/* Post Display */}
-        <div className="flex space-x-2">
-          <div className="rounded-full overflow-hidden" style={{ width: "40px", height: "40px" }}>
+        <div className="flex justify-start space-x-2">
+          <div className="overflow-hidden">
             <Image
               src={post.profilePicture || '/default-avatar.png'}
               alt={`${post.username || 'User'}'s profile`}
               width={40}
               height={40}
+              className="rounded-full"
               objectFit="cover"
             />
           </div>
           <div>
             <div className="font-bold">
               {post.username || "User"}{" "}
-              <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
             </div>
-            {post.imageUrl && (
-              <div className="mt-2 w-full h-auto rounded-lg overflow-hidden">
-                <Image
-                  src={post.imageUrl}
-                  alt="Post image"
-                  layout="responsive"
-                  loading="lazy"
-                  width={imageDimensions[post.id]?.width || 500}
-                  height={imageDimensions[post.id]?.height || 300}
-                  onLoadingComplete={(result) => handleImageLoad(post.id, result)}
-                  className="rounded-lg"
-                />
-              </div>
-            )}
-            <div>{post.content}</div>
+            <span className="text-gray-500">
+              {formatTimestamp(post.createdAt)}
+            </span>
           </div>
         </div>
+
+        {post.imageUrl && (
+          <div className=" flex items-center justify-center my-2 w-full h-auto rounded-lg overflow-hidden">
+            <Image
+              src={post.imageUrl}
+              alt="Post image"
+              loading="lazy"
+              width={imageDimensions[post.id]?.width || 500}
+              height={imageDimensions[post.id]?.height || 300}
+              onLoadingComplete={(result) => handleImageLoad(post.id, result)}
+              className="rounded-lg"
+            />
+          </div>
+        )}
+        <div>{post.content}</div>
+
         <div className="flex items-center justify-center text-gray-500 mt-2">
           <button
             className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 w-full items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`}
