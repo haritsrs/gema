@@ -13,6 +13,7 @@ import Image from 'next/image.js';
 import PostDropdown from '../../components/PostDropdown';
 import { usePostSystem } from '../../hooks/usePostSystem';
 import { useImageDimensions } from '../../hooks/useImageDimensions.js'
+import AuthSidebar from '../../components/auth';
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -147,6 +148,10 @@ export default function ProfilePage() {
     }
   };
 
+  const toggleVisibility = () => {
+    setShowAuthSidebar(!showAuthSidebar);
+  };
+
   if (!currentUser) {
     return (
       <div className="h-full w-full bg-gray-900 flex items-center justify-center">
@@ -159,10 +164,24 @@ export default function ProfilePage() {
             Sign In
           </button>
         </div>
+        {showAuthSidebar && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
+              <button className="absolute top-2 right-2" onClick={toggleVisibility}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                  <g fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <circle cx={12} cy={12} r={10} opacity={0.5}></circle>
+                    <path strokeLinecap="round" d="m14.5 9.5l-5 5m0-5l5 5"></path>
+                  </g>
+                </svg>
+              </button>
+              <AuthSidebar />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
-
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={loading} />
@@ -317,6 +336,21 @@ export default function ProfilePage() {
           </ul>
         )}
       </div>
+      {showAuthSidebar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
+            <button className="absolute top-2 right-2" onClick={toggleVisibility}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                <g fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <circle cx={12} cy={12} r={10} opacity={0.5}></circle>
+                  <path strokeLinecap="round" d="m14.5 9.5l-5 5m0-5l5 5"></path>
+                </g>
+              </svg>
+            </button>
+            <AuthSidebar />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
