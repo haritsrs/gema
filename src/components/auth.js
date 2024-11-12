@@ -90,6 +90,7 @@ export default function AuthSidebar() {
     return true;
   };
 
+  /* Temporarily disabled email sign-up
   const handleEmailSignUp = async () => {
     if (!validatePasswords()) {
       return;
@@ -111,6 +112,7 @@ export default function AuthSidebar() {
       setPasswordError(error.message);
     }
   };
+  */
 
   const handleSignOut = async () => {
     try {
@@ -161,6 +163,7 @@ export default function AuthSidebar() {
           </div>
 
           <div className="flex-col bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
+            {/* Temporarily disabled email sign-up input fields
             {isSignUp && (
               <div>
                 <span className="font-white font-sm">Username</span>
@@ -173,6 +176,7 @@ export default function AuthSidebar() {
                 />
               </div>
             )}
+            */}
             <div>
               <span className="font-white font-sm">Email</span>
               <input
@@ -197,6 +201,7 @@ export default function AuthSidebar() {
               />
             </div>
             
+            {/* Temporarily disabled confirm password input
             {isSignUp && (
               <div>
                 <span className="font-white font-sm">Confirm Password</span>
@@ -215,12 +220,18 @@ export default function AuthSidebar() {
                 )}
               </div>
             )}
+            */}
             
             <div className="py-4 items-center justify-center">
               {isSignUp ? (
-                <button onClick={handleEmailSignUp} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
-                  Sign Up
-                </button>
+                <div>
+                  <button disabled className="p-2 text-center bg-gray-700 w-full rounded-lg cursor-not-allowed">
+                    Sign Up
+                  </button>
+                  <p className="text-yellow-500 text-sm mt-2 text-center">
+                    Creating an account using email is currently disabled. Please use Google or Facebook to create an account.
+                  </p>
+                </div>
               ) : (
                 <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
                   Sign In
