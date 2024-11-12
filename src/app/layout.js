@@ -41,39 +41,46 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}>
-        <div className="fixed w-screen top-0 p-4 flex items-center justify-between bg-gray-950 border border-b-1 border-gray-800 z-40">
+        <div className="fixed w-screen top-0 p-2 flex items-center justify-between bg-gray-950 border border-b-1 border-gray-800 z-40">
           <Link href="/">
             <Image src="/img/logo.png" alt="GEMA Logo" objectFit="contain" width={220} height={32} />
           </Link>
 
-          <div className="flex items-center space-x-4 mr-4">
+          <div className="flex items-center justify-center mr-2">
             {/* Display logout/login button and profile picture */}
-            <button className="text-white text-3xl hover:text-purple-800" onClick={() => setIsVisible(true)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-                <path fill="white" d="M15 2h-1c-2.828 0-4.243 0-5.121.879C8 3.757 8 5.172 8 8v8c0 2.828 0 4.243.879 5.121C9.757 22 11.172 22 14 22h1c2.828 0 4.243 0 5.121-.879C21 20.243 21 18.828 21 16V8c0-2.828 0-4.243-.879-5.121C19.243 2 17.828 2 15 2" opacity={0.6}></path>
-                <path fill="white" d="M8 8c0-1.538 0-2.657.141-3.5H8c-2.357 0-3.536 0-4.268.732S3 7.143 3 9.5v5c0 2.357 0 3.535.732 4.268S5.643 19.5 8 19.5h.141C8 18.657 8 17.538 8 16z" opacity={0.4}></path>
-                <path fill="white" fillRule="evenodd" d="M14.53 11.47a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06l.72-.72H5a.75.75 0 0 1 0-1.5h7.19l-.72-.72a.75.75 0 1 1 1.06-1.06z" clipRule="evenodd"></path>
-              </svg>
-            </button>
+            <button className="w-max h-max rounded-2xl active:bg-purple-500 fill-gray-400 active:fill-purple-900" onClick={() => setIsVisible(true)}>
+              <div className="flex justify-end items-center space-x-4 m-1">
+                {currentUser ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1.75em" height="1.75em" viewBox="0 0 24 24">
+                    <path d="M15 2h-1c-2.828 0-4.243 0-5.121.879C8 3.757 8 5.172 8 8v8c0 2.828 0 4.243.879 5.121C9.757 22 11.172 22 14 22h1c2.828 0 4.243 0 5.121-.879C21 20.243 21 18.828 21 16V8c0-2.828 0-4.243-.879-5.121C19.243 2 17.828 2 15 2" opacity={0.6}></path>
+                    <path d="M8 8c0-1.538 0-2.657.141-3.5H8c-2.357 0-3.536 0-4.268.732S3 7.143 3 9.5v5c0 2.357 0 3.535.732 4.268S5.643 19.5 8 19.5h.141C8 18.657 8 17.538 8 16z" opacity={0.4}></path>
+                    <path fillRule="evenodd" d="M4.47 11.47a.75.75 0 0 0 0 1.06l2 2a.75.75 0 0 0 1.06-1.06l-.72-.72H14a.75.75 0 0 0 0-1.5H6.81l.72-.72a.75.75 0 1 0-1.06-1.06z" clipRule="evenodd"></path>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1.75em" height="1.75em" viewBox="0 0 24 24">
+                    <path d="M15 2h-1c-2.828 0-4.243 0-5.121.879C8 3.757 8 5.172 8 8v8c0 2.828 0 4.243.879 5.121C9.757 22 11.172 22 14 22h1c2.828 0 4.243 0 5.121-.879C21 20.243 21 18.828 21 16V8c0-2.828 0-4.243-.879-5.121C19.243 2 17.828 2 15 2" opacity={0.6}></path>
+                    <path d="M8 8c0-1.538 0-2.657.141-3.5H8c-2.357 0-3.536 0-4.268.732S3 7.143 3 9.5v5c0 2.357 0 3.535.732 4.268S5.643 19.5 8 19.5h.141C8 18.657 8 17.538 8 16z" opacity={0.4}></path>
+                    <path fillRule="evenodd" d="M14.53 11.47a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06l.72-.72H5a.75.75 0 0 1 0-1.5h7.19l-.72-.72a.75.75 0 1 1 1.06-1.06z" clipRule="evenodd"></path>
+                  </svg>
+                )}
 
-            {/* Profile picture or placeholder */}
-            <div
-              className="w-8 h-8 rounded-full cursor-pointer overflow-hidden"
-              onClick={() => setIsVisible(true)}
-            >
-              <Image
-                src={currentUser ? currentUser.photoURL : "/img/placehold.png"}
-                alt="User Profile"
-                objectFit="cover"
-                width={32}
-                height={32}
-              />
-            </div>
+
+                {/* Profile picture or placeholder */}
+                <Image
+                  src={currentUser ? currentUser.photoURL : "/img/placehold.png"}
+                  alt="User Profile"
+                  objectFit="cover"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              </div>
+            </button>
           </div>
         </div>
 
         {isVisible && (
-          <div className="fixed flex z-50 h-screen w-screen bg-gray-950 bg-opacity-85 text-white p-4 justify-center">
+          <div className="fixed flex z-50 h-screen w-screen bg-gray-950 backdrop-blur-sm bg-opacity-85 text-white p-4 justify-center">
             <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
               <button className="absolute top-2 right-2" onClick={toggleVisibility}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
@@ -103,6 +110,6 @@ export default function RootLayout({ children }) {
           </div>
         </div>
       </body>
-    </html>
+    </html >
   );
 }

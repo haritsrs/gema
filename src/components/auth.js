@@ -13,18 +13,18 @@ export default function AuthSidebar() {
   const [passwordError, setPasswordError] = useState('');
   const [username, setUsername] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  
+
   const db = getDatabase();
 
   // Function to add user to database
   const addUserToDatabase = async (user) => {
     const userRef = ref(db, `users/${user.uid}`);
-    
+
     try {
       // First, check if the user already exists
       const snapshot = await get(userRef);
       const existingData = snapshot.val();
-      
+
       const userData = {
         email: user.email,
         displayName: user.displayName || username || 'Anonymous',
@@ -34,7 +34,7 @@ export default function AuthSidebar() {
         // Only set createdAt if it's a new user
         ...(existingData ? {} : { createdAt: new Date().toISOString() })
       };
-      
+
       await set(userRef, userData);
     } catch (error) {
       console.error("Error managing user in database: ", error);
@@ -128,29 +128,43 @@ export default function AuthSidebar() {
     setPassword('');
     setConfirmPassword('');
   };
-  
+
   return (
     <div className="mx-[5%] p-4 md:mx-0 rounded-lg">
       {user ? (
         <div>
           <h2 className="text-xl text-white">Welcome, {user.displayName || 'User'}!</h2>
-          <button onClick={handleSignOut} className="mt-2 w-full bg-purple-800 text-white px-4 py-2 rounded-lg hover:bg-red-300 hover:text-red-700">
+          <button onClick={handleSignOut} className="mt-2 w-full bg-gray-700 text-white px-4 py-2 rounded-lg active:bg-red-300 hover:text-red-700">
             Sign Out
           </button>
         </div>
       ) : (
         <div className="flex-col space-y-10 py-10">
-          <div className="flex-col">
-            <h2 className="flex text-xl text-white py-2 md:py-0">
+          <div className="flex-col text-white">
+            <h2 className="flex text-xl py-2 md:py-0">
               Welcome to GEMA!
             </h2>
-            
-            <button onClick={handleGoogleLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
-              Sign in with Google
+
+            <button onClick={handleGoogleLogin} className="mt-2 w-full bg-gray-700 text-white flex items-center justify-center px-4 py-2 rounded-lg drop-shadow-lg active:bg-red-200 active:bg-opacity-65 active:text-red-700 active:text-bold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                <g fill="none" fillRule="evenodd">
+                  <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
+                  <path fill="currentColor" d="M12 5.5a6.5 6.5 0 1 0 6.326 8H13a1.5 1.5 0 0 1 0-3h7a1.5 1.5 0 0 1 1.5 1.5a9.5 9.5 0 1 1-2.801-6.736a1.5 1.5 0 1 1-2.116 2.127A6.48 6.48 0 0 0 12 5.5"></path>
+                </g>
+              </svg>
+              <span className='pl-2'>Sign in with Google</span>
             </button>
 
-            <button onClick={handleFacebookLogin} className="mt-2 w-full bg-gray-950 text-white flex items-center justify-center px-4 py-2 rounded-lg outline outline-1 outline-gray-700 hover:bg-purple-500 hover:bg-opacity-30 hover:outline-purple-800">
-              Sign in with Facebook
+            <button onClick={handleFacebookLogin} className="mt-2 w-full bg-gray-700 text-white flex items-center justify-center px-4 py-2 rounded-lg drop-shadow-lg active:bg-blue-300 active:bg-opacity-65 active:text-blue-600 active:text-bold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                <g fill="none" fillRule="evenodd">
+                  <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
+                  <path fill="currentColor" d="M8.07 5.002c-1.595-.11-2.865.816-3.753 1.979c-.893 1.17-1.522 2.72-1.87 4.268c-.346 1.547-.433 3.189-.154 4.564c.272 1.336.964 2.71 2.42 3.145c1.389.415 2.635-.175 3.587-.976c.954-.802 1.78-1.946 2.446-3.051c.522-.867.968-1.75 1.318-2.504c.35.753.796 1.637 1.317 2.504c.666 1.105 1.492 2.249 2.446 3.051c.952.801 2.198 1.391 3.587.976c1.456-.435 2.148-1.809 2.42-3.145c.28-1.375.192-3.017-.154-4.564c-.348-1.548-.977-3.099-1.87-4.268c-.887-1.163-2.157-2.09-3.752-1.979c-1.734.12-2.97 1.469-3.687 2.488a11 11 0 0 0-.307.465a10 10 0 0 0-.308-.465c-.717-1.02-1.953-2.367-3.687-2.488Zm2.85 5.025c-.283.715-.97 2.348-1.888 3.873c-.621 1.032-1.313 1.958-2.02 2.552s-1.262.728-1.725.59c-.396-.118-.817-.56-1.034-1.627c-.208-1.027-.157-2.375.146-3.728c.304-1.353.838-2.614 1.508-3.493c.675-.885 1.369-1.242 2.024-1.196c.766.053 1.53.705 2.188 1.642c.368.523.643 1.052.8 1.386Zm2.288 0c.282.715.97 2.348 1.887 3.873c.622 1.032 1.314 1.958 2.02 2.552c.708.595 1.262.728 1.726.59c.395-.118.816-.56 1.033-1.627c.209-1.027.158-2.375-.146-3.728s-.837-2.614-1.508-3.493c-.675-.885-1.368-1.242-2.024-1.196c-.766.053-1.53.705-2.188 1.642a9.6 9.6 0 0 0-.8 1.386Z"></path>
+                </g>
+              </svg>
+              <span className='pl-2'>
+                Sign in with Meta
+              </span>
             </button>
           </div>
 
@@ -162,7 +176,7 @@ export default function AuthSidebar() {
             <hr className="w-full border-t border-gray-700 my-4" />
           </div>
 
-          <div className="flex-col bg-gray-950 outline outline-1 outline-gray-700 hover:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
+          <div className="flex-col bg-gray-950  outline-1 outline-gray-700 active:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
             {/* Temporarily disabled email sign-up input fields
             {isSignUp && (
               <div>
@@ -172,7 +186,7 @@ export default function AuthSidebar() {
                   placeholder=""
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
+                  className="flex w-full p-2 rounded-lg text-black text-sm  outline-2 outline-gray-700 focus:outline-purple-400"
                 />
               </div>
             )}
@@ -184,7 +198,7 @@ export default function AuthSidebar() {
                 placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
+                className="flex w-full p-2 rounded-lg text-white text-sm outline-none bg-gray-700 drop-shadow-lg"
               />
             </div>
             <div>
@@ -197,10 +211,10 @@ export default function AuthSidebar() {
                   setPassword(e.target.value);
                   setPasswordError('');
                 }}
-                className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
+                className="flex w-full p-2 rounded-lg text-white text-sm outline-none bg-gray-700 drop-shadow-lg"
               />
             </div>
-            
+
             {/* Temporarily disabled confirm password input
             {isSignUp && (
               <div>
@@ -213,7 +227,7 @@ export default function AuthSidebar() {
                     setConfirmPassword(e.target.value);
                     setPasswordError('');
                   }}
-                  className="flex w-full p-2 rounded-lg text-black text-sm outline outline-2 outline-gray-700 focus:outline-purple-400"
+                  className="flex w-full p-2 rounded-lg text-black text-sm  outline-2 outline-gray-700 focus:outline-purple-400"
                 />
                 {passwordError && (
                   <p className="text-red-500 text-sm mt-1">{passwordError}</p>
@@ -221,7 +235,7 @@ export default function AuthSidebar() {
               </div>
             )}
             */}
-            
+
             <div className="py-4 items-center justify-center">
               {isSignUp ? (
                 <div>
@@ -233,7 +247,7 @@ export default function AuthSidebar() {
                   </p>
                 </div>
               ) : (
-                <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg hover:bg-purple-300 hover:text-purple-800">
+                <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg active:bg-purple-300 hover:text-purple-800">
                   Sign In
                 </button>
               )}
@@ -245,7 +259,7 @@ export default function AuthSidebar() {
               {isSignUp ? "Already a user?" : "New to the app?"}
             </span>
 
-            <button onClick={toggleAuthMode} className="bg-opacity-0 text-center text-purple-800 hover:text-white">
+            <button onClick={toggleAuthMode} className="bg-opacity-0 text-center text-purple-800 active:text-white">
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </div>

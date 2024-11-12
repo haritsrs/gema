@@ -181,14 +181,13 @@ export default function SearchPage() {
               {searchResults.map((post) => (
                 <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                   <div className="flex space-x-2">
-                    <div className="overflow-hidden">
+                    <div className="w-10 h-10 rounded-full overflow-hidden">
                       <Image
-                        src={post.profilePicture || '/img/placehold.png'}
-                        alt="Profile picture"
-                        objectFit="cover"
-                        width={40}
+                        src={post.profilePicture || '/default-avatar.png'}
+                        alt={`${post.username || 'User'}'s profile`}
+                        width={40} // 10 * 4 = 40px
                         height={40}
-                        className='rounded-full'
+                        objectFit="cover"
                       />
                     </div>
                     <div className="flex-1">

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-switch": "^1.1.1",
-    "@tensorflow/tfjs-node": "^4.22.0",
+    "buffer": "6.0.3",
     "dotenv": "^16.4.5",
     "env": "^0.0.2",
     "esbuild": "^0.24.0",
