@@ -235,8 +235,8 @@ export default function PostPage() {
         </div>
 
         {/* Comments Section */}
-        <div className="rounded-lg bg-gray-900 flex flex-col items-center justify-center mt-4">
-          <div className="m-4">
+        <div className="rounded-lg bg-gray-900 flex items-center justify-center mt-4 w-full h-max">
+          <div className="flex flex-col m-4 w-[95%]">
             <h3 className="font-bold">Comments:</h3>
             <ul className="list-disc pl-5">
               {comments.map((comment) => (

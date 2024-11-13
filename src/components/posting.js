@@ -10,6 +10,12 @@ import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay';
 import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js';
 
+
+function isMobileUserAgent(userAgent) {
+  const mobileOSPatterns = /Android|iPhone|iPad|iPod|iOS/i;
+  return mobileOSPatterns.test(userAgent);
+}
+
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -20,9 +26,14 @@ export default function Posting({ onPostCreated }) {
   const [isUploaderVisible, setIsUploaderVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const maxCharacters = 280;
-
   const storage = getStorage();
   const database = getDatabase();
+  const [isMobile, setIsMobile] = useState(false);
+
+
+  useEffect(() => {
+    setIsMobile(isMobileUserAgent(navigator.userAgent));
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -88,46 +99,16 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
-  const checkImageForNSFW = async (image) => {
-    const model = await nsfwjs.load();
-    const imageElement = document.createElement('img');
-    imageElement.src = URL.createObjectURL(image);
-
-    return new Promise((resolve) => {
-      imageElement.onload = async () => {
-        const predictions = await model.classify(imageElement);
-        const isNSFW = predictions.some(prediction => prediction.className === 'Porn' && prediction.probability > 0.8);
-        resolve(isNSFW);
-      };
-
-      imageElement.onerror = () => {
-        resolve(false);
-      };
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!postContent.trim() && !selectedImage) return;
     if (!user) return;
-
     setLoading(true);
 
     try {
-      if (isSensitiveContentPresent(postContent)) {
-        setError('Your post contains sensitive content. Please remove it and try again.');
-        setLoading(false);
-        return;
-      }
 
       let uploadedImageUrl = '';
       if (selectedImage) {
-        const nsfwDetected = await checkImageForNSFW(selectedImage);
-        if (nsfwDetected) {
-          setError('NSFW content detected. Please upload a different image.');
-          setLoading(false);
-          return;
-        }
         uploadedImageUrl = await uploadImage(selectedImage);
       }
 
@@ -188,7 +169,7 @@ export default function Posting({ onPostCreated }) {
       <div className="flex items-center justify-between mx-1">
         <div className="flex space-x-2 justify-start items-center">
           <button
-            type="button" // Add type="button"
+            type="button"
             onClick={showUploader}
             className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
           >
@@ -199,16 +180,32 @@ export default function Posting({ onPostCreated }) {
               <path d="m22 15.858l-3.879-3.879a3.01 3.01 0 0 0-4.242 0l-.888.888l8.165 8.209c.542-.555.845-1.3.844-2.076z" opacity={0.25}></path>
             </svg>
           </button>
-          <button
-            type="button"
-            onClick={handleOpenCamera}
-            className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
-              <path d="M14.793 3c.346 0 .682.12.95.34l.11.1L17.415 5H20a2 2 0 0 1 1.995 1.85L22 7v12a2 2 0 0 1-1.85 1.995L20 21H4a2 2 0 0 1-1.995-1.85L2 19V7a2 2 0 0 1 1.85-1.995L4 5h2.586l1.56-1.56c.245-.246.568-.399.913-.433L9.207 3z" className="duoicon-secondary-layer" opacity={0.5}></path>
-              <path d="M12 7.5c-3.849 0-6.255 4.167-4.33 7.5A5 5 0 0 0 12 17.5c3.849 0 6.255-4.167 4.33-7.5A5 5 0 0 0 12 7.5" className="duoicon-primary-layer"></path>
-            </svg>
-          </button>
+          {isMobile ? (
+            <button
+              type="button"
+              className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
+                <path d="M14.793 3c.346 0 .682.12.95.34l.11.1L17.415 5H20a2 2 0 0 1 1.995 1.85L22 7v12a2 2 0 0 1-1.85 1.995L20 21H4a2 2 0 0 1-1.995-1.85L2 19V7a2 2 0 0 1 1.85-1.995L4 5h2.586l1.56-1.56c.245-.246.568-.399.913-.433L9.207 3z" className="duoicon-secondary-layer" opacity={0.5}></path>
+                <path d="M12 7.5c-3.849 0-6.255 4.167-4.33 7.5A5 5 0 0 0 12 17.5c3.849 0 6.255-4.167 4.33-7.5A5 5 0 0 0 12 7.5" className="duoicon-primary-layer"></path>
+              </svg>
+              <input id="image-upload" type="file"
+                accept="image/*"
+                capture="user"
+                onChange={handleImageChange}
+                className="hidden" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleOpenCamera}
+              className="mt-2 bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500 rounded-lg drop-shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
+                <path d="M14.793 3c.346 0 .682.12.95.34l.11.1L17.415 5H20a2 2 0 0 1 1.995 1.85L22 7v12a2 2 0 0 1-1.85 1.995L20 21H4a2 2 0 0 1-1.995-1.85L2 19V7a2 2 0 0 1 1.85-1.995L4 5h2.586l1.56-1.56c.245-.246.568-.399.913-.433L9.207 3z" className="duoicon-secondary-layer" opacity={0.5}></path>
+                <path d="M12 7.5c-3.849 0-6.255 4.167-4.33 7.5A5 5 0 0 0 12 17.5c3.849 0 6.255-4.167 4.33-7.5A5 5 0 0 0 12 7.5" className="duoicon-primary-layer"></path>
+              </svg>
+            </button>)}
         </div>
 
         <div className="text-gray-500 items-center">

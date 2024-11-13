@@ -186,7 +186,7 @@ export default function ProfilePage() {
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <LoadingOverlay isLoading={loading} />
       {/* Profile Header */}
-      <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16">
+      <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex flex-col items-center justify-center w-full space-y-2">
             <div className="overflow-hidden">
@@ -237,7 +237,7 @@ export default function ProfilePage() {
 
         {/* Posting Component */}
         <div className="mb-6">
-          <Posting onPostCreated={handlePostCreated} storage={storage} />
+          <Posting onPostCreated={() => { }} storage={storage} />
         </div>
 
         {/* User Posts */}
