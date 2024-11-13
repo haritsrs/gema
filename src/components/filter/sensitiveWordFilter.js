@@ -42,6 +42,10 @@ export const sensitiveWords = [
    'k0t0r', 'kotor', 'k0t0r', 'k@t0r', 
    'pukul4n', 'pukulan', 'pukul@n', 'pukulan',
    'b3rs3tubuh', 'bersetubuh', 'b3rs3tubuh', 'b3rs3tubuh', 
+   'jokowi','mulyono','fufufafa','prabowo','presiden','anies','ganjar',
+   'trummp','kamala','kamil','israel','gibran','megawati','pdip','gundar','tugib',
+   'jomok','rusdi','amba','ngawi','muani','lumpur lapindo','anggrek mekar','kapal karam',
+   'jmk48','gay',
   ];
   
   export function isSensitiveContentPresent(text) {
