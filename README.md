@@ -1,3 +1,3 @@
 
 
-## USE PNPM!!!
+## GEMA
