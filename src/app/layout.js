@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
 
           <div className="flex items-center justify-center mr-2">
             {/* Display logout/login button and profile picture */}
-            <button className="w-max h-max rounded-2xl active:bg-purple-500 fill-gray-400 active:fill-purple-900" onClick={() => setIsVisible(true)}>
+            <button className="w-max h-max rounded-2xl fill-gray-400 active:fill-purple-900" onClick={() => setIsVisible(true)}>
               <div className="flex justify-end items-center space-x-4 m-1">
                 {currentUser ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="1.75em" height="1.75em" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export default function RootLayout({ children }) {
                   objectFit="cover"
                   width={40}
                   height={40}
-                  className="rounded-full"
+                  className="rounded-full hover:outline hover:outline-2 hover:outline-purple-700"
                 />
               </div>
             </button>
