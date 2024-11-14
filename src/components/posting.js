@@ -338,9 +338,9 @@ export default function Posting({ onPostCreated }) {
               : 'border-gray-400 bg-gray-100 cursor-not-allowed text-gray-400 fill-gray-400'
               }`}>
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="2.3rem" height="2.3rem" viewBox="0 0 24 24" className="drop-shadow-md m-2">
-                  <path d="m15.707 5.293l-3-3a1 1 0 0 0-1.414 0l-3 3a1 1 0 0 0 1.414 1.414L11 5.414V17a1 1 0 0 0 2 0V5.414l1.293 1.293a1 1 0 0 0 1.414-1.414"></path>
-                  <path d="M18 9h-5v8a1 1 0 0 1-2 0V9H6a3.003 3.003 0 0 0-3 3v7a3.003 3.003 0-3 0 0 0 3 3h12a3.003 3.003 0 0 0 3-3v-7a3.003 3.003 0 0 0-3-3" opacity={0.5}></path>
+                <svg xmlns="http://www.w3.org/2000/svg" width="2.3em" height="2.3em" viewBox="0 0 24 24">
+	                <path d="M22 16v-1c0-2.829 0-4.242-.879-5.121S18.828 9 16 9H8c-2.83 0-4.243 0-5.122.88C2 10.757 2 12.17 2 14.998V16c0 2.828 0 4.242.879 5.121C3.757 22 5.172 22 8 22h8c2.828 0 4.243 0 5.121-.879S22 18.828 22 16" opacity={0.5}></path>
+	                <path fillRule="evenodd" d="M12 15.75a.75.75 0 0 0 .75-.75V4.027l1.68 1.961a.75.75 0 1 0 1.14-.976l-3-3.5a.75.75 0 0 0-1.14 0l-3 3.5a.75.75 0 1 0 1.14.976l1.68-1.96V15c0 .414.336.75.75.75" clipRule="evenodd"></path>
                 </svg>
                 <p className="mb-2 text-sm">
                   <span className="font-semibold">Click to upload</span> or drag and drop
