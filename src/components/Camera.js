@@ -6,8 +6,7 @@ import Image from "next/legacy/image";
 export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive, setSelectedImage }) {
   const [image, setImage] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
-  const [availableCameras, setAvailableCameras] = useState([]);
-  const [selectedCamera, setSelectedCamera] = useState(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
 
   const videoRef = useRef(null);
@@ -62,6 +61,8 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
     // Use video dimensions for canvas
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    setDimensions({ width: video.videoWidth, height: video.videoHeight });
+
 
     // Flip horizontally if needed (since video is mirrored)
     context.translate(canvas.width, 0);
@@ -107,7 +108,9 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
         <video
           ref={videoRef}
           autoPlay
-          className="max-h-[80vh] w-auto transform -scale-x-100 rounded-xl"
+          videowidth={dimensions.width}
+          videoheight={dimensions.height}
+          className="transform -scale-x-100 rounded-xl"
         ></video>
         <canvas ref={canvasRef} className="hidden transform -scale-x-100"></canvas>
         <div className="flex flex-center p-2 space-x-4 m-2 items-center">
@@ -125,25 +128,29 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
           </button>
         </div>
       </div>
-      <div className={`flex flex-col fixed top-0 items-center justify-center w-screen h-screen z-50 bg-gray-950 ${image ? 'block' : 'hidden'}`}>
-      <div className="w-auto max-h-[80vh] overflow-hidden rounded-xl">
-  <Image
-    src={image}
-    alt="Captured"
-    layout="intrinsic"
-    objectFit="contain"
-  />
-</div>
+      {image && (
+        <div className='flex flex-col fixed top-0 items-center justify-center w-screen h-screen z-50 bg-gray-950'>
+          <div className="flex items-center justify-center overflow-hidden pb-4">
+            <Image
+              src={image}
+              alt="Captured"
+              width={dimensions.width}
+              height={dimensions.height}
+              objectFit="contain"
+              className="rounded-xl"
+            />
+          </div>
 
-        <div className="flex items-center justify-center space-x-2 w-max">
-          <button onClick={uploadImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
-            Upload
-          </button>
-          <button onClick={discardImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
-            Discard
-          </button>
+          <div className="flex items-center justify-center space-x-2 w-max">
+            <button onClick={uploadImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
+              Upload
+            </button>
+            <button onClick={discardImage} className="mt-2 bg-gray-700 text-white px-4 py-2 rounded-md w-full h-max">
+              Discard
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
