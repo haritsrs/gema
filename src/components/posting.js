@@ -199,7 +199,7 @@ export default function Posting({ onPostCreated }) {
         <label htmlFor="post-content" className="sr-only">Post Content</label>
         <textarea
           id="post-content"
-          className={`w-full bg-gray-600/85 backdrop-blur-sm p-2 rounded-lg drop-shadow-md ${user ? 'text-white' : 'text-gray-400'}`}
+          className={`w-full bg-gray-700 p-2 rounded-lg drop-shadow-md focus:ring-2 focus:ring-purple-600 outline outline-none ${user ? 'text-white' : 'text-gray-400'}`}
           rows="4"
           value={postContent}
           onChange={handleInputChange}

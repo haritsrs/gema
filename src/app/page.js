@@ -193,7 +193,7 @@ export default function Page() {
                       }}
                       className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
                         ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
-                        : currentUser ? 'bg-gray-700 fill-gray-500' : 'bg-gray-400 fill-gray-100'}`}
+                        : currentUser ? 'bg-gray-700 fill-gray-500' : 'bg-gray-400 fill-gray-100 text-gray-100'}`}
                       disabled={!currentUser}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">

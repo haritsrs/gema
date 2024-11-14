@@ -135,7 +135,7 @@ export default function SearchPage() {
       <LoadingOverlay isLoading={loading} />
 
       {/* Search Header */}
-      <div className="w-full bg-gray-800 p-4 sticky top-0 z-10">
+      <div className="w-full p-4 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto">
           <div className="relative">
             <input

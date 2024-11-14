@@ -213,8 +213,9 @@ export default function PostPage() {
 
         <div className="flex items-center justify-center text-gray-500 mt-2 space-x-2">
           <button
-            className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 w-full items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : 'bg-gray-700 fill-gray-500'}`}
+            className={`flex space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 w-full items-center justify-center ${post.likedBy?.includes(currentUser?.uid) ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800' : currentUser ? 'bg-gray-700 fill-gray-500 text-gray-500' : 'bg-gray-400 fill-gray-100 text-gray-100'}`}
             onClick={() => handleLike(postId, post.likes, post.likedBy || [])}
+            disabled={!currentUser}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 24 24">
               <path d="M8.106 18.247C5.298 16.083 2 13.542 2 9.137C2 4.274 7.5.825 12 5.501l2 1.998a.75.75 0 0 0 1.06-1.06l-1.93-1.933C17.369 1.403 22 4.675 22 9.137c0 4.405-3.298 6.946-6.106 9.11q-.44.337-.856.664C14 19.729 13 20.5 12 20.5s-2-.77-3.038-1.59q-.417-.326-.856-.663"></path>
@@ -255,9 +256,14 @@ export default function PostPage() {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   className="flex-grow bg-gray-700 rounded-lg p-2"
-                  placeholder="Add a comment..."
+                  placeholder={`${currentUser ? 'Add a comment...' : 'Login to add a comment to this post...'}`}
+                  disabled={!currentUser}
                 />
-                <button type="submit" className="ml-2 bg-gray-700 active:bg-purple-500 text-white active:text-purple-900 rounded-lg p-2 drop-shadow-lg">Post</button>
+                <button
+                  type="submit"
+                  className={`ml-2 text-white ${currentUser ? 'bg-gray-700 active:bg-purple-500 active:text-purple-900' : 'bg-gray-400 fill-gray-100'} rounded-lg p-2 drop-shadow-lg`}>
+                  Post
+                </button>
               </form>
             )}
           </div>
