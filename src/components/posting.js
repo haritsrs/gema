@@ -119,6 +119,12 @@ export default function Posting({ onPostCreated }) {
     
     if (!postContent.trim() && !selectedImage) return;
     if (!user) return;
+
+    if (isSensitiveContentPresent(postContent)) {
+      setError('Your post contains content that violates our community guidelines. Please revise and try again.');
+      return;
+    }
+    
     setLoading(true);
 
     try {
