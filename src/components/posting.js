@@ -8,7 +8,7 @@ import { auth } from '../../firebase.js';
 import Image from "next/legacy/image";
 import Camera from '../components/Camera';
 import LoadingOverlay from './LoadingOverlay';
-import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js';
+import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js'
 
 
 function isMobileUserAgent(userAgent) {
@@ -65,15 +65,73 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     if (showLoginWarning()) return;
 
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(file);
-      setImageUrl(URL.createObjectURL(file));
+      if (file.type === "image/heic" || file.type === "image/heif") {
+        // Create a FormData object to send the file to the server
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Send the file to the API route for conversion
+        const response = await fetch("../app/api/convert-heic/route.js", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const convertedFile = new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+            type: "image/jpeg",
+          });
+
+          setSelectedImage(convertedFile);
+          setImageUrl(URL.createObjectURL(convertedFile));
+        } else {
+          setError("Failed processing the Image. Please try again.");
+          setTimeout(() => {
+            setError('')
+          }, 3000);
+        }
+      } else {
+        setSelectedImage(file);
+        setImageUrl(URL.createObjectURL(file));
+      }
     }
   };
+
+  const imageFormatCheck = (e) => {
+    const file = e.target.files[0];
+
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/svg+xml",
+    ];
+
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".svg", ".heic", ".heif"];
+
+    if (file) {
+      // Extract the file extension from the file name
+      const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+
+      // Check MIME type or file extension
+      if (allowedMimeTypes.includes(file.type) || allowedExtensions.includes(fileExtension)) {
+        handleImageChange(e);
+      } else {
+        setError("Please upload a valid image file (JPG, JPEG, PNG, GIF, SVG, HEIC, or HEIF).");
+        e.target.value = null;
+        setTimeout(() => {
+          setError('')
+        }, 3000);
+      }
+    }
+  };
+
 
   const handleDeleteImage = () => {
     if (showLoginWarning()) return;
@@ -98,6 +156,9 @@ export default function Posting({ onPostCreated }) {
 
       if (!response.ok) {
         setError('Image compression failed.');
+        setTimeout(() => {
+          setError('')
+        }, 3000);
         return '';
       }
 
@@ -110,6 +171,9 @@ export default function Posting({ onPostCreated }) {
     } catch (error) {
       console.error('Error uploading file:', error);
       setError('Failed to upload image. Please try again.');
+      setTimeout(() => {
+        setError('')
+      }, 3000);
       return '';
     }
   };
@@ -227,19 +291,7 @@ export default function Posting({ onPostCreated }) {
                 <input
                   id="upload-image-mobile"
                   type="file"
-                  accept=".png, .jpg, .jpeg, .svg, .gif"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file && file.type.startsWith("image/")) {
-                      handleImageChange(e);
-                    } else {
-                      setError("Please upload an image file (JPG, JPEG, PNG, SVG, GIF)");
-                      setTimeout(() => {
-                        setError('')
-                      }, 3000);
-                      e.target.value = null;
-                    }
-                  }}
+                  onChange={imageFormatCheck}
                   className="hidden"
                   disabled={!user}
                 />
@@ -276,18 +328,7 @@ export default function Posting({ onPostCreated }) {
                   type="file"
                   accept="image/*"
                   capture="environment"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file && file.type.startsWith("image/")) {
-                      handleImageChange(e);
-                    } else {
-                      setError("Video upload is not supported");
-                      setTimeout(() => {
-                        setError('')
-                      }, 3000);
-                      e.target.value = null;
-                    }
-                  }}
+                  onChange={imageFormatCheck}
                   className="hidden"
                   disabled={!user}
                 />
@@ -351,18 +392,7 @@ export default function Posting({ onPostCreated }) {
                 id="image-upload"
                 type="file"
                 accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file && file.type.startsWith("image/")) {
-                    handleImageChange(e);
-                  } else {
-                    setError("Please upload an image file (JPG, JPEG, PNG, SVG, GIF)");
-                    setTimeout(() => {
-                      setError('')
-                    }, 3000);
-                    e.target.value = null;
-                  }
-                }}
+                onChange={imageFormatCheck}
                 className="hidden"
                 disabled={!user}
               />
