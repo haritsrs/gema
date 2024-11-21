@@ -70,34 +70,13 @@ export default function Posting({ onPostCreated }) {
 
     const file = e.target.files[0];
     if (file) {
-      if (file.type === "image/heic" || file.type === "image/heif") {
-        // Create a FormData object to send the file to the server
-        const formData = new FormData();
-        formData.append("file", file);
-
-        // Send the file to the API route for conversion
-        const response = await fetch("../app/api/convert-heic/route.js", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
-          const blob = await response.blob();
-          const convertedFile = new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
-            type: "image/jpeg",
-          });
-
-          setSelectedImage(convertedFile);
-          setImageUrl(URL.createObjectURL(convertedFile));
-        } else {
-          setError("Failed processing the Image. Please try again.");
-          setTimeout(() => {
-            setError('')
-          }, 3000);
-        }
-      } else {
         setSelectedImage(file);
         setImageUrl(URL.createObjectURL(file));
+      } else {
+        setError("Failed processing the Image. Please try again.");
+        setTimeout(() => {
+          setError('')
+        }, 3000);
       }
     }
   };
