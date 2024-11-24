@@ -14,6 +14,7 @@ import PostDropdown from '../../components/PostDropdown';
 import { usePostSystem } from '../../hooks/usePostSystem';
 import { useImageDimensions } from '../../hooks/useImageDimensions.js'
 import AuthSidebar from '../../components/auth';
+import { useSharePost } from "../../hooks/useSharePost";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -75,7 +76,7 @@ export default function ProfilePage() {
   const [showAuthSidebar, setShowAuthSidebar] = useState(false);
   const storage = getStorage();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
-
+  const handleShare = useSharePost();
 
 
   const {
@@ -128,24 +129,6 @@ export default function ProfilePage() {
     if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
     return `${Math.floor(secondsAgo / 86400)}d ago`;
-  };
-
-  // Share functionality
-  const handleShare = async (post) => {
-    const postUrl = `${window.location.origin}/posts/${post.id}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: post.title || "Check out this post!",
-          text: post.content || "Take a look at this post on our platform!",
-          url: postUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(postUrl);
-      }
-    } catch (error) {
-      console.error('Error sharing post:', error);
-    }
   };
 
   const toggleVisibility = () => {

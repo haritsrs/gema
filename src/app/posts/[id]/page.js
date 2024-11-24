@@ -8,6 +8,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
 import Image from "next/legacy/image";
 import { useImageDimensions } from '../../../hooks/useImageDimensions'
+import { useSharePost  } from "../../../hooks/useSharePost";
 
 export default function PostPage() {
   const [postId, setPostId] = useState(null);
@@ -17,6 +18,7 @@ export default function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const { imageDimensions, handleImageLoad } = useImageDimensions();
+  const handleShare = useSharePost();
 
   // Listen for authentication state
   useEffect(() => {
@@ -91,8 +93,8 @@ export default function PostPage() {
   const sharePost = (post) => {
     if (navigator.share) {
       navigator.share({
-        title: post.title || "Check out this post!",
-        text: post.content || "Take a look at this post on our platform!",
+        title: post.title || "Check this out!",
+        text: post.content || "Take a look at this post on GEMA,",
         url: `${window.location.origin}/posts/${postId}`,
       })
         .then(() => console.log('Post shared successfully'))
@@ -105,7 +107,7 @@ export default function PostPage() {
   const copyToClipboard = (postId) => {
     const postUrl = `${window.location.origin}/posts/${postId}`;
 
-    navigator.clipboard.writeText(postUrl)
+    navigator.clipboard.writeText("Check this out! \nTake a look at this post on Gema, \n\n" + postUrl)
       .then(() => {
         alert('Post URL copied to clipboard!');
       })

@@ -12,6 +12,7 @@ import LoadingOverlay from '../components/LoadingOverlay';
 import { usePostSystem } from '../hooks/usePostSystem';
 import PostDropdown from '../components/PostDropdown';
 import { useImageDimensions } from '../hooks/useImageDimensions';
+import { useSharePost } from '../hooks/useSharePost';
 
 
 const geistSans = localFont({
@@ -32,6 +33,7 @@ export default function Page() {
   const loadMoreRef = useRef(null);
   const [shouldLoad, setShouldLoad] = useState(false);
   const { imageDimensions, handleImageLoad } = useImageDimensions();
+  const handleShare = useSharePost();
 
   const {
     posts,
@@ -92,25 +94,7 @@ export default function Page() {
         observer.disconnect();
       }
     };
-  }, [loading, noMorePosts]); // Dependencies that affect observation
-
-  // Share function
-  const handleShare = async (post) => {
-    const postUrl = `${window.location.origin}/posts/${post.id}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: post.title || "Check out this post!",
-          text: post.content || "Take a look at this post on our platform!",
-          url: postUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(postUrl);
-      }
-    } catch (error) {
-      console.error('Error sharing post:', error);
-    }
-  };
+  }, [loading, noMorePosts]); 
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
