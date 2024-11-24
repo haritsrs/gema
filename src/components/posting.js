@@ -12,9 +12,16 @@ import { isSensitiveContentPresent } from './filter/sensitiveWordFilter.js'
 
 
 function isMobileUserAgent(userAgent) {
-  const mobileOSPatterns = /Android|iPhone|iPad|iPod|iOS/i;
-  return mobileOSPatterns.test(userAgent);
+  const appleOSPatterns = /iPhone|iPad|iPod|iOS/i;
+  const androidOSPatterns = /Android/i;
+
+  return {
+      isIOS: appleOSPatterns.test(userAgent),
+      isAndroid: androidOSPatterns.test(userAgent),
+      isMobile: appleOSPatterns.test(userAgent) || androidOSPatterns.test(userAgent),
+  };
 }
+
 
 export default function Posting({ onPostCreated }) {
   const [postContent, setPostContent] = useState('');
@@ -33,14 +40,14 @@ export default function Posting({ onPostCreated }) {
 
 
   useEffect(() => {
-    setIsMobile(isMobileUserAgent(navigator.userAgent));
+    const { isMobile } = isMobileUserAgent(navigator.userAgent);
+    setIsMobile(isMobile);
   }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user || null);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -65,19 +72,60 @@ export default function Posting({ onPostCreated }) {
     }
   };
 
-  const handleImageChange = async (e) => {
-    if (showLoginWarning()) return;
+const handleImageChange = async (e) => {
+  if (showLoginWarning()) return;
+  const file = e.target.files[0];
+  if (file) {
+    const { isIOS } = isMobileUserAgent(navigator.userAgent);
+    if (isIOS) {
+      const reader = new FileReader();
+      reader.onload = function(readerEvent) {
+        const img = document.createElement('img');
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.height;
+          canvas.height = img.width;
+          
+          // Rotate image for iOS devices
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((90 * Math.PI) / 180);
+          ctx.drawImage(img, -img.width / 2, -img.height / 2);
+          
+          canvas.toBlob((blob) => {
+              if (blob) {
+                const rotatedFile = new File([blob], file.name, { type: file.type });
+                setSelectedImage(rotatedFile);
+                setImageUrl(URL.createObjectURL(rotatedFile));
+              } else {
+                setError("Failed to process the image. Please try again.");
+                setTimeout(() => setError(''), 3000);
+              }
+            }, file.type);
+          };
+        
+          img.onerror = () => {
+            setError("Failed to load the image. Please try again.");
+            setTimeout(() => setError(''), 3000);
+          };
 
-    const file = e.target.files[0];
-    if (file) {
+          img.src = readerEvent.target.result;
+        };
+      
+        reader.onerror = () => {
+          setError("Failed to read the file. Please try again.");
+          setTimeout(() => setError(''), 3000);
+        };
+      
+        reader.readAsDataURL(file);
+      } else {
+        // Non-iOS devices don't need rotation
         setSelectedImage(file);
         setImageUrl(URL.createObjectURL(file));
-      } else {
-        setError("Failed processing the Image. Please try again.");
-        setTimeout(() => {
-          setError('')
-        }, 3000);
       }
+    } else {
+      setError("Failed processing the Image. Please try again.");
+      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -92,17 +140,14 @@ export default function Posting({ onPostCreated }) {
       "image/svg+xml",
     ];
 
-    const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".svg", ".heic", ".heif"];
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".svg"];
 
     if (file) {
-      // Extract the file extension from the file name
       const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
-
-      // Check MIME type or file extension
       if (allowedMimeTypes.includes(file.type) || allowedExtensions.includes(fileExtension)) {
         handleImageChange(e);
       } else {
-        setError("Please upload a valid image file (JPG, JPEG, PNG, GIF, SVG, HEIC, or HEIF).");
+        setError("Please upload a valid image file (JPG, JPEG, PNG, GIF, SVG).");
         e.target.value = null;
         setTimeout(() => {
           setError('')
@@ -110,7 +155,6 @@ export default function Posting({ onPostCreated }) {
       }
     }
   };
-
 
   const handleDeleteImage = () => {
     if (showLoginWarning()) return;
