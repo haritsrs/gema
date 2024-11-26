@@ -15,7 +15,7 @@ import { usePostSystem } from '../../../hooks/usePostSystem';
 import { useImageDimensions } from '../../../hooks/useImageDimensions.js'
 import AuthSidebar from '../../../components/auth';
 import { useSharePost } from "../../../hooks/useSharePost";
-import { useRouter } from 'next/router';
+import { useParams } from 'next/navigation';
 
 const geistSans = localFont({
   src: "../../fonts/GeistVF.woff",
@@ -72,8 +72,8 @@ function useChronologicalPosts() {
 }
 
 export default function IDProfilePage() {
-  const router = useRouter();
-  const { id } = router.query; // Get the user ID from the URL
+  const params = useParams();
+  const id = params.id; // Get the user ID from the URL
   const [currentUser , setCurrentUser ] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [showAuthSidebar, setShowAuthSidebar] = useState(false);
