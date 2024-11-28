@@ -211,7 +211,7 @@ export default function IDProfilePage() {
     const enhancedPost = {
       ...newPost,
       id: newPost.id || Date.now().toString(),
-      profilePicture: currentUser?.photoURL || '/default-avatar.png',
+      profilePicture: currentUser?.photoURL || '/placehold.png',
       username: currentUser?.displayName || 'User',
       likes: 0,
       likedBy: [],
@@ -262,14 +262,14 @@ export default function IDProfilePage() {
           <div className="flex flex-col items-center justify-center w-full space-y-2">
             {/* Profile Image and Name */}
             <div className="overflow-hidden">
-              <Image
-                src={profileUser.photoURL || '/default-avatar.png'}
-                alt={`${profileUser.displayName || 'User'}'s Profile`}
-                width={100}
-                height={100}
-                className="rounded-full"
-                objectFit="cover"
-              />
+            <Image
+  src={profileUser.photoURL || '/placehold.png'}
+  alt="User profile"
+  width={100}
+  height={100}
+  className="rounded-full image"
+/>
+
             </div>
 
             <div className="mt-4 text-center">
@@ -352,11 +352,10 @@ export default function IDProfilePage() {
                 <div className="flex space-x-2">
                   <div className="rounded-full w-10 h-10 overflow-hidden">
                     <Image
-                      src={post.profilePicture || '/default-avatar.png'}
+                      src={post.profilePicture || '/placehold.png'}
                       alt={`${post.username || 'User'}'s profile`}
                       width={40}
                       height={40}
-                      objectFit="cover"
                     />
                   </div>
                   <div className="flex-1">
@@ -384,7 +383,7 @@ export default function IDProfilePage() {
                             loading="lazy"
                             width={imageDimensions[post.id]?.width || 500}
                             height={imageDimensions[post.id]?.height || 300}
-                            onLoadingComplete={(result) => handleImageLoad(post.id, result)}
+                            onLoad={(result) => handleImageLoad(post.id, result)}
                             className="rounded-lg"
                           />
                         </div>
