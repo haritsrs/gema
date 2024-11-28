@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
-import { getDatabase, ref, query, orderByChild, onValue, get } from 'firebase/database';
+import { getDatabase, ref, query, orderByChild, onValue, get, update, remove} from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../../firebase.js';
 import localFont from "next/font/local";
@@ -83,6 +83,9 @@ export default function IDProfilePage() {
   const database = getDatabase();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const {
     posts,
@@ -99,6 +102,37 @@ export default function IDProfilePage() {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleFollow = async () => {
+    if (!currentUser || !profileUser) return;
+  
+    const followRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
+    const followerRef = ref(database, `follows/${profileUser.uid}/followers/${currentUser.uid}`);
+  
+    try {
+      if (isFollowing) {
+        // Unfollow
+        await remove(followRef);
+        await remove(followerRef);
+        setIsFollowing(false);
+      } else {
+        // Follow
+        await update(followRef, {
+          uid: profileUser.uid,
+          displayName: profileUser.displayName || '',
+          photoURL: profileUser.photoURL || ''
+        });
+        await update(followerRef, {
+          uid: currentUser.uid,
+          displayName: currentUser.displayName || '',
+          photoURL: currentUser.photoURL || ''
+        });
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error updating follow status:", error);
+    }
+  };
 
   // Fetch profile user details
   useEffect(() => {
@@ -124,6 +158,46 @@ export default function IDProfilePage() {
 
     fetchProfileUser();
   }, [id, database]);
+
+  useEffect(() => {
+    if (!profileUser) return;
+
+    const followersRef = ref(database, `follows/${profileUser.uid}/followers`);
+    const followingRef = ref(database, `follows/${profileUser.uid}/following`);
+
+    // Fetch followers
+    const fetchFollowers = onValue(followersRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const followersData = Object.values(snapshot.val());
+        setFollowers(followersData);
+      } else {
+        setFollowers([]);
+      }
+    });
+
+    const fetchFollowing = onValue(followingRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const followingData = Object.values(snapshot.val());
+        setFollowing(followingData);
+      } else {
+        setFollowing([]);
+      }
+    });
+
+    // Check if current user is following the profile user
+    if (currentUser) {
+      const isFollowingRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
+      get(isFollowingRef).then((snapshot) => {
+        setIsFollowing(snapshot.exists());
+      });
+    }
+
+    // Cleanup subscriptions
+    return () => {
+      fetchFollowers();
+      fetchFollowing();
+    };
+  }, [profileUser, currentUser]);
 
   // Fetch user posts based on the provided id
   useEffect(() => {
@@ -186,6 +260,7 @@ export default function IDProfilePage() {
       <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex flex-col items-center justify-center w-full space-y-2">
+            {/* Profile Image and Name */}
             <div className="overflow-hidden">
               <Image
                 src={profileUser.photoURL || '/default-avatar.png'}
@@ -201,7 +276,21 @@ export default function IDProfilePage() {
               <h1 className="text-2xl font-bold text-white">{profileUser.displayName || 'User'}</h1>
               <p className="text-gray-300">@{profileUser.email?.split('@')[0]}</p>
             </div>
-            {/* Edit Profile button only visible to the profile owner when logged in */}
+
+            {/* Follow/Edit Profile Button */}
+            {currentUser && currentUser.uid !== profileUser.uid && (
+              <button 
+                onClick={handleFollow}
+                className={`px-4 py-2 rounded-xl ${
+                  isFollowing 
+                    ? 'bg-gray-700 text-white' 
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
+              >
+                {isFollowing ? 'Unfollow' : 'Follow'}
+              </button>
+            )}
+
             {currentUser && currentUser.uid === profileUser.uid && (
               <Link
                 href="/settings/edit-profile"
@@ -225,6 +314,14 @@ export default function IDProfilePage() {
             <div className="text-center">
               <div className="text-xl font-bold text-white">{userPosts.length}</div>
               <div className="text-gray-400">Posts</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-white">{followers.length}</div>
+              <div className="text-gray-400">Followers</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-white">{following.length}</div>
+              <div className="text-gray-400">Following</div>
             </div>
             <div className="text-center">
               <div className="text-xl font-bold text-white">
