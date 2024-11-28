@@ -180,38 +180,6 @@ export default function IDProfilePage() {
     );
   }
 
-  // Not signed in
-  if (!currentUser) {
-    return (
-      <div className="h-full w-full bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-xl font-bold mb-4">Please sign in to view profiles</h2>
-          <button
-            onClick={() => setShowAuthSidebar(true)}
-            className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg"
-          >
-            Sign In
-          </button>
-        </div>
-        {showAuthSidebar && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
-              <button className="absolute top-2 right-2" onClick={toggleVisibility}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
-                  <g fill="none" stroke="currentColor" strokeWidth={1.5}>
-                    <circle cx={12} cy={12} r={10} opacity={0.5}></circle>
-                    <path strokeLinecap="round" d="m14.5 9.5l-5 5m0-5l5 5"></path>
-                  </g>
-                </svg>
-              </button>
-              <AuthSidebar />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
       {/* Profile Header */}
@@ -233,8 +201,8 @@ export default function IDProfilePage() {
               <h1 className="text-2xl font-bold text-white">{profileUser.displayName || 'User'}</h1>
               <p className="text-gray-300">@{profileUser.email?.split('@')[0]}</p>
             </div>
-            {/* Only show Edit Profile if viewing own profile */}
-            {currentUser.uid === profileUser.uid && (
+            {/* Edit Profile button only visible to the profile owner when logged in */}
+            {currentUser && currentUser.uid === profileUser.uid && (
               <Link
                 href="/settings/edit-profile"
                 className="absolute right bottom bg-purple-100 hover:bg-purple-700 text-bold text-purple-700 hover:text-white px-4 py-2 rounded-xl flex items-center space-x-2 relative"
@@ -267,8 +235,8 @@ export default function IDProfilePage() {
           </div>
         </div>
 
-        {/* Posting Component (only show if viewing own profile) */}
-        {currentUser.uid === profileUser.uid && (
+        {/* Posting Component (only show if viewing own profile and logged in) */}
+        {currentUser && currentUser.uid === profileUser.uid && (
           <div className="mb-6">
             <Posting onPostCreated={handlePostCreated} storage={storage} />
           </div>
@@ -300,11 +268,14 @@ export default function IDProfilePage() {
                         {post.username || profileUser.displayName || 'User'} 
                         <span className="text-gray-500"> · {formatTimestamp(post.createdAt)}</span>
                       </div>
-                      <PostDropdown
-                        post={post}
-                        currentUser={currentUser}
-                        onDelete={handleDeletePost}
-                      />
+                      {/* PostDropdown only visible to the post owner when logged in */}
+                      {currentUser && (
+                        <PostDropdown
+                          post={post}
+                          currentUser={currentUser}
+                          onDelete={handleDeletePost}
+                        />
+                      )}
                     </div>
                     <Link href={`/posts/${post.id}`}>
                       <div>{post.content}</div>
