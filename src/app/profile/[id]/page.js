@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
-import { getDatabase, ref, query, orderByChild, onValue } from 'firebase/database';
+import { getDatabase, ref, query, orderByChild, onValue, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../../firebase.js';
 import localFont from "next/font/local";
@@ -74,16 +74,19 @@ function useChronologicalPosts() {
 export default function IDProfilePage() {
   const params = useParams();
   const id = params.id; // Get the user ID from the URL
-  const [currentUser , setCurrentUser ] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [showAuthSidebar, setShowAuthSidebar] = useState(false);
+  const [loading, setLoading] = useState(true);
   const storage = getStorage();
+  const database = getDatabase();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
 
   const {
     posts,
-    loading,
+    loading: postsLoading,
     handleLike,
     handleDeletePost,
     setPosts
@@ -92,10 +95,35 @@ export default function IDProfilePage() {
   // Authentication listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser (user);
+      setCurrentUser(user);
     });
     return () => unsubscribe();
   }, []);
+
+  // Fetch profile user details
+  useEffect(() => {
+    const fetchProfileUser = async () => {
+      if (!id) return;
+
+      try {
+        const userRef = ref(database, `users/${id}`);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+          setProfileUser({
+            uid: id,
+            ...snapshot.val()
+          });
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching profile user:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchProfileUser();
+  }, [id, database]);
 
   // Fetch user posts based on the provided id
   useEffect(() => {
@@ -109,14 +137,14 @@ export default function IDProfilePage() {
     const enhancedPost = {
       ...newPost,
       id: newPost.id || Date.now().toString(),
-      profilePicture: currentUser ?.photoURL || '/default-avatar.png',
-      username: currentUser ?.displayName || 'User ',
+      profilePicture: currentUser?.photoURL || '/default-avatar.png',
+      username: currentUser?.displayName || 'User',
       likes: 0,
       likedBy: [],
     };
 
     setPosts(prevPosts => [enhancedPost, ...prevPosts]);
-  }, [currentUser , setPosts]);
+  }, [currentUser, setPosts]);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
@@ -136,11 +164,28 @@ export default function IDProfilePage() {
     setShowAuthSidebar(!showAuthSidebar);
   };
 
-  if (!currentUser ) {
+  // Loading state
+  if (loading || postsLoading) {
+    return <LoadingOverlay isLoading={true} />;
+  }
+
+  // No profile found
+  if (!profileUser) {
     return (
       <div className="h-full w-full bg-gray-900 flex items-center justify-center">
         <div className="text-white text-center">
-          <h2 className="text-xl font-bold mb-4">Please sign in to view your profile</h2>
+          <h2 className="text-xl font-bold mb-4">User profile not found</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Not signed in
+  if (!currentUser) {
+    return (
+      <div className="h-full w-full bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h2 className="text-xl font-bold mb-4">Please sign in to view profiles</h2>
           <button
             onClick={() => setShowAuthSidebar(true)}
             className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg"
@@ -169,15 +214,14 @@ export default function IDProfilePage() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
-      <LoadingOverlay isLoading={loading} />
       {/* Profile Header */}
       <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex flex-col items-center justify-center w-full space-y-2">
             <div className="overflow-hidden">
               <Image
-                src={currentUser .photoURL || '/default-avatar.png'}
-                alt={`${currentUser .displayName || 'User '}'s Profile`}
+                src={profileUser.photoURL || '/default-avatar.png'}
+                alt={`${profileUser.displayName || 'User'}'s Profile`}
                 width={100}
                 height={100}
                 className="rounded-full"
@@ -186,18 +230,21 @@ export default function IDProfilePage() {
             </div>
 
             <div className="mt-4 text-center">
-              <h1 className="text-2xl font-bold text-white">{currentUser .displayName || 'User '}</h1>
-              <p className="text-gray-300">@{currentUser .email?.split('@')[0]}</p>
+              <h1 className="text-2xl font-bold text-white">{profileUser.displayName || 'User'}</h1>
+              <p className="text-gray-300">@{profileUser.email?.split('@')[0]}</p>
             </div>
-            <Link
-              href="/settings/edit-profile"
-              className="absolute right bottom bg-purple-100 hover:bg-purple-700 text-bold text-purple-700 hover:text-white px-4 py-2 rounded-xl flex items-center space-x-2 relative"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-              </svg>
-              <span>Edit Profile</span>
-            </Link>
+            {/* Only show Edit Profile if viewing own profile */}
+            {currentUser.uid === profileUser.uid && (
+              <Link
+                href="/settings/edit-profile"
+                className="absolute right bottom bg-purple-100 hover:bg-purple-700 text-bold text-purple-700 hover:text-white px-4 py-2 rounded-xl flex items-center space-x-2 relative"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                </svg>
+                <span>Edit Profile</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -220,13 +267,15 @@ export default function IDProfilePage() {
           </div>
         </div>
 
-        {/* Posting Component */}
-        <div className="mb-6">
-          <Posting onPostCreated={handlePostCreated} storage={storage} />
-        </div>
+        {/* Posting Component (only show if viewing own profile) */}
+        {currentUser.uid === profileUser.uid && (
+          <div className="mb-6">
+            <Posting onPostCreated={handlePostCreated} storage={storage} />
+          </div>
+        )}
 
         {/* User Posts */}
-        <h2 className="text-xl font-bold text-white mb-4">User  Posts</h2>
+        <h2 className="text-xl font-bold text-white mb-4">{profileUser.displayName || 'User'}'s Posts</h2>
         {userPosts.length === 0 ? (
           <div className="text-gray-400 text-center py-8">
             This user hasn't made any posts yet.
@@ -239,7 +288,7 @@ export default function IDProfilePage() {
                   <div className="rounded-full w-10 h-10 overflow-hidden">
                     <Image
                       src={post.profilePicture || '/default-avatar.png'}
-                      alt={`${post.username || 'User  '}'s profile`}
+                      alt={`${post.username || 'User'}'s profile`}
                       width={40}
                       height={40}
                       objectFit="cover"
@@ -248,12 +297,12 @@ export default function IDProfilePage() {
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="font-bold">
-                        {post.username || currentUser .displayName || 'User  '} 
+                        {post.username || profileUser.displayName || 'User'} 
                         <span className="text-gray-500"> · {formatTimestamp(post.createdAt)}</span>
                       </div>
                       <PostDropdown
                         post={post}
-                        currentUser ={currentUser  }
+                        currentUser={currentUser}
                         onDelete={handleDeletePost}
                       />
                     </div>
