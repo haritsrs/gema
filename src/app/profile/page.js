@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
-import { getDatabase, ref, query, orderByChild, onValue } from 'firebase/database';
+import { getDatabase, ref, query, orderByChild, onValue, off } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../firebase.js';
 import localFont from "next/font/local";
@@ -77,7 +77,8 @@ export default function ProfilePage() {
   const storage = getStorage();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
-
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   const {
     posts,
@@ -102,6 +103,29 @@ export default function ProfilePage() {
       setUserPosts(filtered);
     }
   }, [posts, currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    const database = getDatabase();
+    const followersRef = ref(database, `users/${currentUser.uid}/followers`);
+    const followingRef = ref(database, `users/${currentUser.uid}/following`);
+  
+    const followersListener = onValue(followersRef, (snapshot) => {
+      const followersData = snapshot.val();
+      setFollowersCount(followersData ? Object.keys(followersData).length : 0);
+    });
+  
+    const followingListener = onValue(followingRef, (snapshot) => {
+      const followingData = snapshot.val();
+      setFollowingCount(followingData ? Object.keys(followingData).length : 0);
+    });
+  
+    return () => {
+      off(followersRef, 'value', followersListener);
+      off(followingRef, 'value', followingListener);
+    };
+  }, [currentUser]);
 
   const handlePostCreated = useCallback((newPost) => {
     const enhancedPost = {
@@ -204,19 +228,27 @@ export default function ProfilePage() {
       <div className="max-w-2xl mx-auto px-4 mt-8">
         {/* User Stats */}
         <div className="bg-gray-800 rounded-lg p-4 mb-6 justify-center items-center flex">
-          <div className="flex space-x-6">
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{userPosts.length}</div>
-              <div className="text-gray-400">Posts</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">
-                {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
-              </div>
-              <div className="text-gray-400">Total Likes</div>
-            </div>
-          </div>
-        </div>
+  <div className="flex space-x-6">
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">{userPosts.length}</div>
+      <div className="text-gray-400">Posts</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">{followersCount}</div>
+      <div className="text-gray-400">Followers</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">{followingCount}</div>
+      <div className="text-gray-400">Following</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">
+        {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
+      </div>
+      <div className="text-gray-400">Total Likes</div>
+    </div>
+  </div>
+</div>
 
         {/* Posting Component */}
         <div className="mb-6">
