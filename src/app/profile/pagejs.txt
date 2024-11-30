@@ -2,29 +2,28 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
-import { getDatabase, ref, query, orderByChild, onValue, get, update, remove} from 'firebase/database';
+import { getDatabase, ref, query, orderByChild, onValue, off } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../../firebase.js';
+import { auth } from '../../../firebase.js';
 import localFont from "next/font/local";
-import Posting from '../../../components/posting';
-import LoadingOverlay from '../../../components/LoadingOverlay';
+import Posting from '../../components/posting';
+import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
 import Image from 'next/image.js';
-import PostDropdown from '../../../components/PostDropdown';
-import { usePostSystem } from '../../../hooks/usePostSystem';
-import { useImageDimensions } from '../../../hooks/useImageDimensions.js'
-import AuthSidebar from '../../../components/auth';
-import { useSharePost } from "../../../hooks/useSharePost";
-import { useParams } from 'next/navigation';
+import PostDropdown from '../../components/PostDropdown';
+import { usePostSystem } from '../../hooks/usePostSystem';
+import { useImageDimensions } from '../../hooks/useImageDimensions.js'
+import AuthSidebar from '../../components/auth';
+import { useSharePost } from "../../hooks/useSharePost";
 
 const geistSans = localFont({
-  src: "../../fonts/GeistVF.woff",
+  src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
 
 const geistMono = localFont({
-  src: "../../fonts/GeistMonoVF.woff",
+  src: "../fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
 });
@@ -71,25 +70,19 @@ function useChronologicalPosts() {
   };
 }
 
-export default function IDProfilePage() {
-  const params = useParams();
-  const id = params.id; // Get the user ID from the URL
+export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [showAuthSidebar, setShowAuthSidebar] = useState(false);
-  const [loading, setLoading] = useState(true);
   const storage = getStorage();
-  const database = getDatabase();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
-  const [followers, setFollowers] = useState([]);
-  const [following, setFollowing] = useState([]);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   const {
     posts,
-    loading: postsLoading,
+    loading,
     handleLike,
     handleDeletePost,
     setPosts
@@ -103,115 +96,42 @@ export default function IDProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  const handleFollow = async () => {
-    if (!currentUser || !profileUser) return;
-  
-    const followRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
-    const followerRef = ref(database, `follows/${profileUser.uid}/followers/${currentUser.uid}`);
-  
-    try {
-      if (isFollowing) {
-        // Unfollow
-        await remove(followRef);
-        await remove(followerRef);
-        setIsFollowing(false);
-      } else {
-        // Follow
-        await update(followRef, {
-          uid: profileUser.uid,
-          displayName: profileUser.displayName || '',
-          photoURL: profileUser.photoURL || ''
-        });
-        await update(followerRef, {
-          uid: currentUser.uid,
-          displayName: currentUser.displayName || '',
-          photoURL: currentUser.photoURL || ''
-        });
-        setIsFollowing(true);
-      }
-    } catch (error) {
-      console.error("Error updating follow status:", error);
-    }
-  };
-
-  // Fetch profile user details
+  // Filter posts for current user
   useEffect(() => {
-    const fetchProfileUser = async () => {
-      if (!id) return;
-
-      try {
-        const userRef = ref(database, `users/${id}`);
-        const snapshot = await get(userRef);
-        
-        if (snapshot.exists()) {
-          setProfileUser({
-            uid: id,
-            ...snapshot.val()
-          });
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching profile user:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchProfileUser();
-  }, [id, database]);
-
-  useEffect(() => {
-    if (!profileUser) return;
-
-    const followersRef = ref(database, `follows/${profileUser.uid}/followers`);
-    const followingRef = ref(database, `follows/${profileUser.uid}/following`);
-
-    // Fetch followers
-    const fetchFollowers = onValue(followersRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const followersData = Object.values(snapshot.val());
-        setFollowers(followersData);
-      } else {
-        setFollowers([]);
-      }
-    });
-
-    const fetchFollowing = onValue(followingRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const followingData = Object.values(snapshot.val());
-        setFollowing(followingData);
-      } else {
-        setFollowing([]);
-      }
-    });
-
-    // Check if current user is following the profile user
-    if (currentUser) {
-      const isFollowingRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
-      get(isFollowingRef).then((snapshot) => {
-        setIsFollowing(snapshot.exists());
-      });
-    }
-
-    // Cleanup subscriptions
-    return () => {
-      fetchFollowers();
-      fetchFollowing();
-    };
-  }, [profileUser, currentUser]);
-
-  // Fetch user posts based on the provided id
-  useEffect(() => {
-    if (posts && id) {
-      const filtered = posts.filter(post => post.userId === id);
+    if (posts && currentUser) {
+      const filtered = posts.filter(post => post.userId === currentUser.uid);
       setUserPosts(filtered);
     }
-  }, [posts, id]);
+  }, [posts, currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    const database = getDatabase();
+    const followersRef = ref(database, `users/${currentUser.uid}/followers`);
+    const followingRef = ref(database, `users/${currentUser.uid}/following`);
+  
+    const followersListener = onValue(followersRef, (snapshot) => {
+      const followersData = snapshot.val();
+      setFollowersCount(followersData ? Object.keys(followersData).length : 0);
+    });
+  
+    const followingListener = onValue(followingRef, (snapshot) => {
+      const followingData = snapshot.val();
+      setFollowingCount(followingData ? Object.keys(followingData).length : 0);
+    });
+  
+    return () => {
+      off(followersRef, 'value', followersListener);
+      off(followingRef, 'value', followingListener);
+    };
+  }, [currentUser]);
 
   const handlePostCreated = useCallback((newPost) => {
     const enhancedPost = {
       ...newPost,
-      id: newPost.id || Date.now().toString(),
-      profilePicture: currentUser?.photoURL || '/img/error.png',
+      id: newPost.id || Date.now().toString(), // Ensure there's always an ID
+      profilePicture: currentUser?.photoURL || '/default-avatar.png',
       username: currentUser?.displayName || 'User',
       likes: 0,
       likedBy: [],
@@ -220,6 +140,7 @@ export default function IDProfilePage() {
     setPosts(prevPosts => [enhancedPost, ...prevPosts]);
   }, [currentUser, setPosts]);
 
+  // Timestamp formatter
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";
 
@@ -238,70 +159,67 @@ export default function IDProfilePage() {
     setShowAuthSidebar(!showAuthSidebar);
   };
 
-  // Loading state
-  if (loading || postsLoading) {
-    return <LoadingOverlay isLoading={true} />;
-  }
-
-  // No profile found
-  if (!profileUser) {
+  if (!currentUser) {
     return (
       <div className="h-full w-full bg-gray-900 flex items-center justify-center">
         <div className="text-white text-center">
-          <h2 className="text-xl font-bold mb-4">User profile not found</h2>
+          <h2 className="text-xl font-bold mb-4">Please sign in to view your profile</h2>
+          <button
+            onClick={() => setShowAuthSidebar(true)}
+            className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg"
+          >
+            Sign In
+          </button>
         </div>
+        {showAuthSidebar && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
+              <button className="absolute top-2 right-2" onClick={toggleVisibility}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                  <g fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <circle cx={12} cy={12} r={10} opacity={0.5}></circle>
+                    <path strokeLinecap="round" d="m14.5 9.5l-5 5m0-5l5 5"></path>
+                  </g>
+                </svg>
+              </button>
+              <AuthSidebar />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
-
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
+      <LoadingOverlay isLoading={loading} />
       {/* Profile Header */}
       <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex flex-col items-center justify-center w-full space-y-2">
-            {/* Profile Image and Name */}
             <div className="overflow-hidden">
-            <Image
-  src={profileUser.photoURL || '/img/error.png'}
-  alt="User profile"
-  width={100}
-  height={100}
-  className="rounded-full image"
-/>
-
+              <Image
+                src={currentUser.photoURL || '/default-avatar.png'}
+                alt={`${currentUser.displayName || 'User'}'s Profile`}
+                width={100}
+                height={100}
+                className="rounded-full"
+                objectFit="cover"
+              />
             </div>
 
             <div className="mt-4 text-center">
-              <h1 className="text-2xl font-bold text-white">{profileUser.displayName || 'User'}</h1>
-              <p className="text-gray-300">@{profileUser.email?.split('@')[0]}</p>
+              <h1 className="text-2xl font-bold text-white">{currentUser.displayName || 'User'}</h1>
+              <p className="text-gray-300">@{currentUser.email?.split('@')[0]}</p>
             </div>
-
-            {/* Follow/Edit Profile Button */}
-            {currentUser && currentUser.uid !== profileUser.uid && (
-              <button 
-                onClick={handleFollow}
-                className={`px-4 py-2 rounded-xl ${
-                  isFollowing 
-                    ? 'bg-gray-700 text-white' 
-                    : 'bg-purple-600 text-white hover:bg-purple-700'
-                }`}
-              >
-                {isFollowing ? 'Unfollow' : 'Follow'}
-              </button>
-            )}
-
-            {currentUser && currentUser.uid === profileUser.uid && (
-              <Link
-                href="/settings/edit-profile"
-                className="absolute right bottom bg-purple-100 hover:bg-purple-700 text-bold text-purple-700 hover:text-white px-4 py-2 rounded-xl flex items-center space-x-2 relative"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                </svg>
-                <span>Edit Profile</span>
-              </Link>
-            )}
+            <Link
+              href="/settings/edit-profile"
+              className="absolute right bottom bg-purple-100 hover:bg-purple-700 text-bold text-purple-700 hover:text-white px-4 py-2 rounded-xl flex items-center space-x-2 relative"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+              </svg>
+              <span>Edit Profile</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -310,40 +228,38 @@ export default function IDProfilePage() {
       <div className="max-w-2xl mx-auto px-4 mt-8">
         {/* User Stats */}
         <div className="bg-gray-800 rounded-lg p-4 mb-6 justify-center items-center flex">
-          <div className="flex space-x-6">
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{userPosts.length}</div>
-              <div className="text-gray-400">Posts</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{followers.length}</div>
-              <div className="text-gray-400">Followers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{following.length}</div>
-              <div className="text-gray-400">Following</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">
-                {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
-              </div>
-              <div className="text-gray-400">Total Likes</div>
-            </div>
-          </div>
+  <div className="flex space-x-6">
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">{userPosts.length}</div>
+      <div className="text-gray-400">Posts</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">{followersCount}</div>
+      <div className="text-gray-400">Followers</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">{followingCount}</div>
+      <div className="text-gray-400">Following</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xl font-bold text-white">
+        {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
+      </div>
+      <div className="text-gray-400">Total Likes</div>
+    </div>
+  </div>
+</div>
+
+        {/* Posting Component */}
+        <div className="mb-6">
+          <Posting onPostCreated={() => { }} storage={storage} />
         </div>
 
-        {/* Posting Component (only show if viewing own profile and logged in) */}
-        {currentUser && currentUser.uid === profileUser.uid && (
-          <div className="mb-6">
-            <Posting onPostCreated={handlePostCreated} storage={storage} />
-          </div>
-        )}
-
         {/* User Posts */}
-        <h2 className="text-xl font-bold text-white mb-4">{profileUser.displayName || 'User'}'s Posts</h2>
+        <h2 className="text-xl font-bold text-white mb-4">Your Posts</h2>
         {userPosts.length === 0 ? (
           <div className="text-gray-400 text-center py-8">
-            This user hasn't made any posts yet.
+            You haven&apos;t made any posts yet
           </div>
         ) : (
           <ul className="space-y-4">
@@ -352,26 +268,24 @@ export default function IDProfilePage() {
                 <div className="flex space-x-2">
                   <div className="rounded-full w-10 h-10 overflow-hidden">
                     <Image
-                      src={post.profilePicture || '/img/error.png'}
+                      src={post.profilePicture || '/default-avatar.png'}
                       alt={`${post.username || 'User'}'s profile`}
                       width={40}
                       height={40}
+                      objectFit="cover"
                     />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="font-bold">
-                        {post.username || profileUser.displayName || 'User'} 
-                        <span className="text-gray-500"> · {formatTimestamp(post.createdAt)}</span>
+                        {post.username || currentUser?.displayName || 'User'}{' '}
+                        <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
                       </div>
-                      {/* PostDropdown only visible to the post owner when logged in */}
-                      {currentUser && (
-                        <PostDropdown
-                          post={post}
-                          currentUser={currentUser}
-                          onDelete={handleDeletePost}
-                        />
-                      )}
+                      <PostDropdown
+                        post={post}
+                        currentUser={currentUser}
+                        onDelete={handleDeletePost}
+                      />
                     </div>
                     <Link href={`/posts/${post.id}`}>
                       <div>{post.content}</div>
@@ -383,8 +297,9 @@ export default function IDProfilePage() {
                             loading="lazy"
                             width={imageDimensions[post.id]?.width || 500}
                             height={imageDimensions[post.id]?.height || 300}
-                            onLoad={(result) => handleImageLoad(post.id, result)}
+                            onLoadingComplete={(result) => handleImageLoad(post.id, result)}
                             className="rounded-lg"
+
                           />
                         </div>
                       )}
@@ -396,8 +311,8 @@ export default function IDProfilePage() {
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
                     <button
-                      onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser ?.uid)}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser ?.uid)
+                      onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
                         ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
                         : 'bg-gray-700 fill-gray-500'
                         }`}
@@ -429,13 +344,28 @@ export default function IDProfilePage() {
                       <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
                       <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
                     </svg>
-                    </button>
+                  </button>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </div>
+      {showAuthSidebar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="relative flex-col w-[98%] h-[98%] max-w-sm bg-gray-900 rounded-xl items-center overflow-y-auto">
+            <button className="absolute top-2 right-2" onClick={toggleVisibility}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                <g fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <circle cx={12} cy={12} r={10} opacity={0.5}></circle>
+                  <path strokeLinecap="round" d="m14.5 9.5l-5 5m0-5l5 5"></path>
+                </g>
+              </svg>
+            </button>
+            <AuthSidebar />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
