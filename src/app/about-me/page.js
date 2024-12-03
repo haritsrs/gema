@@ -17,7 +17,9 @@ const geistSans = localFont({
 const AboutMe = () => {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900 flex flex-col items-center justify-center`}>
-      <Image src={logo} alt="Logo" className="max-w-[600px] mb-12" />
+      <div className="relative w-[1000px] h-[250px]"> 
+        <Image src={logo} alt="Logo"  layout="fill" objectFit="contain"  />
+      </div>
       <h2 className="text-2xl font-bold text-white mb-4">Kelompok 4</h2>
       <ul className="text-gray-300 space-y-2">
         <li>Harits Raharjo Setiono</li>
