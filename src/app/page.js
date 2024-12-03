@@ -112,19 +112,21 @@ export default function Page() {
             {posts.map((post) => (
               <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
                 <div className="flex space-x-2">
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
+                  <Link href={`/profile/${post.userId}`} className="w-10 h-10 rounded-full overflow-hidden">
                     <Image
                       src={post.profilePicture || '/default-avatar.png'}
                       alt={`${post.username || 'User'}'s profile`}
-                      width={40} // 10 * 4 = 40px
+                      width={40} 
                       height={40}
                       objectFit="cover"
                     />
-                  </div>
+                  </Link>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="font-bold">
-                        {post.username || 'User'}{' '}
+                        <Link href={`/profile/${post.userId}`}>
+                          {post.username || 'User'}
+                        </Link>{' '}
                         <span className="text-gray-500">· {formatTimestamp(post.createdAt)}</span>
                       </div>
                       <PostDropdown
