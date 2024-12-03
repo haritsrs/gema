@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
-import { getDatabase, ref, query, orderByChild, onValue, get, update, remove} from 'firebase/database';
+import { getDatabase, ref, query, orderByChild, onValue, get, update, remove } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../../firebase.js';
 import localFont from "next/font/local";
@@ -77,7 +77,6 @@ export default function IDProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
-  const [showAuthSidebar, setShowAuthSidebar] = useState(false);
   const [loading, setLoading] = useState(true);
   const storage = getStorage();
   const database = getDatabase();
@@ -105,10 +104,10 @@ export default function IDProfilePage() {
 
   const handleFollow = async () => {
     if (!currentUser || !profileUser) return;
-  
+
     const followRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
     const followerRef = ref(database, `follows/${profileUser.uid}/followers/${currentUser.uid}`);
-  
+
     try {
       if (isFollowing) {
         // Unfollow
@@ -142,7 +141,7 @@ export default function IDProfilePage() {
       try {
         const userRef = ref(database, `users/${id}`);
         const snapshot = await get(userRef);
-        
+
         if (snapshot.exists()) {
           setProfileUser({
             uid: id,
@@ -234,10 +233,6 @@ export default function IDProfilePage() {
     return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
 
-  const toggleVisibility = () => {
-    setShowAuthSidebar(!showAuthSidebar);
-  };
-
   // Loading state
   if (loading || postsLoading) {
     return <LoadingOverlay isLoading={true} />;
@@ -262,13 +257,13 @@ export default function IDProfilePage() {
           <div className="flex flex-col items-center justify-center w-full space-y-2">
             {/* Profile Image and Name */}
             <div className="overflow-hidden">
-            <Image
-  src={profileUser.photoURL || '/img/error.png'}
-  alt="User profile"
-  width={100}
-  height={100}
-  className="rounded-full image"
-/>
+              <Image
+                src={profileUser.profilePicture || '/img/error.png'}
+                alt="User profile"
+                width={100}
+                height={100}
+                className="rounded-full image"
+              />
 
             </div>
 
@@ -279,13 +274,12 @@ export default function IDProfilePage() {
 
             {/* Follow/Edit Profile Button */}
             {currentUser && currentUser.uid !== profileUser.uid && (
-              <button 
+              <button
                 onClick={handleFollow}
-                className={`px-4 py-2 rounded-xl ${
-                  isFollowing 
-                    ? 'bg-gray-700 text-white' 
-                    : 'bg-purple-600 text-white hover:bg-purple-700'
-                }`}
+                className={`px-4 py-2 rounded-xl ${isFollowing
+                  ? 'bg-gray-700 text-white'
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+                  }`}
               >
                 {isFollowing ? 'Unfollow' : 'Follow'}
               </button>
@@ -361,7 +355,7 @@ export default function IDProfilePage() {
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="font-bold">
-                        {post.username || profileUser.displayName || 'User'} 
+                        {post.username || profileUser.displayName || 'User'}
                         <span className="text-gray-500"> · {formatTimestamp(post.createdAt)}</span>
                       </div>
                       {/* PostDropdown only visible to the post owner when logged in */}
@@ -396,8 +390,8 @@ export default function IDProfilePage() {
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
                     <button
-                      onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser ?.uid)}
-                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser ?.uid)
+                      onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
+                      className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
                         ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
                         : 'bg-gray-700 fill-gray-500'
                         }`}
@@ -429,7 +423,7 @@ export default function IDProfilePage() {
                       <path d="M3.464 3.464C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536" opacity={0.5} />
                       <path fillRule="evenodd" d="M16.47 1.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H14c-1.552 0-2.467.757-2.788 1.08l-.19.191l-.193.191c-.322.32-1.079 1.236-1.079 2.788v3a.75.75 0 0 1-1.5 0v-3c0-2.084 1.027-3.36 1.521-3.851l.19-.189l.188-.189C10.64 7.277 11.916 6.25 14 6.25h6.19l-3.72-3.72a.75.75 0 0 1 0-1.06" clipRule="evenodd" />
                     </svg>
-                    </button>
+                  </button>
                 </div>
               </li>
             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, update, onValue } from 'firebase/database';
 
 const POSTS_PER_PAGE = 30;
@@ -109,7 +109,7 @@ export function usePostSystem() {
 
   const handlePostDeleted = (deletedPostId) => {
     // Update the local state by filtering out the deleted post
-    setPosts((currentPosts) => 
+    setPosts((currentPosts) =>
       currentPosts.filter(post => post.id !== deletedPostId)
     );
 
