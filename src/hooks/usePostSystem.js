@@ -7,7 +7,7 @@ const POSTS_PER_PAGE = 30;
 const TIME_WEIGHT = 1;
 const LIKE_WEIGHT = 2;
 const CACHE_EXPIRY = 5 * 60 * 1000;
-const SORT_DELAY = 500;
+const SORT_DELAY = 5000;
 
 // Utility functions
 const createPostsCache = () => {
@@ -254,6 +254,20 @@ export function usePostSystem() {
     }
   }, [database]);
 
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "Unknown";
+    const now = Date.now();
+    const postDate = new Date(timestamp);
+    const secondsAgo = Math.floor((now - postDate) / 1000);
+
+    if (secondsAgo < 30) return "Just now";
+    if (secondsAgo < 60) return `${secondsAgo}s ago`;
+    if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
+    if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
+    return `${Math.floor(secondsAgo / 86400)}d ago`;
+  };
+
+
   // Function to manually trigger sorting
   const triggerSort = useCallback(() => {
     setShouldSort(true);
@@ -267,6 +281,7 @@ export function usePostSystem() {
     fetchOlderPosts,
     handleLike,
     triggerSort,
-    handlePostDeleted
+    handlePostDeleted,
+    formatTimestamp
   };
 }

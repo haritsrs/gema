@@ -43,7 +43,8 @@ export default function Page() {
     fetchOlderPosts,
     handleLike,
     handleDeletePost,
-    handlePostDeleted
+    handlePostDeleted,
+    formatTimestamp
   } = usePostSystem();
 
   // Authentication listener
@@ -94,20 +95,7 @@ export default function Page() {
         observer.disconnect();
       }
     };
-  }, [loading, noMorePosts]); 
-
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "Unknown";
-    const now = Date.now();
-    const postDate = new Date(timestamp);
-    const secondsAgo = Math.floor((now - postDate) / 1000);
-
-    if (secondsAgo < 30) return "Just now";
-    if (secondsAgo < 60) return `${secondsAgo}s ago`;
-    if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
-    if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
-    return `${Math.floor(secondsAgo / 86400)}d ago`;
-  };
+  }, [loading, noMorePosts]);
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>

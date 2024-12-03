@@ -9,6 +9,7 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 import Link from 'next/link';
 import Image from 'next/image.js';
 import PostDropdown from '../../components/PostDropdown';
+import { usePostSystem } from '../../hooks/usePostSystem.js';
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 import { useSharePost } from "../../hooks/useSharePost";
 
@@ -86,7 +87,7 @@ export default function SearchPage() {
   const [currentUser, setCurrentUser] = useState(null);
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
-
+  const { formatTimestamp } = usePostSystem();
   const {
     loading,
     searchResults,
@@ -100,20 +101,6 @@ export default function SearchPage() {
     });
     return () => unsubscribe();
   }, []);
-
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "Unknown";
-
-    const now = Date.now();
-    const postDate = new Date(timestamp);
-    const secondsAgo = Math.floor((now - postDate) / 1000);
-
-    if (secondsAgo < 30) return "Just now";
-    if (secondsAgo < 60) return `${secondsAgo}s ago`;
-    if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
-    if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
-    return `${Math.floor(secondsAgo / 86400)}d ago`;
-  };
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>

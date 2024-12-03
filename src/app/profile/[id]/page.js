@@ -12,8 +12,7 @@ import Link from 'next/link';
 import Image from 'next/image.js';
 import PostDropdown from '../../../components/PostDropdown';
 import { usePostSystem } from '../../../hooks/usePostSystem';
-import { useImageDimensions } from '../../../hooks/useImageDimensions.js'
-import AuthSidebar from '../../../components/auth';
+import { useImageDimensions } from '../../../hooks/useImageDimensions.js';
 import { useSharePost } from "../../../hooks/useSharePost";
 import { useParams } from 'next/navigation';
 
@@ -72,19 +71,20 @@ function useChronologicalPosts() {
 }
 
 export default function IDProfilePage() {
-  const params = useParams();
-  const id = params.id; // Get the user ID from the URL
   const [currentUser, setCurrentUser] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const storage = getStorage();
-  const database = getDatabase();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
-  const handleShare = useSharePost();
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
+  const params = useParams();
+  const handleShare = useSharePost();
+  const { formatTimestamp } = usePostSystem();
+  const id = params.id; // Get the user ID from the URL
+  const storage = getStorage();
+  const database = getDatabase();
 
   const {
     posts,
@@ -218,20 +218,6 @@ export default function IDProfilePage() {
 
     setPosts(prevPosts => [enhancedPost, ...prevPosts]);
   }, [currentUser, setPosts]);
-
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "Unknown";
-
-    const now = Date.now();
-    const postDate = new Date(timestamp);
-    const secondsAgo = Math.floor((now - postDate) / 1000);
-
-    if (secondsAgo < 30) return "Just now";
-    if (secondsAgo < 60) return `${secondsAgo}s ago`;
-    if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
-    if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
-    return `${Math.floor(secondsAgo / 86400)}d ago`;
-  };
 
   // Loading state
   if (loading || postsLoading) {

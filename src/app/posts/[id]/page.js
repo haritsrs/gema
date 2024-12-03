@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { database } from "../../../../firebase";
-import { ref, get, set, push, onValue, off } from "firebase/database";
+import { ref, set, push, onValue, off } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../../firebase";
 import Image from "next/legacy/image";
 import { useImageDimensions } from '../../../hooks/useImageDimensions'
-import { useSharePost  } from "../../../hooks/useSharePost";
+import { usePostSystem } from "../../../hooks/usePostSystem";
 
 export default function PostPage() {
   const [postId, setPostId] = useState(null);
@@ -18,8 +17,7 @@ export default function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const { imageDimensions, handleImageLoad } = useImageDimensions();
-  const handleShare = useSharePost();
-
+  const { formatTimestamp } = usePostSystem();
   // Listen for authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -32,7 +30,6 @@ export default function PostPage() {
   const handleLike = async (postId, currentLikes, likedBy = []) => {
     if (!currentUser) return;
 
-    const postRef = ref(database, `posts/${postId}`);
     const hasLiked = likedBy.includes(currentUser.uid);
 
     try {
@@ -74,19 +71,6 @@ export default function PostPage() {
     } catch (error) {
       console.error("Error submitting comment:", error);
     }
-  };
-
-  // Format timestamp
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "Unknown";
-    const date = new Date(timestamp);
-    const now = new Date();
-    const secondsAgo = Math.floor((now - date) / 1000);
-
-    if (secondsAgo < 60) return `${secondsAgo}s ago`;
-    if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
-    if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
-    return `${Math.floor(secondsAgo / 86400)}d ago`;
   };
 
   // Share post methods
