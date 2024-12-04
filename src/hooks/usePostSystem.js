@@ -207,6 +207,8 @@ export function usePostSystem() {
       onlyOnce: false
     });
 
+    const cache = postsCache.current;
+
     return () => {
       unsubscribe();
       postsCache.current.clear();

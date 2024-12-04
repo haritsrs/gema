@@ -211,7 +211,7 @@ export default function IDProfilePage() {
     };
 
     setPosts(prevPosts => [enhancedPost, ...prevPosts]);
-  }, [currentUser, setPosts]);
+  }, [currentUser, setPosts, database]);
 
   // Loading state
   if (loading || postsLoading) {
@@ -349,10 +349,10 @@ export default function IDProfilePage() {
         )}
 
         {/* User Posts */}
-        <h2 className="text-xl font-bold text-white mb-4">{profileUser.displayName || 'User'}'s Posts</h2>
+        <h2 className="text-xl font-bold text-white mb-4">{profileUser.displayName || 'User'}&apos;s Posts</h2>
         {userPosts.length === 0 ? (
           <div className="text-gray-400 text-center py-8">
-            This user hasn't made any posts yet.
+            This user hasn&apos;t made any posts yet.
           </div>
         ) : (
           <ul className="space-y-4">
