@@ -2,21 +2,15 @@ import Image from "next/legacy/image";
 import logo from '../../../public/img/logo.png';
 import localFont from "next/font/local";
 
-const geistSans = localFont({
-    src: "../fonts/GeistVF.woff",
-    variable: "--font-geist-sans",
-    weight: "100 900",
-  });
-  
-  const geistMono = localFont({
-    src: "../fonts/GeistMonoVF.woff",
-    variable: "--font-geist-mono",
-    weight: "100 900",
-  });
+const inter = localFont({
+  src: "./fonts/Inter-VariableFont_opsz,wght.ttf",
+  variable: "--font-inter",
+  weight: "100 900",
+});
 
 const AboutMe = () => {
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900 flex flex-col items-center justify-center`}>
+    <div className={`${Inter.variable} antialiased min-h-screen w-full bg-gray-900 flex flex-col items-center justify-center`}>
       <div className="relative w-[1000px] h-[250px]"> 
         <Image src={logo} alt="Logo"  layout="fill" objectFit="contain"  />
       </div>

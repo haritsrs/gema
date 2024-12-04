@@ -60,7 +60,7 @@ const SettingsPage = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-gray-900 text-white">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Settings</h1>
         

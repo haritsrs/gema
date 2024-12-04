@@ -10,15 +10,9 @@ import Image from "next/legacy/image";
 import localFont from "next/font/local";
 import { useState, useEffect } from 'react';
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+const inter = localFont({
+  src: "./fonts/Inter-VariableFont_opsz,wght.ttf",
+  variable: "--font-inter",
   weight: "100 900",
 });
 
@@ -39,11 +33,11 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-gray-900 via-gray-950 to-black`}>
+      <body className={`${inter.variable} antialiased bg-gradient-to-br from-gray-900 via-gray-950 to-black`}>
         {/* Glassmorphic Navbar */}
         <div className="fixed w-screen top-0 p-2 flex items-center justify-between 
           bg-white/5 backdrop-blur-lg border border-white/10 
-          shadow-lg rounded-b-xl z-40 transition-all duration-300 
+          shadow-lg z-40 transition-all duration-300 
           hover:bg-white/10 hover:border-white/15">
           <Link href="/" className="hover:scale-105 transition-transform">
             <Image 

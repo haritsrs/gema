@@ -274,7 +274,28 @@ const handleImageChange = async (e) => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="mb-6 relative">
+      <form 
+  onSubmit={handleSubmit} 
+  className="mb-6 
+    bg-gradient-to-br 
+    from-purple-900/10 
+    via-gray-800/20 
+    to-blue-900/10 
+    backdrop-blur-lg 
+    border 
+    border-white/10 
+    rounded-2xl 
+    shadow-xl 
+    hover:from-purple-900/15 
+    hover:via-gray-800/25 
+    hover:to-blue-900/15 
+    transition-all 
+    duration-300 
+    ease-in-out 
+    relative 
+    overflow-hidden 
+    p-4"
+>
         {showAuthWarning && (
           <div className="absolute top-0 left-0 right-0 bg-yellow-500 text-yellow-900 p-2 rounded-t-lg text-center animate-fade-in">
             Please log in to create a post
@@ -432,16 +453,35 @@ const handleImageChange = async (e) => {
           />
         )}
 
-        <button
-          type="submit"
-          className={`mt-2 px-12 py-2 rounded-lg ${user
-            ? 'bg-purple-800 text-white hover:bg-purple-300 hover:text-purple-800'
-            : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-            }`}
-          disabled={loading || !user || (!postContent.trim() && !selectedImage)}
-        >
-          {loading ? 'Posting...' : 'Post'}
-        </button>
+<button
+  type="submit"
+  className={`
+    mt-2 
+    px-12 
+    py-2 
+    rounded-lg 
+    bg-purple-900/20 
+    backdrop-blur-xl 
+    border 
+    border-purple-500/30 
+    text-white 
+    hover:bg-purple-900/30 
+    transition-all 
+    duration-300 
+    ease-in-out 
+    shadow-lg 
+    hover:shadow-xl 
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-purple-500/50
+    ${user
+      ? 'opacity-100'
+      : 'opacity-50 cursor-not-allowed'
+    }`}
+  disabled={loading || !user || (!postContent.trim() && !selectedImage)}
+>
+  {loading ? 'Posting...' : 'Post'}
+</button>
       </form>
     </div>
   );

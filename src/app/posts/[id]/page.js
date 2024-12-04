@@ -158,7 +158,7 @@ export default function PostPage() {
   if (!post) return <div>Post not found</div>;
 
   return (
-    <div className="flex w-full text-white p-4 items-center justify-center">
+    <div className="flex w-full text-white p-4 items-center  justify-center">
       <div className="flex-col w-full max-w-xl bg-gray-800 p-5 rounded-xl">
         {/* Post Display */}
         <div className="flex justify-start space-x-2">

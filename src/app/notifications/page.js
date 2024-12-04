@@ -2,15 +2,9 @@ import React from 'react';
 import Image from "next/legacy/image";
 import localFont from "next/font/local";
 
-const geistSans = localFont({
-  src: "../fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "../fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+const inter = localFont({
+  src: "../fonts/Inter-VariableFont_opsz,wght.ttf",
+  variable: "--font-inter",
   weight: "100 900",
 });
 
@@ -127,7 +121,7 @@ export default function NotificationsPage() {
   ];
 
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
+    <div className={`${inter.variable} antialiased min-h-screen w-full bg-gray-900`}>
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
           <div className="flex justify-between items-center mb-6">

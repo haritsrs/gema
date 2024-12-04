@@ -14,17 +14,10 @@ import PostDropdown from '../components/PostDropdown';
 import { useImageDimensions } from '../hooks/useImageDimensions';
 import { useSharePost } from '../hooks/useSharePost';
 
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const inter = localFont({
+  src: "./fonts/Inter-VariableFont_opsz,wght.ttf",
+  variable: "--font-inter",
+  weight: "100 900", // Variable fonts use a range
 });
 
 export default function Page() {
@@ -98,7 +91,7 @@ export default function Page() {
   }, [loading, noMorePosts]);
 
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
+    <div className={`${inter.variable} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
       <LoadingOverlay isLoading={initialLoading} />
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
@@ -110,7 +103,24 @@ export default function Page() {
 
           <ul className="space-y-4">
             {posts.map((post) => (
-              <li key={post.id} className="text-white p-4 bg-gray-800 rounded-lg">
+              <li key={post.id} className="text-white p-4 
+              bg-gradient-to-br 
+              from-purple-900/10 
+              via-gray-800/20 
+              to-blue-900/10 
+              backdrop-blur-lg 
+              border border-white/10 
+              rounded-2xl 
+              shadow-xl 
+              hover:from-purple-900/15 
+              hover:via-gray-800/25 
+              hover:to-blue-900/15 
+              transition-all 
+              duration-300 
+              ease-in-out 
+              relative 
+              overflow-hidden"
+            >
                 <div className="flex space-x-2">
                   <Link href={`/profile/${post.userId}`} className="w-10 h-10 rounded-full overflow-hidden">
                     <Image

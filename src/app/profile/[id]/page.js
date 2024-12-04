@@ -16,15 +16,9 @@ import { useImageDimensions } from '../../../hooks/useImageDimensions.js';
 import { useSharePost } from "../../../hooks/useSharePost";
 import { useParams } from 'next/navigation';
 
-const geistSans = localFont({
-  src: "../../fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "../../fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+const inter = localFont({
+  src: "../../fonts/Inter-VariableFont_opsz,wght.ttf",
+  variable: "--font-inter",
   weight: "100 900",
 });
 
@@ -236,7 +230,7 @@ export default function IDProfilePage() {
   }
 
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen w-full bg-gray-900`}>
+    <div className={`${inter.variable}  antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
       {/* Profile Header */}
       <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
@@ -289,28 +283,63 @@ export default function IDProfilePage() {
       {/* Profile Content */}
       <div className="max-w-2xl mx-auto px-4 mt-8">
         {/* User Stats */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-6 justify-center items-center flex">
-          <div className="flex space-x-6">
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{userPosts.length}</div>
-              <div className="text-gray-400">Posts</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{followers.length}</div>
-              <div className="text-gray-400">Followers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{following.length}</div>
-              <div className="text-gray-400">Following</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">
-                {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
-              </div>
-              <div className="text-gray-400">Total Likes</div>
-            </div>
+        <div className="mb-6">
+  <div className="
+    bg-gradient-to-br 
+    from-gray-900/40 
+    to-gray-800/40 
+    backdrop-blur-xl 
+    border 
+    border-white/10 
+    rounded-3xl 
+    shadow-2xl 
+    p-6
+    relative"
+  >
+    <div className="grid grid-cols-3 gap-4 items-center">
+      <div className="col-span-1 flex flex-col items-start">
+        <div className="text-sm font-medium text-white mb-1">
+          Likes
+        </div>
+        <div className="text-2xl text-white">
+          {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
+        </div>
+      </div>
+
+      <div className="col-span-1 flex flex-col items-center">
+        <div className="text-sm font-medium text-white mb-1">
+          Posts
+        </div>
+        <div className="text-2xl text-white">
+          {userPosts.length}
+        </div>
+      </div>
+
+      <div className="col-span-1 flex flex-col items-end text-right">
+        <div className="flex items-center space-x-2">
+          <div className="text-sm font-medium text-white">
+            Followers
+          </div>
+          <div className="text-xl text-white">
+            {followers.length}
           </div>
         </div>
+        <div className="flex items-center space-x-2 mt-1">
+          <div className="text-sm font-medium text-white">
+            Following
+          </div>
+          <div className="text-xl  text-white">
+            {following.length}
+          </div>
+        </div>
+      </div>
+
+      {/* Vertical separators */}
+      <div className="absolute top-1/2 left-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
+      <div className="absolute top-1/2 right-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
+    </div>
+  </div>
+</div>
 
         {/* Posting Component (only show if viewing own profile and logged in) */}
         {currentUser && currentUser.uid === profileUser.uid && (
@@ -328,7 +357,24 @@ export default function IDProfilePage() {
         ) : (
           <ul className="space-y-4">
             {userPosts.map((post) => (
-              <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 bg-gray-800 rounded-lg">
+              <li key={post.id || `post-${Date.now()}-${Math.random()}`} className="text-white p-4 
+              bg-gradient-to-br 
+              from-purple-900/10 
+              via-gray-800/20 
+              to-blue-900/10 
+              backdrop-blur-lg 
+              border border-white/10 
+              rounded-2xl 
+              shadow-xl 
+              hover:from-purple-900/15 
+              hover:via-gray-800/25 
+              hover:to-blue-900/15 
+              transition-all 
+              duration-300 
+              ease-in-out 
+              relative 
+              overflow-hidden"
+            >
                 <div className="flex space-x-2">
                   <div className="rounded-full w-10 h-10 overflow-hidden">
                     <Image
