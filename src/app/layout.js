@@ -36,21 +36,21 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} antialiased bg-gradient-to-br from-gray-900 via-gray-950 to-black`}>
         {/* Glassmorphic Navbar */}
         <div className="fixed w-screen top-0 p-2 flex items-center justify-between 
-          bg-white/5 backdrop-blur-lg border border-white/10 
+          bg-white/5 backdrop-blur-sm border border-white/10 
           shadow-lg z-40 transition-all duration-300 
           hover:bg-white/10 hover:border-white/15">
           <Link href="/" className="hover:scale-105 transition-transform">
-            <Image 
-              src="/img/logo.png" 
-              alt="GEMA Logo" 
-              objectFit="contain" 
-              width={220} 
-              height={32} 
+            <Image
+              src="/img/logo.png"
+              alt="GEMA Logo"
+              objectFit="contain"
+              width={220}
+              height={32}
             />
           </Link>
 
           <div className="flex items-center justify-center mr-2">
-            <button 
+            <button
               className="w-max h-max rounded-2xl fill-gray-400 
               active:scale-95 transition-all duration-200 
               hover:bg-white/10 p-1 rounded-full"
@@ -89,7 +89,7 @@ export default function RootLayout({ children }) {
         {/* Glassmorphic Modal */}
         {isVisible && (
           <div className="fixed flex z-50 h-screen w-screen 
-            bg-black/60 backdrop-blur-lg 
+            bg-black/60 backdrop-blur-sm 
             text-white p-4 justify-center items-center 
             animate-fade-in">
             <div className="relative flex-col w-[98%] h-[98%] max-w-sm 
@@ -97,7 +97,7 @@ export default function RootLayout({ children }) {
               rounded-xl border border-white/10 
               shadow-2xl overflow-hidden 
               transition-all duration-300">
-              <button 
+              <button
                 className="absolute top-2 right-2 
                 hover:bg-white/10 rounded-full p-1 
                 transition-all duration-200"
@@ -119,7 +119,7 @@ export default function RootLayout({ children }) {
         <div className="flex min-h-screen">
           {/* Sidebar with Glassmorphic Design */}
           <div className="hidden md:block fixed top-16 h-full w-max 
-            bg-white/5 backdrop-blur-lg 
+            bg-white/5 backdrop-blur-sm 
             border border-white/10 
             rounded-r-xl 
             hover:border-purple-800/30 
@@ -137,11 +137,11 @@ export default function RootLayout({ children }) {
 
           {/* Mobile Navbar with Glassmorphic Design */}
           <div className="md:hidden fixed 
-            bg-white/5 backdrop-blur-lg 
+            bg-white/5 backdrop-blur-sm 
             bottom-0 left-0 w-screen 
             border-t border-white/10 
             rounded-t-xl 
-            h- max items-center text-white p-2 transition-all duration-300">
+            h-max items-center text-white p-2 transition-all duration-300">
             <Sidebar />
           </div>
         </div>
