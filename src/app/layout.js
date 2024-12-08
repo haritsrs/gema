@@ -36,9 +36,9 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} antialiased bg-gradient-to-br from-gray-900 via-gray-950 to-black`}>
         {/* Glassmorphic Navbar */}
         <div className="fixed w-screen top-0 p-2 flex items-center justify-between 
-          bg-white/5 backdrop-blur-sm border border-white/10 
+          bg-gray-900/85 backdrop-blur-sm border border-white/10 
           shadow-lg z-40 transition-all duration-300 
-          hover:bg-white/10 hover:border-white/15">
+          hover:bg-gray-800/85 hover:border-white/15">
           <Link href="/" className="hover:scale-105 transition-transform">
             <Image
               src="/img/logo.png"
@@ -78,8 +78,7 @@ export default function RootLayout({ children }) {
                   width={40}
                   height={40}
                   className="rounded-full transition-all duration-300 
-                    hover:scale-110 hover:outline hover:outline-2 
-                    hover:outline-purple-700"
+                    hover:scale-105"
                 />
               </div>
             </button>
@@ -93,8 +92,8 @@ export default function RootLayout({ children }) {
             text-white p-4 justify-center items-center 
             animate-fade-in">
             <div className="relative flex-col w-[98%] h-[98%] max-w-sm 
-              bg-white/5 backdrop-blur-xl 
-              rounded-xl border border-white/10 
+              bg-gray-900/85 backdrop-blur-sm 
+              rounded-xl border border-gray-500/10 
               shadow-2xl overflow-hidden 
               transition-all duration-300">
               <button
@@ -119,10 +118,10 @@ export default function RootLayout({ children }) {
         <div className="flex min-h-screen">
           {/* Sidebar with Glassmorphic Design */}
           <div className="hidden md:block fixed top-16 h-full w-max 
-            bg-white/5 backdrop-blur-sm 
+            bg-gray-900/85 backdrop-blur-sm 
             border border-white/10 
             rounded-r-xl 
-            hover:border-purple-800/30 
+            hover:bg-gray-800/30 
             transition-all duration-300 
             text-white px-4 z-30">
             <Sidebar />
@@ -137,7 +136,7 @@ export default function RootLayout({ children }) {
 
           {/* Mobile Navbar with Glassmorphic Design */}
           <div className="md:hidden fixed 
-            bg-white/5 backdrop-blur-sm 
+            bg-gray-800/85 backdrop-blur-sm 
             bottom-0 left-0 w-screen 
             border-t border-white/10 
             rounded-t-xl 

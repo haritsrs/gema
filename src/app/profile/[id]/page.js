@@ -362,7 +362,7 @@ export default function IDProfilePage() {
               from-purple-900/10 
               via-gray-800/20 
               to-blue-900/10 
-              backdrop-blur-lg 
+              backdrop-blur-sm 
               border border-white/10 
               rounded-2xl 
               shadow-xl 
