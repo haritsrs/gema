@@ -15,6 +15,9 @@ import { usePostSystem } from '../../../hooks/usePostSystem';
 import { useImageDimensions } from '../../../hooks/useImageDimensions.js';
 import { useSharePost } from "../../../hooks/useSharePost";
 import { useParams } from 'next/navigation';
+import { useFollow } from '../../../hooks/useProfile/useFollow'
+import { useChronologicalPosts } from '../../../hooks/usePostSorting/useChronologicalPosts'
+
 
 const inter = localFont({
   src: "../../fonts/Inter-VariableFont_opsz,wght.ttf",
@@ -22,57 +25,12 @@ const inter = localFont({
   weight: "100 900",
 });
 
-// Modified usePostSystem hook for chronological ordering
-function useChronologicalPosts() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const database = getDatabase();
-  const { handleLike, handleDeletePost } = usePostSystem();
-
-  useEffect(() => {
-    const postsRef = ref(database, 'posts');
-    const postsQuery = query(postsRef, orderByChild('createdAt'));
-
-    const handlePosts = (snapshot) => {
-      if (!snapshot.exists()) {
-        setLoading(false);
-        return;
-      }
-
-      const postsData = [];
-      snapshot.forEach((childSnapshot) => {
-        postsData.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
-        });
-      });
-
-      setPosts(postsData.reverse());
-      setLoading(false);
-    };
-
-    const unsubscribe = onValue(postsQuery, handlePosts);
-    return () => unsubscribe();
-  }, [database]);
-
-  return {
-    posts,
-    loading,
-    handleLike,
-    handleDeletePost,
-    setPosts
-  };
-}
-
 export default function IDProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { imageDimensions, handleImageLoad } = useImageDimensions();
-  const [followers, setFollowers] = useState([]);
-  const [following, setFollowing] = useState([]);
-  const [isFollowing, setIsFollowing] = useState(false);
   const params = useParams();
   const handleShare = useSharePost();
   const { formatTimestamp } = usePostSystem();
@@ -81,12 +39,19 @@ export default function IDProfilePage() {
   const database = getDatabase();
 
   const {
+    followers,
+    following,
+    isFollowing,
+    toggleFollow,
+  } = useFollow(currentUser, profileUser);
+
+  const {
     posts,
     loading: postsLoading,
     handleLike,
     handleDeletePost,
     setPosts
-  } = useChronologicalPosts();
+  } = useChronologicalPosts({id});
 
   // Authentication listener
   useEffect(() => {
@@ -95,37 +60,6 @@ export default function IDProfilePage() {
     });
     return () => unsubscribe();
   }, []);
-
-  const handleFollow = async () => {
-    if (!currentUser || !profileUser) return;
-
-    const followRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
-    const followerRef = ref(database, `follows/${profileUser.uid}/followers/${currentUser.uid}`);
-
-    try {
-      if (isFollowing) {
-        // Unfollow
-        await remove(followRef);
-        await remove(followerRef);
-        setIsFollowing(false);
-      } else {
-        // Follow
-        await update(followRef, {
-          uid: profileUser.uid,
-          displayName: profileUser.displayName || '',
-          photoURL: profileUser.photoURL || ''
-        });
-        await update(followerRef, {
-          uid: currentUser.uid,
-          displayName: currentUser.displayName || '',
-          photoURL: currentUser.photoURL || ''
-        });
-        setIsFollowing(true);
-      }
-    } catch (error) {
-      console.error("Error updating follow status:", error);
-    }
-  };
 
   // Fetch profile user details
   useEffect(() => {
@@ -151,46 +85,6 @@ export default function IDProfilePage() {
 
     fetchProfileUser();
   }, [id, database]);
-
-  useEffect(() => {
-    if (!profileUser) return;
-
-    const followersRef = ref(database, `follows/${profileUser.uid}/followers`);
-    const followingRef = ref(database, `follows/${profileUser.uid}/following`);
-
-    // Fetch followers
-    const fetchFollowers = onValue(followersRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const followersData = Object.values(snapshot.val());
-        setFollowers(followersData);
-      } else {
-        setFollowers([]);
-      }
-    });
-
-    const fetchFollowing = onValue(followingRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const followingData = Object.values(snapshot.val());
-        setFollowing(followingData);
-      } else {
-        setFollowing([]);
-      }
-    });
-
-    // Check if current user is following the profile user
-    if (currentUser) {
-      const isFollowingRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
-      get(isFollowingRef).then((snapshot) => {
-        setIsFollowing(snapshot.exists());
-      });
-    }
-
-    // Cleanup subscriptions
-    return () => {
-      fetchFollowers();
-      fetchFollowing();
-    };
-  }, [profileUser, currentUser]);
 
   // Fetch user posts based on the provided id
   useEffect(() => {
@@ -255,7 +149,7 @@ export default function IDProfilePage() {
             {/* Follow/Edit Profile Button */}
             {currentUser && currentUser.uid !== profileUser.uid && (
               <button
-                onClick={handleFollow}
+                onClick={toggleFollow}
                 className={`px-4 py-2 rounded-xl ${isFollowing
                   ? 'bg-gray-700 text-white'
                   : 'bg-purple-600 text-white hover:bg-purple-700'

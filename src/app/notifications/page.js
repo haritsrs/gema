@@ -8,6 +8,7 @@ const inter = localFont({
   weight: "100 900",
 });
 
+
 const NotificationItem = ({ type, user, content, timestamp, read, userImage }) => {
   const getNotificationIcon = () => {
     switch (type) {
