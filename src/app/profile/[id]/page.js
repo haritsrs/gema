@@ -178,62 +178,62 @@ export default function IDProfilePage() {
       <div className="max-w-2xl mx-auto px-4 mt-8">
         {/* User Stats */}
         <div className="mb-6">
-  <div className="
-    bg-gradient-to-br 
-    from-gray-900/40 
-    to-gray-800/40 
-    backdrop-blur-xl 
-    border 
-    border-white/10 
-    rounded-3xl 
-    shadow-2xl 
-    p-6
-    relative"
-  >
-    <div className="grid grid-cols-3 gap-4 items-center">
-      <div className="col-span-1 flex flex-col items-start">
-        <div className="text-sm font-medium text-white mb-1">
-          Likes
-        </div>
-        <div className="text-2xl text-white">
-          {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
-        </div>
-      </div>
+          <div className="
+            bg-gradient-to-br 
+            from-gray-900/40 
+            to-gray-800/40 
+            backdrop-blur-xl 
+            border 
+            border-white/10 
+            rounded-3xl 
+            shadow-2xl 
+            p-6
+            relative"
+          >
+            <div className="grid grid-cols-3 gap-4 items-center">
+              <div className="col-span-1 flex flex-col items-start">
+                <div className="text-sm font-medium text-white mb-1">
+                  Likes
+                </div>
+                <div className="text-2xl text-white">
+                  {userPosts.reduce((acc, post) => acc + (post?.likes ?? 0), 0)}
+                </div>
+              </div>
 
-      <div className="col-span-1 flex flex-col items-center">
-        <div className="text-sm font-medium text-white mb-1">
-          Posts
-        </div>
-        <div className="text-2xl text-white">
-          {userPosts.length}
-        </div>
-      </div>
+              <div className="col-span-1 flex flex-col items-center">
+                <div className="text-sm font-medium text-white mb-1">
+                  Posts
+                </div>
+                <div className="text-2xl text-white">
+                  {userPosts.length}
+                </div>
+              </div>
 
-      <div className="col-span-1 flex flex-col items-end text-right">
-        <div className="flex items-center space-x-2">
-          <div className="text-sm font-medium text-white">
-            Followers
-          </div>
-          <div className="text-xl text-white">
-            {followers.length}
-          </div>
-        </div>
-        <div className="flex items-center space-x-2 mt-1">
-          <div className="text-sm font-medium text-white">
-            Following
-          </div>
-          <div className="text-xl  text-white">
-            {following.length}
-          </div>
-        </div>
-      </div>
+              <div className="col-span-1 flex flex-col items-end text-right">
+                <div className="flex items-center space-x-2">
+                  <div className="text-sm font-medium text-white">
+                    Followers
+                  </div>
+                  <div className="text-xl text-white">
+                    {followers.length}
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 mt-1">
+                  <div className="text-sm font-medium text-white">
+                    Following
+                  </div>
+                  <div className="text-xl  text-white">
+                    {following.length}
+                  </div>
+                </div>
+              </div>
 
-      {/* Vertical separators */}
-      <div className="absolute top-1/2 left-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
-      <div className="absolute top-1/2 right-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
-    </div>
-  </div>
-</div>
+              {/* Vertical separators */}
+              <div className="absolute top-1/2 left-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
+              <div className="absolute top-1/2 right-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
+            </div>
+          </div>
+        </div>
 
         {/* Posting Component (only show if viewing own profile and logged in) */}
         {currentUser && currentUser.uid === profileUser.uid && (
