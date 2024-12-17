@@ -1,21 +1,23 @@
 # Security Policy
 
-## Supported Versions
-
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
-
 ## Reporting a Vulnerability
+We take security vulnerabilities seriously and appreciate your efforts in helping to secure our project.
 
-Use this section to tell people how to report a vulnerability.
+Steps to Report a Vulnerability:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Contact Us: Send an email to [haritssetiono23@gmail.com] with the following details:
+
+Description of the vulnerability.
+Steps to reproduce the issue (if applicable).
+Potential impact of the vulnerability.
+Any suggested fixes or mitigations.
+
+Our Response Time:
+
+You will receive an acknowledgment of your report within 48 hours.
+We will keep you informed on the progress of the investigation, typically providing updates every 7 days.
+Next Steps:
+
+If the vulnerability is confirmed, we will work to resolve it promptly and release any necessary patches.
+Credit will be given to the reporter in our release notes unless anonymity is requested.
+We are committed to resolving security issues swiftly and transparently. Thank you for contributing to the safety of our users and systems.
