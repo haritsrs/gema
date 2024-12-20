@@ -17,6 +17,7 @@ import { useSharePost } from "../../../hooks/useSharePost";
 import { useParams } from 'next/navigation';
 import { useFollow } from '../../../hooks/useProfile/useFollow'
 import { useChronologicalPosts } from '../../../hooks/usePostSorting/useChronologicalPosts'
+import FollowModal from '../../../components/FollowModal.js';
 
 
 const inter = localFont({
@@ -37,6 +38,8 @@ export default function IDProfilePage() {
   const id = params.id; // Get the user ID from the URL
   const storage = getStorage();
   const database = getDatabase();
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
 
   const {
     followers,
@@ -209,24 +212,30 @@ export default function IDProfilePage() {
                 </div>
               </div>
 
-              <div className="col-span-1 flex flex-col items-end text-right">
-                <div className="flex items-center space-x-2">
-                  <div className="text-sm font-medium text-white">
-                    Followers
-                  </div>
-                  <div className="text-xl text-white">
-                    {followers.length}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <div className="text-sm font-medium text-white">
-                    Following
-                  </div>
-                  <div className="text-xl  text-white">
-                    {following.length}
-                  </div>
-                </div>
-              </div>
+              <div className="flex flex-col space-y-2">
+  <button
+    onClick={() => setShowFollowersModal(true)}
+    className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors"
+  >
+    <div className="text-sm font-medium text-white">
+      Followers
+    </div>
+    <div className="text-xl text-white">
+      {followers.length}
+    </div>
+  </button>
+  <button
+    onClick={() => setShowFollowingModal(true)}
+    className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors"
+  >
+    <div className="text-sm font-medium text-white">
+      Following
+    </div>
+    <div className="text-xl text-white">
+      {following.length}
+    </div>
+  </button>
+</div>
 
               {/* Vertical separators */}
               <div className="absolute top-1/2 left-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
@@ -355,6 +364,18 @@ export default function IDProfilePage() {
             ))}
           </ul>
         )}
+              <FollowModal
+  isOpen={showFollowersModal}
+  onClose={() => setShowFollowersModal(false)}
+  title="Followers"
+  users={followers}
+/>
+<FollowModal
+  isOpen={showFollowingModal}
+  onClose={() => setShowFollowingModal(false)}
+  title="Following"
+  users={following}
+/>
       </div>
     </div>
   );
