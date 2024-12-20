@@ -1,13 +1,8 @@
+"use client";
+
 import React from 'react';
 import Image from "next/legacy/image";
-import localFont from "next/font/local";
-
-const inter = localFont({
-  src: "../fonts/Inter-VariableFont_opsz,wght.ttf",
-  variable: "--font-inter",
-  weight: "100 900",
-});
-
+import { useNotificationSystem } from "../../hooks/useNotificationSystem";
 
 const NotificationItem = ({ type, user, content, timestamp, read, userImage }) => {
   const getNotificationIcon = () => {
@@ -36,14 +31,6 @@ const NotificationItem = ({ type, user, content, timestamp, read, userImage }) =
             </svg>
           </div>
         );
-      case 'mention':
-        return (
-          <div className="p-2 bg-yellow-500 bg-opacity-20 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-yellow-500" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h5v-2h-5c-4.34 0-8-3.66-8-8s3.66-8 8-8s8 3.66 8 8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12c0-2.76-2.24-5-5-5s-5 2.24-5 5s2.24 5 5 5c1.38 0 2.64-.56 3.54-1.47c.65.89 1.77 1.47 2.96 1.47c1.97 0 3.5-1.6 3.5-3.57V12c0-5.52-4.48-10-10-10m0 13c-1.66 0-3-1.34-3-3s1.34-3 3-3s3 1.34 3 3s-1.34 3-3 3" />
-            </svg>
-          </div>
-        );
       default:
         return null;
     }
@@ -52,13 +39,13 @@ const NotificationItem = ({ type, user, content, timestamp, read, userImage }) =
   return (
     <div className={`flex items-start space-x-4 p-4 ${read ? 'bg-gray-800' : 'bg-gray-800 border-l-4 border-purple-500'} rounded-lg transition-all duration-200 hover:bg-gray-700`}>
       <div className="w-10 h-10 rounded-full overflow-hidden">
-  <Image
-    src={userImage || '/default-avatar.png'}
-    alt={`${user}'s profile`}
-    layout="fill"
-    objectFit="cover"
-  />
-</div>
+        <Image
+          src={userImage || '/default-avatar.png'}
+          alt={`${user}'s profile`}
+          layout="fill"
+          objectFit="cover"
+        />
+      </div>
       {getNotificationIcon()}
       <div className="flex-1 min-w-0">
         <p className="text-white">
@@ -72,62 +59,18 @@ const NotificationItem = ({ type, user, content, timestamp, read, userImage }) =
 };
 
 export default function NotificationsPage() {
-  // Sample notifications data
-  const notifications = [
-    {
-      id: 1,
-      type: 'like',
-      user: 'Sarah Chen',
-      content: 'liked your post "Building a React Component Library"',
-      timestamp: 'Just now',
-      read: false,
-      src: '/img/placehold.png'
-    },
-    {
-      id: 2,
-      type: 'comment',
-      user: 'Alex Thompson',
-      content: 'commented on your post: "This is exactly what I was looking for!"',
-      timestamp: '5m ago',
-      read: false,
-      src: '/img/placehold.png'
-    },
-    {
-      id: 3,
-      type: 'follow',
-      user: 'Maria Garcia',
-      content: 'started following you',
-      timestamp: '1h ago',
-      read: true,
-      src: '/img/placehold.png'
-    },
-    {
-      id: 4,
-      type: 'mention',
-      user: 'David Kim',
-      content: 'mentioned you in a comment: "@username Great explanation!"',
-      timestamp: '2h ago',
-      read: true,
-      src: '/img/placehold.png'
-    },
-    {
-      id: 5,
-      type: 'like',
-      user: 'Emma Wilson',
-      content: 'and 5 others liked your post',
-      timestamp: '3h ago',
-      read: true,
-      src: '/img/placehold.png'
-    }
-  ];
+  const { notifications, markAllAsRead } = useNotificationSystem();
 
   return (
-    <div className={`${inter.variable} antialiased min-h-screen w-full bg-gray-900`}>
+    <div className="antialiased min-h-screen w-full bg-gray-900">
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white">Notifications</h2>
-            <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
+            <button
+              onClick={markAllAsRead}
+              className="text-purple-400 hover:text-purple-300 text-sm font-medium"
+            >
               Mark all as read
             </button>
           </div>
@@ -156,3 +99,4 @@ export default function NotificationsPage() {
     </div>
   );
 }
+
