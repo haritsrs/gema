@@ -54,7 +54,7 @@ export default function IDProfilePage() {
     handleLike,
     handleDeletePost,
     setPosts
-  } = useChronologicalPosts({id});
+  } = useChronologicalPosts({ id });
 
   // Authentication listener
   useEffect(() => {
@@ -213,29 +213,29 @@ export default function IDProfilePage() {
               </div>
 
               <div className="flex flex-col space-y-2">
-  <button
-    onClick={() => setShowFollowersModal(true)}
-    className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors"
-  >
-    <div className="text-sm font-medium text-white">
-      Followers
-    </div>
-    <div className="text-xl text-white">
-      {followers.length}
-    </div>
-  </button>
-  <button
-    onClick={() => setShowFollowingModal(true)}
-    className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors"
-  >
-    <div className="text-sm font-medium text-white">
-      Following
-    </div>
-    <div className="text-xl text-white">
-      {following.length}
-    </div>
-  </button>
-</div>
+                <button
+                  onClick={() => setShowFollowersModal(true)}
+                  className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors"
+                >
+                  <div className="text-sm font-medium text-white">
+                    Followers
+                  </div>
+                  <div className="text-xl text-white">
+                    {followers.length}
+                  </div>
+                </button>
+                <button
+                  onClick={() => setShowFollowingModal(true)}
+                  className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors"
+                >
+                  <div className="text-sm font-medium text-white">
+                    Following
+                  </div>
+                  <div className="text-xl text-white">
+                    {following.length}
+                  </div>
+                </button>
+              </div>
 
               {/* Vertical separators */}
               <div className="absolute top-1/2 left-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
@@ -277,7 +277,7 @@ export default function IDProfilePage() {
               ease-in-out 
               relative 
               overflow-hidden"
-            >
+              >
                 <div className="flex space-x-2">
                   <div className="rounded-full w-10 h-10 overflow-hidden">
                     <Image
@@ -364,18 +364,18 @@ export default function IDProfilePage() {
             ))}
           </ul>
         )}
-              <FollowModal
-  isOpen={showFollowersModal}
-  onClose={() => setShowFollowersModal(false)}
-  title="Followers"
-  users={followers}
-/>
-<FollowModal
-  isOpen={showFollowingModal}
-  onClose={() => setShowFollowingModal(false)}
-  title="Following"
-  users={following}
-/>
+        <FollowModal
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          title="Followers"
+          users={followers}
+        />
+        <FollowModal
+          isOpen={showFollowingModal}
+          onClose={() => setShowFollowingModal(false)}
+          title="Following"
+          users={following}
+        />
       </div>
     </div>
   );
