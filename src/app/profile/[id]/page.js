@@ -9,7 +9,7 @@ import localFont from "next/font/local";
 import Posting from '../../../components/posting';
 import LoadingOverlay from '../../../components/LoadingOverlay';
 import Link from 'next/link';
-import Image from 'next/image.js';
+import Image from 'next/image';
 import PostDropdown from '../../../components/PostDropdown';
 import { usePostSystem } from '../../../hooks/usePostSystem';
 import { useImageDimensions } from '../../../hooks/useImageDimensions.js';
