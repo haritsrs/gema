@@ -32,7 +32,7 @@ const UserList = ({ users, onClose, onAction, modalType }) => {
         >
           <div className="flex items-center space-x-3">
             <Image
-              src={user.profilePicture || '/img/error.png'}
+              src={user.photoURL || '/img/error.png'}
               alt={user.displayName}
               width={40}
               height={40}
