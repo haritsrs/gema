@@ -1,9 +1,9 @@
 // PostsView.jsx
 import Link from 'next/link';
 import Image from 'next/legacy/image';
-import LoadingOverlay from '../components/LoadingOverlay';
-import Posting from '../components/posting';
-import PostDropdown from '../components/PostDropdown';
+import LoadingOverlay from './LoadingOverlay';
+import Posting from './posting';
+import PostDropdown from './PostDropdown';
 
 export default function PostsView({
   inter,
