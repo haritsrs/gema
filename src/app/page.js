@@ -9,7 +9,7 @@ import localFont from "next/font/local";
 import { usePostSystem } from '../hooks/usePostSystem';
 import { useImageDimensions } from '../hooks/useImageDimensions';
 import { useSharePost } from '../hooks/useSharePost';
-import PostsView from '../components/PostsView.jsx';
+import PostsView from '../views/PostsView.jsx';
 
 const inter = localFont({
   src: "./fonts/Inter-VariableFont_opsz,wght.ttf",
