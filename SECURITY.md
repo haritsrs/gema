@@ -5,7 +5,7 @@ We take security vulnerabilities seriously and appreciate your efforts in helpin
 
 Steps to Report a Vulnerability:
 
-Contact Us: Send an email to [haritssetiono23@gmail.com] with the following details:
+Contact Us: Send an email to haritssetiono23@gmail.com with the following details:
 
 Description of the vulnerability.
 Steps to reproduce the issue (if applicable).
