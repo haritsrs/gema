@@ -361,6 +361,12 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
+            <button 
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition"
+              onClick={() => window.location.href = '/about-me'}
+            >
+              About Me
+            </button>
           </div>
         )}
 
