@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreVertical, X } from 'lucide-react';
+import { MoreVertical, X, UserPlus, BellOff, Ban, Flag } from 'lucide-react';
 import { getDatabase, ref, remove, get, onValue, off } from 'firebase/database';
 
 const DeleteDialog = ({ isOpen, onClose, userData, post, onPostDeleted }) => {
@@ -23,7 +23,6 @@ const DeleteDialog = ({ isOpen, onClose, userData, post, onPostDeleted }) => {
       const postRef = ref(database, `posts/${post.id}`);
       await remove(postRef);
       
-      // Trigger the callback to update the UI
       if (onPostDeleted) {
         onPostDeleted(post.id);
       }
@@ -82,6 +81,63 @@ const DeleteDialog = ({ isOpen, onClose, userData, post, onPostDeleted }) => {
   );
 };
 
+const UserInteractionButtons = ({ post, currentUser }) => {
+  // Only show these buttons if user is logged in and isn't viewing their own post
+  if (!currentUser || currentUser.uid === post.userId) return null;
+
+  return (
+    <div className="py-1">
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Follow user function will go here
+        }}
+        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+      >
+        <UserPlus className="w-4 h-4" />
+        <span>Follow User</span>
+      </button>
+      
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Mute user function will go here
+        }}
+        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+      >
+        <BellOff className="w-4 h-4" />
+        <span>Mute User</span>
+      </button>
+      
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Block user function will go here
+        }}
+        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+      >
+        <Ban className="w-4 h-4" />
+        <span>Block User</span>
+      </button>
+      
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Report post function will go here
+        }}
+        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+      >
+        <Flag className="w-4 h-4" />
+        <span>Report Post</span>
+      </button>
+    </div>
+  );
+};
+
 const PostDropdown = ({ post, currentUser, onPostDeleted }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -109,7 +165,6 @@ const PostDropdown = ({ post, currentUser, onPostDeleted }) => {
       }
     };
 
-    // Set up real-time listener for post deletion
     const database = getDatabase();
     const postRef = ref(database, `posts/${post.id}`);
     
@@ -129,19 +184,18 @@ const PostDropdown = ({ post, currentUser, onPostDeleted }) => {
 
     document.addEventListener('mousedown', handleClickOutside);
     
-    // Cleanup
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      // Remove Firebase listener
       off(postRef);
     };
   }, [currentUser, post.id, onPostDeleted]);
 
   const isAdmin = userData?.admin === true;
   const isOwnPost = currentUser?.uid === post.userId;
-  const shouldShowDropdown = isAdmin || isOwnPost;
+  const shouldShowDeleteOption = isAdmin || isOwnPost;
 
-  if (!shouldShowDropdown) return null;
+  // Show dropdown if user is logged in (either for their own post actions or interaction options)
+  if (!currentUser) return null;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -158,19 +212,23 @@ const PostDropdown = ({ post, currentUser, onPostDeleted }) => {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-10">
-          <div className="py-1">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowDeleteDialog(true);
-                setIsOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition-colors"
-            >
-              Delete Post
-            </button>
-          </div>
+          {shouldShowDeleteOption && (
+            <div className="py-1">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition-colors"
+              >
+                Delete Post
+              </button>
+            </div>
+          )}
+          
+          <UserInteractionButtons post={post} currentUser={currentUser} />
         </div>
       )}
 
@@ -185,4 +243,4 @@ const PostDropdown = ({ post, currentUser, onPostDeleted }) => {
   );
 };
 
-export default PostDropdown;
+export default PostDropdown;  
