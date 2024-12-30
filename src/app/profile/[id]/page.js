@@ -17,7 +17,7 @@ import { useSharePost } from "../../../hooks/useSharePost";
 import { useParams } from 'next/navigation';
 import { useFollow } from '../../../hooks/useProfile/useFollow'
 import { useChronologicalPosts } from '../../../hooks/usePostSorting/useChronologicalPosts'
-import FollowModal from '../../../components/FollowModal.js';
+import { FollowersModal, FollowingModal } from '../../../components/UserModals';
 
 
 const inter = localFont({
@@ -96,6 +96,34 @@ export default function IDProfilePage() {
       setUserPosts(filtered);
     }
   }, [posts, id]);
+
+  const handleRemoveFollower = async (followerId) => {
+    try {
+      const followerRef = ref(database, `users/${profileUser.uid}/followers/${followerId}`);
+      const userRef = ref(database, `users/${followerId}/following/${profileUser.uid}`);
+      
+      await Promise.all([
+        remove(followerRef),
+        remove(userRef)
+      ]);
+    } catch (error) {
+      console.error('Error removing follower:', error);
+    }
+  };
+  
+  const handleUnfollow = async (userId) => {
+    try {
+      const followingRef = ref(database, `users/${currentUser.uid}/following/${userId}`);
+      const followerRef = ref(database, `users/${userId}/followers/${currentUser.uid}`);
+      
+      await Promise.all([
+        remove(followingRef),
+        remove(followerRef)
+      ]);
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+    }
+  };
 
   const handlePostCreated = useCallback((newPost) => {
     const enhancedPost = {
@@ -364,18 +392,18 @@ export default function IDProfilePage() {
             ))}
           </ul>
         )}
-        <FollowModal
-          isOpen={showFollowersModal}
-          onClose={() => setShowFollowersModal(false)}
-          title="Followers"
-          users={followers}
-        />
-        <FollowModal
-          isOpen={showFollowingModal}
-          onClose={() => setShowFollowingModal(false)}
-          title="Following"
-          users={following}
-        />
+       <FollowersModal
+  isOpen={showFollowersModal}
+  onClose={() => setShowFollowersModal(false)}
+  users={followers}
+  onRemoveFollower={handleRemoveFollower} // Add this function to handle removing followers
+/>
+<FollowingModal
+  isOpen={showFollowingModal}
+  onClose={() => setShowFollowingModal(false)}
+  users={following}
+  onUnfollow={handleUnfollow} // Add this function to handle unfollowing
+/>
       </div>
     </div>
   );
