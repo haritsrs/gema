@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { database } from "../../firebase"; // Adjust the path as needed
+import { database } from "../../firebase";
 import { ref, onChildChanged, get, set, remove } from "firebase/database";
 
 export function useNotificationSystem(currentUserId) {
