@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue, get, update, remove } from 'firebase/database';
+import { useNotifications } from '../useNotifications';
 
 export function useFollow(currentUser, profileUser) {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
+  const { addNotification } = useNotifications();
   const database = getDatabase();
 
   // Fetch followers and following data
@@ -59,6 +61,16 @@ export function useFollow(currentUser, profileUser) {
           photoURL: currentUser.photoURL || '',
         });
         setIsFollowing(true);
+
+        const notification = {
+          type: 'follow',
+          triggeredBy: {
+            uid: currentUser.uid,
+          },
+          timestamp: Date.now(),
+          message: `${currentUser.displayName || 'Unknown User'} followed you`,
+        };
+        addNotification(profileUser.uid, notification);
       }
     } catch (error) {
       console.error("Error updating follow status:", error);

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { auth } from '../../../firebase.js';
-import { onAuthStateChanged } from 'firebase/auth';
+import {  useEffect } from 'react';
+import { useAuth } from "../../hooks/useAuth";
 import localFont from "next/font/local";
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 import { useSharePost } from "../../hooks/useSharePost";
@@ -17,7 +16,7 @@ const inter = localFont({
 });
 
 export default function SearchPage() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user:currentUser } = useAuth();
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
   const { formatTimestamp } = usePostSystem();
@@ -27,14 +26,7 @@ export default function SearchPage() {
     searchTerm,
     setSearchTerm
   } = useSearchPosts();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
-
+  
   return (
     <SearchView
       inter={inter}

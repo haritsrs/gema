@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDatabase, ref, get, query, orderByChild, limitToLast, endBefore, update, onValue } from 'firebase/database';
+import { useNotifications } from './useNotifications';
 
 const POSTS_PER_PAGE = 30;
 const TIME_WEIGHT = 1;
@@ -32,6 +33,7 @@ const createPostsCache = () => {
 };
 
 export function usePostSystem() {
+  const { addNotification } = useNotifications();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -219,10 +221,10 @@ export function usePostSystem() {
   }, [database, batchUpdatePosts]);
 
   // Modified handleLike that doesn't trigger immediate sort
-  const handleLike = useCallback(async (postId, currentLikes, likedBy = [], userId) => {
+  const handleLike = useCallback(async (post, currentLikes, likedBy = [], userId) => {
     if (!userId) return;
 
-    const postRef = ref(database, `posts/${postId}`);
+    const postRef = ref(database, `posts/${post.id}`);
     const hasLiked = likedBy.includes(userId);
     const newLikes = hasLiked ? currentLikes - 1 : currentLikes + 1;
     const newLikedBy = hasLiked
@@ -231,10 +233,10 @@ export function usePostSystem() {
 
     // Update without sorting
     setPosts(prevPosts =>
-      prevPosts.map(post =>
-        post.id === postId
-          ? { ...post, likes: newLikes, likedBy: newLikedBy }
-          : post
+      prevPosts.map(p =>
+        p.id === post.id
+          ? { ...p, likes: newLikes, likedBy: newLikedBy }
+          : p
       )
     );
 
@@ -243,18 +245,32 @@ export function usePostSystem() {
         likes: newLikes,
         likedBy: newLikedBy
       });
+
+      if (!hasLiked) {
+        const postAuthorId = post.authorId; // Assuming you have authorId in post
+        const notification = {
+          type: 'like',
+          triggeredBy: {
+            uid: userId.uid,
+          },
+          postId: post.id,
+          timestamp: Date.now(),
+          message: `${userId.displayName} liked your post`,
+        };
+        addNotification(postAuthorId, notification);
+      }
     } catch (error) {
       console.error("Error updating likes:", error);
       // Revert update without sorting
       setPosts(prevPosts =>
-        prevPosts.map(post =>
-          post.id === postId
-            ? { ...post, likes: currentLikes, likedBy }
-            : post
+        prevPosts.map(p =>
+          p.id === post.id
+            ? { ...p, likes: currentLikes, likedBy }
+            : p
         )
       );
     }
-  }, [database]);
+  }, [database, addNotification]);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "Unknown";

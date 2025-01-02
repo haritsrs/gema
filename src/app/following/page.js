@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue } from 'firebase/database';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../firebase.js';
+import { useAuth } from "../../hooks/useAuth";
 import localFont from "next/font/local";
 import Link from 'next/link';
 import Image from 'next/legacy/image';
@@ -21,19 +20,12 @@ const inter = localFont({
 });
 
 export default function FollowingFeed() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user:currentUser } = useAuth();
   const [followingList, setFollowingList] = useState([]);
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
   const { posts, loading, handleLike, handleDeletePost } = useChronologicalPosts({});
   const { following } = useFollow(currentUser, currentUser);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     if (!currentUser) return;

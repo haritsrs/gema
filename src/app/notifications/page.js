@@ -1,8 +1,10 @@
 "use client";
 
 import React from 'react';
-import { useNotificationSystem } from "../../hooks/useNotificationSystem";
 import localFont from "next/font/local";
+import { useNotifications } from "../../hooks/useNotifications";
+import { useAuth } from '../../hooks/useAuth';
+
 
 const inter = localFont({
   src: "../fonts/Inter-VariableFont_opsz,wght.ttf",
@@ -11,7 +13,8 @@ const inter = localFont({
 });
 
 export default function NotificationsPage() {
-  const { notifications, clearNotifications } = useNotificationSystem();
+  const { user:currentUser } = useAuth();
+  const { notifications, clearNotifications } = useNotifications(currentUser?.uid);
 
   return (
     <div className={`${inter.variable} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4`}>
@@ -44,7 +47,7 @@ export default function NotificationsPage() {
                   shadow-xl hover:from-purple-900/15 hover:via-gray-800/25 hover:to-blue-900/15 
                   transition-all duration-300 ease-in-out text-white"
               >
-                {notification.content}
+                {notification.message}
               </li>
             ))
           )}

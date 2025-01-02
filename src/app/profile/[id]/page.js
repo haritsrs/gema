@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, query, orderByChild, onValue, get, update, remove } from 'firebase/database';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../../firebase.js';
+import { useAuth } from '../../../hooks/useAuth';
 import localFont from "next/font/local";
 import Posting from '../../../components/posting';
 import LoadingOverlay from '../../../components/LoadingOverlay';
@@ -27,7 +26,7 @@ const inter = localFont({
 });
 
 export default function IDProfilePage() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user:currentUser } = useAuth();
   const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,14 +54,6 @@ export default function IDProfilePage() {
     handleDeletePost,
     setPosts
   } = useChronologicalPosts({ id });
-
-  // Authentication listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Fetch profile user details
   useEffect(() => {
@@ -353,7 +344,8 @@ export default function IDProfilePage() {
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
                     <button
-                      onClick={() => handleLike(post.id, post.likes || 0, post.likedBy || [], currentUser?.uid)}
+                      onClick={() => handleLike(post, post.likes, post.likedBy || [], currentUser.uid)}
+                      disabled={!currentUser}
                       className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${post.likedBy?.includes(currentUser?.uid)
                         ? 'text-purple-800 bg-purple-300 bg-opacity-50 fill-purple-800'
                         : 'bg-gray-700 fill-gray-500'

@@ -3,8 +3,7 @@
 
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { getStorage } from 'firebase/storage';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../firebase.js';
+import { useAuth } from '../hooks/useAuth';
 import localFont from "next/font/local";
 import { usePostSystem } from '../hooks/usePostSystem';
 import { useImageDimensions } from '../hooks/useImageDimensions';
@@ -18,12 +17,12 @@ const inter = localFont({
 });
 
 export default function Page() {
-  const [currentUser, setCurrentUser] = useState(null);
   const storage = getStorage();
   const loadMoreRef = useRef(null);
   const [shouldLoad, setShouldLoad] = useState(false);
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const handleShare = useSharePost();
+  const { user: currentUser } = useAuth();
 
   const {
     posts,
@@ -36,14 +35,6 @@ export default function Page() {
     handlePostDeleted,
     formatTimestamp
   } = usePostSystem();
-
-  // Authentication listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Load more posts when shouldLoad is true
   useEffect(() => {

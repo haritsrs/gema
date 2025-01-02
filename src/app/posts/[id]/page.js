@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { database } from "../../../../firebase";
 import { ref, set, push, onValue, off } from "firebase/database";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../../firebase";
+import { useAuth } from "../../../hooks/useAuth";
 import Image from "next/legacy/image";
 import { useImageDimensions } from '../../../hooks/useImageDimensions'
 import { usePostSystem } from "../../../hooks/usePostSystem";
@@ -13,18 +12,11 @@ export default function PostPage() {
   const [postId, setPostId] = useState(null);
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const { imageDimensions, handleImageLoad } = useImageDimensions();
   const { formatTimestamp } = usePostSystem();
-  // Listen for authentication state
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
+  const { user:currentUser } = useAuth();
 
   // Handle Like Button Click
   const handleLike = async (postId, currentLikes, likedBy = []) => {
