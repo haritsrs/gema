@@ -17,7 +17,7 @@ export default function SearchView({
     return (
       <div className={`${inter.variable} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
         <LoadingOverlay isLoading={loading} />
-  
+    
         <div className="w-full p-4 sticky top-0 z-10">
           <div className="max-w-2xl mx-auto">
             <div className="relative">
@@ -26,10 +26,10 @@ export default function SearchView({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search posts..."
-                className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 pl-12 focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
               <svg
-                className="absolute left-3 top-2.5 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
                 height="20"
@@ -46,7 +46,6 @@ export default function SearchView({
             </div>
           </div>
         </div>
-  
         <div className="max-w-2xl mx-auto px-4 py-6">
           {searchTerm.trim() === '' ? (
             <div className="text-gray-400 text-center py-8">
