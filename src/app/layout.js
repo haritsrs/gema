@@ -9,6 +9,7 @@ import Link from 'next/link';
 import Image from "next/legacy/image";
 import localFont from "next/font/local";
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 const inter = localFont({
   src: "./fonts/Inter-VariableFont_opsz,wght.ttf",
@@ -16,9 +17,22 @@ const inter = localFont({
   weight: "100 900",
 });
 
+// Map routes to their display names
+const routeTitles = {
+  '/': 'Home',
+  '/notifications': 'Notifications',
+  '/settings': 'Settings',
+  '/search': 'Search',
+  '/profile': 'Profile',
+  '/following': 'Following',
+  '/about-me': 'About Me',
+
+};
+
 export default function RootLayout({ children }) {
   const [isVisible, setIsVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -27,12 +41,23 @@ export default function RootLayout({ children }) {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // Get the current route's display name or use a default
+    const pageTitle = routeTitles[pathname] || 'Page';
+    // Update the document title in Twitter's format
+    document.title = `${pageTitle} / GEMA`;
+  }, [pathname]);
+
   const toggleVisibility = () => {
     setIsVisible(!isVisible);
   };
 
   return (
     <html lang="en">
+      <head>
+        {/* Default title that will be overridden by useEffect */}
+        <title>GEMA</title>
+      </head>
       <body className={`${inter.variable} antialiased bg-gradient-to-br from-gray-900 via-gray-950 to-black`}>
         {/* Glassmorphic Navbar */}
         <div className="fixed w-screen top-0 p-2 flex items-center justify-between 

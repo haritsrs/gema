@@ -14,6 +14,7 @@ import { useImageDimensions } from '../../hooks/useImageDimensions';
 import { useSharePost } from '../../hooks/useSharePost';
 import { usePostSystem } from '../../hooks/usePostSystem';
 import { Users } from 'lucide-react';
+import Head from 'next/head';
 
 const inter = localFont({
   src: "../fonts/Inter-VariableFont_opsz,wght.ttf",
@@ -55,6 +56,9 @@ export default function FollowingFeed() {
 
   return (
     <div className={`${inter.variable} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
+      <Head>
+        <title>GEMA</title>
+      </Head>
       <LoadingOverlay isLoading={loading} />
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">
