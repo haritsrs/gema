@@ -108,7 +108,7 @@ export default function PostsView({
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
                     <button
-                      onClick={() => handleLike(post, post.likes, post.likedBy || [], currentUser.uid)}
+                      onClick={() => handleLike(post, post.likes, post.likedBy || [], currentUser)}
                       disabled={!currentUser}
                       className={`flex items-center space-x-1 cursor-pointer rounded-lg drop-shadow-md active:filter-none p-2 mr-2 justify-center ${
                         post.likedBy?.includes(currentUser?.uid)

@@ -221,15 +221,15 @@ export function usePostSystem() {
   }, [database, batchUpdatePosts]);
 
   // Modified handleLike that doesn't trigger immediate sort
-  const handleLike = useCallback(async (post, currentLikes, likedBy = [], userId) => {
-    if (!userId) return;
+  const handleLike = useCallback(async (post, currentLikes, likedBy = [], currentUser) => {
+    if (!currentUser) return;
 
     const postRef = ref(database, `posts/${post.id}`);
-    const hasLiked = likedBy.includes(userId);
+    const hasLiked = likedBy.includes(currentUser.uid);
     const newLikes = hasLiked ? currentLikes - 1 : currentLikes + 1;
     const newLikedBy = hasLiked
-      ? likedBy.filter(uid => uid !== userId)
-      : [...likedBy, userId];
+      ? likedBy.filter(uid => uid !== currentUser.uid)
+      : [...likedBy, currentUser.uid];
 
     // Update without sorting
     setPosts(prevPosts =>
@@ -247,15 +247,15 @@ export function usePostSystem() {
       });
 
       if (!hasLiked) {
-        const postAuthorId = post.authorId; // Assuming you have authorId in post
+        const postAuthorId = post.userId;
         const notification = {
           type: 'like',
           triggeredBy: {
-            uid: userId.uid,
+            uid: currentUser.uid,
           },
           postId: post.id,
           timestamp: Date.now(),
-          message: `${userId.displayName} liked your post`,
+          message: `${currentUser.displayName || 'Someone'} liked your post`,
         };
         addNotification(postAuthorId, notification);
       }
