@@ -33,7 +33,6 @@ export const sensitiveWords = [
    'g!la', 'gila', 'g1la', 'g!1a', 
    'g4ntung diri', 'gantung diri', 'g4ntung d!ri', 
    'pen!pu', 'penipu', 'pen1pu',
-   't01let', 'toilet', 't0ilet', 't01l3t',
    'berengs3k', 'berengsek', 'b3r3ngs3k', 'brngsek',
    'ng3ntot', 'ngentot', 'ng3nt0t', 'ng3nt0t', 
    'kampr3t', 'kampret', 'k@mpr3t',
@@ -46,6 +45,12 @@ export const sensitiveWords = [
    'trummp','kamala','kamil','israel','gibran','megawati','pdip','gundar','tugib',
    'jomok','rusdi','amba','ngawi','muani','lumpur lapindo','anggrek mekar','kapal karam',
    'jmk48','gay',
+  'lesbian', 'homo', 'trans', 'queer', 'dyke', 'tranny', 'shemale', 'rapist', 'molester',
+  'bejat',
+  'pantek',
+  'sinting',
+  'dungu',
+  'keparat'
   ];
   
   export function isSensitiveContentPresent(text) {

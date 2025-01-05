@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/legacy/image';
 import LoadingOverlay from '../components/LoadingOverlay';
+import PostDropdown from '../components/PostDropdown';
 
 export default function SearchView({
     inter,

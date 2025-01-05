@@ -47,21 +47,38 @@ export default function PostPage() {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-
+  
     try {
       const commentsRef = ref(database, `posts/${postId}/comments`);
       const newCommentRef = push(commentsRef);
-
+      
+      // Add the new comment
       await set(newCommentRef, {
         userId: currentUser.uid,
         username: currentUser.displayName || "Anonymous",
         content: newComment,
         createdAt: new Date().toISOString(),
       });
-
+  
+      // Update the comment count in the post data
+      const currentCount = (post.comment || 0) + 1;
+      await set(ref(database, `posts/${postId}/comment`), currentCount);
+  
       setNewComment("");
     } catch (error) {
       console.error("Error submitting comment:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await set(ref(database, `posts/${postId}/comments/${commentId}`), null);
+      
+      // Decrease the comment count
+      const currentCount = (post.comment || 0) - 1;
+      await set(ref(database, `posts/${postId}/comment`), Math.max(0, currentCount));
+    } catch (error) {
+      console.error("Error deleting comment:", error);
     }
   };
 
