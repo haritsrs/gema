@@ -33,7 +33,7 @@ const createPostsCache = () => {
 };
 
 export function usePostSystem() {
-  const { addNotification } = useNotifications();
+  const {addNotification} = useNotifications();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);

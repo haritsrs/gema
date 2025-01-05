@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { database } from "../../../../firebase";
-import { ref, set, push, onValue, off } from "firebase/database";
+import { ref, set, push, onValue, off, update } from "firebase/database";
 import { useAuth } from "../../../hooks/useAuth";
 import Image from "next/legacy/image";
 import { useImageDimensions } from '../../../hooks/useImageDimensions';
 import { usePostSystem } from "../../../hooks/usePostSystem";
+import { useNotifications } from "../../../hooks/useNotifications";
 import { Trash2 } from "lucide-react";
 
 export default function PostPage() {
@@ -15,9 +16,12 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const { imageDimensions, handleImageLoad } = useImageDimensions();
-  const { formatTimestamp } = usePostSystem();
-  const { user:currentUser } = useAuth();
+  const {imageDimensions, handleImageLoad} = useImageDimensions();
+  const {user:currentUser} = useAuth();
+  const {addNotification} = useNotifications();
+  const {formatTimestamp} = usePostSystem();
+  const [submitting, setSubmitting] = useState(false);
+
 
   // Handle Like Button Click
   const handleLike = async (postId, currentLikes, likedBy = []) => {
@@ -45,30 +49,74 @@ export default function PostPage() {
   };
 
   // Handle New Comment Submission
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
+  const handleCommentSubmit = useCallback(async (post, postId, newComment, currentUser) => {
+    if (!currentUser) return;
     if (!newComment.trim()) return;
   
+    const commentsRef = ref(database, `posts/${postId}/comments`);
+    const newCommentRef = push(commentsRef);
+  
     try {
-      const commentsRef = ref(database, `posts/${postId}/comments`);
-      const newCommentRef = push(commentsRef);
-      
-      // Add the new comment
-      await set(newCommentRef, {
+      const commentData = {
         userId: currentUser.uid,
         username: currentUser.displayName || "Anonymous",
         content: newComment,
         createdAt: new Date().toISOString(),
-      });
+      };
+  
+      // Disable the submit button
+      setSubmitting(true);
+  
+      // Add the new comment to the database
+      await set(newCommentRef, commentData);
   
       // Update the comment count in the post data
       const currentCount = (post.comment || 0) + 1;
-      await set(ref(database, `posts/${postId}/comment`), currentCount);
+      await update(ref(database, `posts/${postId}`), { comment: currentCount });
   
+      // Send notification to the post author
+      const postAuthorId = post.userId;
+      const notification = {
+        type: 'comment',
+        triggeredBy: {
+          uid: currentUser.uid,
+        },
+        postId: postId,
+        timestamp: Date.now(),
+        message: `${currentUser.displayName || 'Someone'} has commented on your post\n"${newComment}"`,
+      };
+      addNotification(postAuthorId, notification);
+  
+      // ANTI DUPLIKAT COMMENT INI
+      setComments(prevComments => {
+        if (prevComments.some(comment => comment.id === newCommentRef.key)) {
+          return prevComments;
+        }
+  
+        // Add the new comment
+        return [
+          ...prevComments,
+          {
+            id: newCommentRef.key,
+            ...commentData
+          }
+        ];
+      });
+  
+      // Clear the new comment input
       setNewComment("");
     } catch (error) {
       console.error("Error submitting comment:", error);
+    } finally {
+      // Re-enable the submit button
+      setSubmitting(false);
     }
+  }, [database, addNotification, setComments, setNewComment, setSubmitting]);
+  
+  // Updated component to use handleCommentSubmit
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    handleCommentSubmit(post, postId, newComment, currentUser);
   };
 
   const handleDeleteComment = async (commentId) => {
@@ -262,14 +310,14 @@ export default function PostPage() {
             </ul>
             {/* New Comment Input */}
             {currentUser && (
-              <form onSubmit={handleCommentSubmit} className="flex mt-4">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
+               <form onSubmit={handleFormSubmit} className="flex mt-4">
+               <input
+                 type="text"
+                 value={newComment}
+                 onChange={(e) => setNewComment(e.target.value)}
                   className="flex-grow bg-gray-700 rounded-lg p-2"
                   placeholder={`${currentUser ? 'Add a comment...' : 'Login to add a comment to this post...'}`}
-                  disabled={!currentUser}
+                  disabled={!currentUser || submitting}
                 />
                 <button
                   type="submit"
