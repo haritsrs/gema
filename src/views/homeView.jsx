@@ -4,6 +4,7 @@ import Image from 'next/legacy/image';
 import LoadingOverlay from '../components/LoadingOverlay';
 import Posting from '../components/posting';
 import PostDropdown from '../components/PostDropdown';
+import Head from 'next/head';
 
 export default function PostsView({
   inter,
@@ -25,6 +26,9 @@ export default function PostsView({
 }) {
   return (
     <div className={`${inter.variable} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
+      <Head>
+        <title>GEMA </title>
+      </Head>
       <LoadingOverlay isLoading={initialLoading} />
       <div className="max-w-2xl mx-auto px-4">
         <div className="space-y-4 py-4">

@@ -64,7 +64,7 @@ export default function SettingsPage() {
         const dbData = snapshot.exists() ? snapshot.val() : {};
 
         setUserData({
-          username: currentUser.displayName || '',
+          username: dbData.username || `@${currentUser.email?.split('@')[0]}`,
           displayName: currentUser.displayName || '',
           profilePicture: currentUser.photoURL || '',
           email: currentUser.email || '',
@@ -110,6 +110,7 @@ export default function SettingsPage() {
 
     try {
       setLoading(true);
+      // Update display name in Firebase Auth
       await updateProfile(currentUser, { 
         displayName: userData.displayName, 
         photoURL: userData.profilePicture 
@@ -119,9 +120,11 @@ export default function SettingsPage() {
         await updateEmail(currentUser, userData.email);
       }
 
+      // Update both username and display name in Realtime Database
       const userRef = databaseRef(database, `users/${currentUser.uid}`);
       await update(userRef, {
-        displayName: userData.displayName,
+        username: userData.username, // Save username to database
+        displayName: userData.displayName, // Save display name to database
         birthday: userData.birthday,
         profilePicture: userData.profilePicture,
         email: userData.email
@@ -196,7 +199,9 @@ export default function SettingsPage() {
                 value={userData.username}
                 onChange={handleInputChange}
                 className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
+                placeholder="Enter your unique username"
               />
+              <p className="mt-1 text-sm text-gray-400">This is your unique identifier that others will use to find you</p>
             </div>
 
             <div>
@@ -207,7 +212,9 @@ export default function SettingsPage() {
                 value={userData.displayName}
                 onChange={handleInputChange}
                 className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
+                placeholder="Enter your display name"
               />
+              <p className="mt-1 text-sm text-gray-400">This is the name that will be displayed to others</p>
             </div>
 
             <div>
@@ -392,4 +399,4 @@ export default function SettingsPage() {
       )}
     </div>
   );
-}
+}o

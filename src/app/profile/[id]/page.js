@@ -165,7 +165,7 @@ export default function IDProfilePage() {
 
             <div className="mt-4 text-center">
               <h1 className="text-2xl font-bold text-white">{profileUser.displayName || 'User'}</h1>
-              <p className="text-gray-300">@{profileUser.email?.split('@')[0]}</p>
+              <p className="text-gray-300"> @{profileUser.username || profileUser.email?.split('@')[0]} </p>
             </div>
 
             {/* Follow/Edit Profile Button */}
