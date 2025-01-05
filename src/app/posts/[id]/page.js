@@ -5,8 +5,9 @@ import { database } from "../../../../firebase";
 import { ref, set, push, onValue, off } from "firebase/database";
 import { useAuth } from "../../../hooks/useAuth";
 import Image from "next/legacy/image";
-import { useImageDimensions } from '../../../hooks/useImageDimensions'
+import { useImageDimensions } from '../../../hooks/useImageDimensions';
 import { usePostSystem } from "../../../hooks/usePostSystem";
+import { Trash2 } from "lucide-react";
 
 export default function PostPage() {
   const [postId, setPostId] = useState(null);
@@ -77,6 +78,9 @@ export default function PostPage() {
       // Decrease the comment count
       const currentCount = (post.comment || 0) - 1;
       await set(ref(database, `posts/${postId}/comment`), Math.max(0, currentCount));
+      
+      // Update local state to immediately reflect the deletion
+      setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
@@ -167,7 +171,7 @@ export default function PostPage() {
   if (!post) return <div>Post not found</div>;
 
   return (
-    <div className="flex w-full text-white p-4 items-center  justify-center">
+    <div className="flex w-full text-white p-4 items-center justify-center">
       <div className="flex-col w-full max-w-xl bg-gray-800 p-5 rounded-xl">
         {/* Post Display */}
         <div className="flex justify-start space-x-2">
@@ -230,16 +234,29 @@ export default function PostPage() {
           </button>
         </div>
 
-        {/* Comments Section */}
         <div className="rounded-lg bg-gray-900 flex items-center justify-center mt-4 w-full h-max">
           <div className="flex flex-col m-4 w-[95%]">
             <h3 className="font-bold">Comments:</h3>
-            <ul className="list-disc pl-5">
+            <ul className="list-none">
               {comments.map((comment) => (
-                <li key={comment.id} className="mt-2">
-                  <strong>{comment.username}: </strong>
-                  <span>{comment.content}</span>
-                  <span className="text-gray-500"> · {formatTimestamp(comment.createdAt)}</span>
+                <li 
+                  key={comment.id} 
+                  className="mt-2 group relative flex items-center justify-between p-2 rounded hover:bg-gray-800"
+                >
+                  <div className="flex-grow">
+                    <strong>{comment.username}: </strong>
+                    <span>{comment.content}</span>
+                    <span className="text-gray-500"> · {formatTimestamp(comment.createdAt)}</span>
+                  </div>
+                  {currentUser && comment.userId === currentUser.uid && (
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 hover:bg-red-500 hover:bg-opacity-20 rounded"
+                      title="Delete comment"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
