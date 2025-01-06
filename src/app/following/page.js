@@ -74,15 +74,15 @@ export default function FollowingFeed() {
                 <span className="text-purple-300 font-medium">{following.length}</span>
               </div>
               {showTooltip && (
-  <div
-    className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 
-               bg-purple-900/80 text-purple-200 text-sm rounded-lg backdrop-blur-md 
-               shadow-md whitespace-nowrap transition-transform duration-200 
-               transform scale-95 opacity-80"
-  >
-    Following
-  </div>
-)}
+            <div
+              className="absolute z-10 top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 
+                        bg-purple-900/80 text-purple-200 text-sm rounded-lg backdrop-blur-md 
+                        shadow-md whitespace-nowrap transition-transform duration-200 
+                        transform scale-95 opacity-80"
+            >
+              Following
+            </div>
+          )}
 
             </div>
           </div>

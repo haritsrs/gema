@@ -26,14 +26,14 @@ const inter = localFont({
 });
 
 export default function IDProfilePage() {
-  const { user:currentUser } = useAuth();
+  const {user:currentUser} = useAuth();
   const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { imageDimensions, handleImageLoad } = useImageDimensions();
+  const {imageDimensions, handleImageLoad} = useImageDimensions();
   const params = useParams();
   const handleShare = useSharePost();
-  const { formatTimestamp } = usePostSystem();
+  const {formatTimestamp} = usePostSystem();
   const id = params.id; // Get the user ID from the URL
   const storage = getStorage();
   const database = getDatabase();
@@ -385,17 +385,17 @@ export default function IDProfilePage() {
           </ul>
         )}
        <FollowersModal
-  isOpen={showFollowersModal}
-  onClose={() => setShowFollowersModal(false)}
-  users={followers}
-  onRemoveFollower={handleRemoveFollower} // Add this function to handle removing followers
-/>
-<FollowingModal
-  isOpen={showFollowingModal}
-  onClose={() => setShowFollowingModal(false)}
-  users={following}
-  onUnfollow={handleUnfollow} // Add this function to handle unfollowing
-/>
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          users={followers}
+          onRemoveFollower={handleRemoveFollower} // Add this function to handle removing followers
+        />
+        <FollowingModal
+          isOpen={showFollowingModal}
+          onClose={() => setShowFollowingModal(false)}
+          users={following}
+          onUnfollow={handleUnfollow} // Add this function to handle unfollowing
+        />
       </div>
     </div>
   );

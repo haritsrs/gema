@@ -30,7 +30,7 @@ const UserList = ({ users, onClose, onAction, modalType }) => {
             }}
           >
             <Image
-              src={user.profilePicture || user.photoURL || '/img/error.png'}
+              src={user.photoURL || '/img/error.png'}
               alt={user.displayName}
               width={40}
               height={40}
@@ -38,7 +38,7 @@ const UserList = ({ users, onClose, onAction, modalType }) => {
             />
             <div>
               <div className="text-white font-medium">{user.displayName}</div>
-              <div className="text-gray-400 text-sm">@{user.email?.split('@')[0]}</div>
+              <div className="text-gray-400 text-sm">@{user.userName}</div>
             </div>
           </div>
           <button

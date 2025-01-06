@@ -6,7 +6,7 @@ export function useFollow(currentUser, profileUser) {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
-  const { addNotification } = useNotifications();
+  const {addNotification} = useNotifications();
   const database = getDatabase();
 
   // Fetch followers and following data
@@ -49,16 +49,19 @@ export function useFollow(currentUser, profileUser) {
         await remove(followerRef);
         setIsFollowing(false);
       } else {
-        // Follow
+        // Following data submission
         await update(followRef, {
           uid: profileUser.uid,
           displayName: profileUser.displayName || '',
-          photoURL: profileUser.photoURL || '',
+          photoURL: profileUser.profilePicture || '',
+          userName : profileUser.username || profileUser.email?.split('@')[0], // Nanti 'else' conditionnya ilangin aja kalo udah implement sistem username yang bener
         });
+        // Follower data submission 
         await update(followerRef, {
           uid: currentUser.uid,
           displayName: currentUser.displayName || '',
           photoURL: currentUser.photoURL || '',
+          userName : currentUser.username || currentUser.email?.split('@')[0], // Sama aowkwkwkwk
         });
         setIsFollowing(true);
 
@@ -68,7 +71,7 @@ export function useFollow(currentUser, profileUser) {
             uid: currentUser.uid,
           },
           timestamp: Date.now(),
-          message: `${currentUser.displayName || 'Unknown User'} followed you`,
+          message: `${currentUser.displayName || 'Someone'} followed you`,
         };
         addNotification(profileUser.uid, notification);
       }
