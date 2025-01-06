@@ -2,6 +2,24 @@ import { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue, get, update, remove } from 'firebase/database';
 import { useNotifications } from '../useNotifications';
 
+export const unFollow = async (currentUser, profileUser, database, setIsFollowing) => {
+  if (!currentUser || !profileUser) return;
+  
+  const followRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
+  const followerRef = ref(database, `follows/${profileUser.uid}/followers/${currentUser.uid}`);
+  
+  try {
+    await remove(followRef);
+    await remove(followerRef);
+    if (setIsFollowing) {
+      setIsFollowing(false);
+    }
+  } catch (error) {
+    console.error("Error unfollowing:", error);
+    throw error;
+  }
+};
+
 export function useFollow(currentUser, profileUser) {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -45,9 +63,7 @@ export function useFollow(currentUser, profileUser) {
     try {
       if (isFollowing) {
         // Unfollow
-        await remove(followRef);
-        await remove(followerRef);
-        setIsFollowing(false);
+        await unFollow(currentUser, profileUser, database, setIsFollowing);
       } else {
         // Following data submission
         await update(followRef, {
@@ -85,5 +101,6 @@ export function useFollow(currentUser, profileUser) {
     following,
     isFollowing,
     toggleFollow,
+    unFollow: () => unFollow(currentUser, profileUser, database, setIsFollowing),
   };
 }

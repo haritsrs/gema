@@ -5,7 +5,6 @@ import localFont from "next/font/local";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useAuth } from '../../hooks/useAuth';
 
-
 const inter = localFont({
   src: "../fonts/Inter-VariableFont_opsz,wght.ttf",
   variable: "--font-inter",
@@ -13,8 +12,24 @@ const inter = localFont({
 });
 
 export default function NotificationsPage() {
-  const { user:currentUser } = useAuth();
+  const { user: currentUser, loading } = useAuth();
   const { notifications, clearNotifications } = useNotifications(currentUser?.uid);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-white">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-white">Please login to view notifications.</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`${inter.variable} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4`}>
@@ -23,7 +38,7 @@ export default function NotificationsPage() {
           <h1 className="text-2xl font-bold text-white mt-4">Notifications</h1>
           {notifications.length > 0 && (
             <button
-              onClick={clearNotifications}
+              onClick={() => clearNotifications(currentUser.uid)}
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 
                 text-white px-4 py-2 rounded-xl transition-all duration-300 ease-in-out 
                 shadow-lg hover:shadow-red-500/20"

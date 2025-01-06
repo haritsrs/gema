@@ -14,7 +14,7 @@ import { usePostSystem } from '../../../hooks/usePostSystem';
 import { useImageDimensions } from '../../../hooks/useImageDimensions.js';
 import { useSharePost } from "../../../hooks/useSharePost";
 import { useParams } from 'next/navigation';
-import { useFollow } from '../../../hooks/useProfile/useFollow'
+import { useFollow, unFollow } from '../../../hooks/useProfile/useFollow'
 import { useChronologicalPosts } from '../../../hooks/usePostSorting/useChronologicalPosts'
 import { FollowersModal, FollowingModal } from '../../../components/UserModals';
 
@@ -34,7 +34,7 @@ export default function IDProfilePage() {
   const params = useParams();
   const handleShare = useSharePost();
   const {formatTimestamp} = usePostSystem();
-  const id = params.id; // Get the user ID from the URL
+  const id = params.id; // jadi ngambil uid dari URL route nya
   const storage = getStorage();
   const database = getDatabase();
   const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -104,13 +104,7 @@ export default function IDProfilePage() {
   
   const handleUnfollow = async (userId) => {
     try {
-      const followingRef = ref(database, `users/${currentUser.uid}/following/${userId}`);
-      const followerRef = ref(database, `users/${userId}/followers/${currentUser.uid}`);
-      
-      await Promise.all([
-        remove(followingRef),
-        remove(followerRef)
-      ]);
+      await unFollow(currentUser, { uid: userId }, database);
     } catch (error) {
       console.error('Error unfollowing user:', error);
     }

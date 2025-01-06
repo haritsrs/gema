@@ -8,14 +8,24 @@ const Sidebar = () => {
     <div className="flex justify-between pl-4 pr-4 text-white text-sm items-center md:flex-col md:pl-0 md:pr-0 md:p-4">
       <Link href="/" passHref>
         <div className="flex flex-col items-center justify-center mb-0 md:mb-6 fill-gray-400 active:text-purple-500 active:fill-purple-800 active:stroke-purple-800 rounded-lg group">
-          <svg xmlns="http://www.w3.org/2000/svg" width="1.75em" height="1.75em" viewBox="0 0 24 24" className="group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300">
-            <path d="M13.106 22h-2.212c-3.447 0-5.17 0-6.345-1.012s-1.419-2.705-1.906-6.093l-.279-1.937c-.38-2.637-.57-3.956-.029-5.083s1.691-1.813 3.992-3.183l1.385-.825C9.8 2.622 10.846 2 12 2s2.199.622 4.288 1.867l1.385.825c2.3 1.37 3.451 2.056 3.992 3.183s.35 2.446-.03 5.083l-.278 1.937c-.487 3.388-.731 5.081-1.906 6.093S16.553 22 13.106 22" opacity={0.5}></path>
-            <path fill="white" d="M8.25 18a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75"></path>
-          </svg>
-          <span className="md:hidden m-1">Home</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2" className="duoicon-secondary-layer" opacity={0.3}></path>
+          <path fill="currentColor" d="M16.243 7.757c-.354-.353-4.95.707-6.364 2.122c-1.414 1.414-2.475 6.01-2.122 6.364c.354.353 4.95-.707 6.364-2.122c1.415-1.414 2.475-6.01 2.122-6.364" className="duoicon-primary-layer"></path>
+        </svg>
+          <span className="md:hidden m-1">Explore</span>
         </div>
       </Link>
       
+      <Link href="/following" passHref>
+        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 fill-gray-400 active:text-purple-500 active:fill-purple-800 active:stroke-purple-800 rounded-lg group">
+        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" fillRule="evenodd" d="M14.447 1.106a1 1 0 0 1 .447 1.341L14.118 4H18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3.882l-.776-1.553a1 1 0 0 1 1.788-.894L12 3.763l1.106-2.21a1 1 0 0 1 1.341-.447" className="duoicon-secondary-layer" opacity={0.3}></path>
+          <path fill="currentColor" fillRule="evenodd" d="M12 9c-1.54 0-2.502 1.667-1.732 3c.357.619 1.017 1 1.732 1c1.54 0 2.502-1.667 1.732-3A2 2 0 0 0 12 9m1.5 5h-3a2.5 2.5 0 0 0-2.495 2.336L8 16.5v.5a1 1 0 0 0 1.993.117L10 17v-.5a.5.5 0 0 1 .41-.492L10.5 16h3a.5.5 0 0 1 .492.41l.008.09v.5a1 1 0 0 0 1.993.117L16 17v-.5a2.5 2.5 0 0 0-2.336-2.495z" className="duoicon-primary-layer"></path>
+        </svg>
+          <span className="md:hidden m-1">Following</span>
+        </div>
+      </Link>
+
       <Link href="/search" passHref>
         <div className="flex flex-col items-center justify-center mb-0 md:mb-6 fill-gray-400 active:text-purple-500 active:fill-purple-800 active:stroke-purple-800 rounded-lg group">
           <svg xmlns="http://www.w3.org/2000/svg" width="1.75em" height="1.75em" viewBox="0 0 24 24" className="group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300">
@@ -47,14 +57,6 @@ const Sidebar = () => {
           <span className="md:hidden m-1">
             Profile
           </span>
-        </div>
-      </Link>
-      
-      <Link href="/following" passHref>
-        <div className="flex flex-col items-center justify-center mb-0 md:mb-6 fill-gray-400 active:text-purple-500 active:fill-purple-800 active:stroke-purple-800 rounded-lg group">
-          <svg xmlns="http://www.w3.org/2000/svg" width="1.75em" height="1.75em" viewBox="0 0 256 256"><g fill="currentColor"><path d="M136 108a52 52 0 1 1-52-52a52 52 0 0 1 52 52" opacity="0.2"/>
-        <path d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"/></g>
-        </svg>
         </div>
       </Link>
     </div>
