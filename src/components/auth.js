@@ -16,6 +16,10 @@ export default function AuthSidebar() {
 
   const db = getDatabase();
 
+  const getDefaultUsername = (email) => {
+    return email.split('@')[0];
+  };
+
   // Function to add user to database
   const addUserToDatabase = async (user) => {
     const userRef = ref(db, `users/${user.uid}`);
@@ -25,9 +29,21 @@ export default function AuthSidebar() {
       const snapshot = await get(userRef);
       const existingData = snapshot.val();
 
+      // If this is a new user, set their default username as their email prefix
+      let defaultUsername = '';
+      if (!existingData) {
+        defaultUsername = getDefaultUsername(user.email);
+        
+        // If using Google/Facebook auth and they have a display name, prefer that
+        if (user.displayName) {
+          defaultUsername = user.displayName;
+        }
+      }
+
       const userData = {
         email: user.email,
-        displayName: user.displayName || username || 'Anonymous',
+        // For existing users, keep their display name; for new users, use the default username
+        displayName: existingData ? existingData.displayName : defaultUsername,
         profilePicture: user.photoURL || '',
         // If user exists, keep their admin status, otherwise set to false
         admin: existingData ? existingData.admin : false,
@@ -99,6 +115,7 @@ export default function AuthSidebar() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      const displayName = username || getDefaultUsername(email);
 
       await updateProfile(user, {
         displayName: username

@@ -63,8 +63,12 @@ export default function SettingsPage() {
         const snapshot = await get(userRef);
         const dbData = snapshot.exists() ? snapshot.val() : {};
 
+        // First check database for username, then use current username if it exists, 
+        // finally fall back to email-based username
+        const currentUsername = dbData.username || `${currentUser.email?.split('@')[0]}`;
+        
         setUserData({
-          username: dbData.username || `@${currentUser.email?.split('@')[0]}`,
+          username: currentUsername,
           displayName: currentUser.displayName || '',
           profilePicture: currentUser.photoURL || '',
           email: currentUser.email || '',
@@ -229,15 +233,20 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block mb-2 text-gray-400">Birthday</label>
-              <input
-                type="date"
-                name="birthday"
-                value={userData.birthday}
-                onChange={handleInputChange}
-                className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
-              />
-            </div>
+      <label className="block mb-2 text-gray-400">Birthday</label>
+      <input
+        type="date"
+        name="birthday"
+        value={userData.birthday || ''}
+        onChange={handleInputChange}
+        className="p-3 border-2 border-gray-700 rounded w-full bg-gray-800 text-white focus:outline-none focus:border-purple-500"
+      />
+      {userData.birthday && (
+        <p className="mt-1 text-sm text-gray-400">
+          Current birthday: {new Date(userData.birthday).toLocaleDateString()}
+        </p>
+      )}
+    </div>
 
             <div>
               <label className="block mb-2 text-gray-400">Profile Picture</label>
@@ -399,4 +408,4 @@ export default function SettingsPage() {
       )}
     </div>
   );
-}o
+}
