@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-const UserList = ({ users, onClose, onAction, modalType }) => {
+const UserList = ({ users, onClose, onAction, modalType, currentUserId }) => {
   const [loadingId, setLoadingId] = useState(null);
   const router = useRouter();
 
@@ -12,7 +12,7 @@ const UserList = ({ users, onClose, onAction, modalType }) => {
     try {
       await onAction(userId);
     } catch (error) {
-      console.error(`Failed to ${modalType === 'followers' ? 'remove follower' : 'unfollow'}:`, error);
+      console.error('Failed to unfollow:', error);
     } finally {
       setLoadingId(null);
     }
@@ -41,21 +41,19 @@ const UserList = ({ users, onClose, onAction, modalType }) => {
               <div className="text-gray-400 text-sm">@{user.userName}</div>
             </div>
           </div>
-          <button
-            onClick={(e) => handleAction(user.uid, e)}
-            disabled={loadingId === user.uid}
-            className={`px-3 py-1 rounded-full text-sm font-medium 
-              ${loadingId === user.uid 
-                ? 'bg-gray-700 text-gray-400' 
-                : modalType === 'followers'
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
+          {modalType === 'following' && user.uid !== currentUserId && (
+            <button
+              onClick={(e) => handleAction(user.uid, e)}
+              disabled={loadingId === user.uid}
+              className={`px-3 py-1 rounded-full text-sm font-medium 
+                ${loadingId === user.uid 
+                  ? 'bg-gray-700 text-gray-400' 
                   : 'bg-gray-600 hover:bg-gray-700 text-white'} 
-              transition-colors duration-200`}
-          >
-            {loadingId === user.uid 
-              ? (modalType === 'followers' ? 'Removing...' : 'Unfollowing...') 
-              : (modalType === 'followers' ? 'Remove' : 'Unfollow')}
-          </button>
+                transition-colors duration-200`}
+            >
+              {loadingId === user.uid ? 'Unfollowing...' : 'Unfollow'}
+            </button>
+          )}
         </div>
       ))}
       {users.length === 0 && (
@@ -67,7 +65,7 @@ const UserList = ({ users, onClose, onAction, modalType }) => {
   );
 };
 
-export function FollowersModal({ isOpen, onClose, users, onRemoveFollower }) {
+export function FollowersModal({ isOpen, onClose, users }) {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = 'unset'; };
@@ -89,8 +87,7 @@ export function FollowersModal({ isOpen, onClose, users, onRemoveFollower }) {
         </div>
         <UserList 
           users={users} 
-          onClose={onClose} 
-          onAction={onRemoveFollower}
+          onClose={onClose}
           modalType="followers"
         />
       </div>
@@ -98,7 +95,7 @@ export function FollowersModal({ isOpen, onClose, users, onRemoveFollower }) {
   );
 }
 
-export function FollowingModal({ isOpen, onClose, users, onUnfollow }) {
+export function FollowingModal({ isOpen, onClose, users, onUnfollow, currentUserId }) {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = 'unset'; };
@@ -123,6 +120,7 @@ export function FollowingModal({ isOpen, onClose, users, onUnfollow }) {
           onClose={onClose} 
           onAction={onUnfollow}
           modalType="following"
+          currentUserId={currentUserId}
         />
       </div>
     </div>

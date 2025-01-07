@@ -29,27 +29,22 @@ export default function AuthSidebar() {
       const snapshot = await get(userRef);
       const existingData = snapshot.val();
 
-      // If this is a new user, set their default username as their email prefix
-      let defaultUsername = '';
-      if (!existingData) {
-        defaultUsername = getDefaultUsername(user.email);
-        
-        // If using Google/Facebook auth and they have a display name, prefer that
-        if (user.displayName) {
-          defaultUsername = user.displayName;
-        }
-      }
-
+      // Prepare the user data object
       const userData = {
         email: user.email,
-        // For existing users, keep their display name; for new users, use the default username
-        displayName: existingData ? existingData.displayName : defaultUsername,
-        profilePicture: user.photoURL || '',
-        // If user exists, keep their admin status, otherwise set to false
-        admin: existingData ? existingData.admin : false,
+        // Only set username and displayName for new users
+        username: existingData?.username || getDefaultUsername(user.email),
+        displayName: existingData?.displayName || user.displayName || getDefaultUsername(user.email),
+        profilePicture: user.photoURL || existingData?.profilePicture || '',
+        admin: existingData?.admin || false,
         // Only set createdAt if it's a new user
-        ...(existingData ? {} : { createdAt: new Date().toISOString() })
+        ...(existingData ? {} : { createdAt: new Date().toISOString() }),
+        // Preserve any other existing data
+        ...existingData
       };
+
+      // Important: The spread of existingData is after the new fields
+      // This ensures we don't overwrite any existing values
 
       await set(userRef, userData);
     } catch (error) {
@@ -264,9 +259,14 @@ export default function AuthSidebar() {
                   </p>
                 </div>
               ) : (
-                <button onClick={handleEmailLogin} className="p-2 text-center bg-purple-800 w-full rounded-lg active:bg-purple-300 hover:text-purple-800">
-                  Sign In
-                </button>
+                <div>
+                  <button disabled className="p-2 text-center bg-gray-700 w-full rounded-lg cursor-not-allowed">
+                    Sign in
+                  </button>
+                  <p className="text-yellow-500 text-sm mt-2 text-center">
+                    Signing in using email is currently disabled. Please use Google or Facebook to sign in.
+                  </p>
+                </div>
               )}
             </div>
           </div>

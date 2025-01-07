@@ -29,19 +29,24 @@ export function useFollow(currentUser, profileUser) {
 
   // Fetch followers and following data
   useEffect(() => {
-    if (!profileUser) return;
+    if (!profileUser?.uid) return;
 
     const followersRef = ref(database, `follows/${profileUser.uid}/followers`);
     const followingRef = ref(database, `follows/${profileUser.uid}/following`);
 
     const fetchFollowers = onValue(followersRef, (snapshot) => {
-      setFollowers(snapshot.exists() ? Object.values(snapshot.val()) : []);
+      // Get full user objects for displaying detailed information
+      const followersData = snapshot.exists() ? Object.values(snapshot.val()) : [];
+      setFollowers(followersData);
     });
 
     const fetchFollowing = onValue(followingRef, (snapshot) => {
-      setFollowing(snapshot.exists() ? Object.values(snapshot.val()) : []);
+      // Get full user objects for displaying detailed information
+      const followingData = snapshot.exists() ? Object.values(snapshot.val()) : [];
+      setFollowing(followingData);
     });
 
+    // Check if current user is following the profile user
     if (currentUser) {
       const isFollowingRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
       get(isFollowingRef).then((snapshot) => setIsFollowing(snapshot.exists()));
@@ -70,14 +75,14 @@ export function useFollow(currentUser, profileUser) {
           uid: profileUser.uid,
           displayName: profileUser.displayName || '',
           photoURL: profileUser.profilePicture || '',
-          userName : profileUser.username || profileUser.email?.split('@')[0], // Nanti 'else' conditionnya ilangin aja kalo udah implement sistem username yang bener
+          userName: profileUser.username || profileUser.email?.split('@')[0],
         });
         // Follower data submission 
         await update(followerRef, {
           uid: currentUser.uid,
           displayName: currentUser.displayName || '',
           photoURL: currentUser.photoURL || '',
-          userName : currentUser.username || currentUser.email?.split('@')[0], // Sama aowkwkwkwk
+          userName: currentUser.username || currentUser.email?.split('@')[0],
         });
         setIsFollowing(true);
 
@@ -99,6 +104,8 @@ export function useFollow(currentUser, profileUser) {
   return {
     followers,
     following,
+    followersCount: followers.length,  // Add count properties
+    followingCount: following.length,  // Add count properties
     isFollowing,
     toggleFollow,
     unFollow: () => unFollow(currentUser, profileUser, database, setIsFollowing),
