@@ -34,7 +34,7 @@ export default function IDProfilePage() {
   const params = useParams();
   const handleShare = useSharePost();
   const {formatTimestamp} = usePostSystem();
-  const id = params.id; // jadi ngambil uid dari URL route nya
+  const id = params.id;
   const storage = getStorage();
   const database = getDatabase();
   const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -55,7 +55,6 @@ export default function IDProfilePage() {
     setPosts
   } = useChronologicalPosts({ id });
 
-  // Fetch profile user details
   useEffect(() => {
     const fetchProfileUser = async () => {
       if (!id) return;
@@ -80,7 +79,6 @@ export default function IDProfilePage() {
     fetchProfileUser();
   }, [id, database]);
 
-  // Fetch user posts based on the provided id
   useEffect(() => {
     if (posts && id) {
       const filtered = posts.filter(post => post.userId === id);
@@ -123,12 +121,10 @@ export default function IDProfilePage() {
     setPosts(prevPosts => [enhancedPost, ...prevPosts]);
   }, [currentUser, setPosts, database]);
 
-  // Loading state
   if (loading || postsLoading) {
     return <LoadingOverlay isLoading={true} />;
   }
 
-  // No profile found
   if (!profileUser) {
     return (
       <div className="h-full w-full bg-gray-900 flex items-center justify-center">
@@ -141,11 +137,11 @@ export default function IDProfilePage() {
 
   return (
     <div className={`${inter.variable}  antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
-      {/* Profile Header */}
+      {}
       <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex flex-col items-center justify-center w-full space-y-2">
-            {/* Profile Image and Name */}
+            {}
             <div className="overflow-hidden">
               <Image
                 src={profileUser.profilePicture || '/img/error.png'}
@@ -162,7 +158,7 @@ export default function IDProfilePage() {
               <p className="text-gray-300"> @{profileUser.username || profileUser.email?.split('@')[0]} </p>
             </div>
 
-            {/* Follow/Edit Profile Button */}
+            {}
             {currentUser && currentUser.uid !== profileUser.uid && (
               <button
                 onClick={toggleFollow}
@@ -190,9 +186,9 @@ export default function IDProfilePage() {
         </div>
       </div>
 
-      {/* Profile Content */}
+      {}
       <div className="max-w-2xl mx-auto px-4 mt-8">
-        {/* User Stats */}
+        {}
         <div className="mb-6">
           <div className="
             bg-gradient-to-br 
@@ -250,21 +246,21 @@ export default function IDProfilePage() {
                 </button>
               </div>
 
-              {/* Vertical separators */}
+              {}
               <div className="absolute top-1/2 left-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
               <div className="absolute top-1/2 right-1/3 w-px h-1/2 bg-white/10 transform -translate-y-1/2"></div>
             </div>
           </div>
         </div>
 
-        {/* Posting Component (only show if viewing own profile and logged in) */}
+        {}
         {currentUser && currentUser.uid === profileUser.uid && (
           <div className="mb-6">
             <Posting onPostCreated={handlePostCreated} storage={storage} />
           </div>
         )}
 
-        {/* User Posts */}
+        {}
         <h2 className="text-xl font-bold text-white mb-4">{profileUser.displayName || 'User'}&apos;s Posts</h2>
         {userPosts.length === 0 ? (
           <div className="text-gray-400 text-center py-8">
@@ -306,7 +302,7 @@ export default function IDProfilePage() {
                         {post.username || profileUser.displayName || 'User'}
                         <span className="text-gray-500"> · {formatTimestamp(post.createdAt)}</span>
                       </div>
-                      {/* PostDropdown only visible to the post owner when logged in */}
+                      {}
                       {currentUser && (
                         <PostDropdown
                           post={post}
@@ -334,7 +330,7 @@ export default function IDProfilePage() {
                   </div>
                 </div>
 
-                {/* Post Actions */}
+                {}
                 <div className="flex items-center justify-between text-gray-300 mt-2">
                   <div className="flex mx-2">
                     <button
@@ -382,13 +378,13 @@ export default function IDProfilePage() {
           isOpen={showFollowersModal}
           onClose={() => setShowFollowersModal(false)}
           users={followers}
-          onRemoveFollower={handleRemoveFollower} // Add this function to handle removing followers
+          onRemoveFollower={handleRemoveFollower}
         />
         <FollowingModal
           isOpen={showFollowingModal}
           onClose={() => setShowFollowingModal(false)}
           users={following}
-          onUnfollow={handleUnfollow} // Add this function to handle unfollowing
+          onUnfollow={handleUnfollow}
         />
       </div>
     </div>

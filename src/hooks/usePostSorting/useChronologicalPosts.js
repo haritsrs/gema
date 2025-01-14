@@ -26,7 +26,6 @@ export function useChronologicalPosts({ userId = null }) {
             ...childSnapshot.val(),
           };
   
-          // Optionally filter posts
           if (!userId || post.userId === userId) {
             postsData.push(post);
           }

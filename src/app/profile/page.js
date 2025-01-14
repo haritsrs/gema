@@ -18,7 +18,6 @@ export default function ProfileRedirect() {
       }
     });
 
-    // Cleanup subscription
     return () => unsubscribe();
   }, [router]);
 

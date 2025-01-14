@@ -87,7 +87,6 @@ const handleImageChange = async (e) => {
           canvas.width = img.height;
           canvas.height = img.width;
           
-          // Rotate image for iOS devices
           ctx.translate(canvas.width / 2, canvas.height / 2);
           ctx.rotate((90 * Math.PI) / 180);
           ctx.drawImage(img, -img.width / 2, -img.height / 2);
@@ -119,7 +118,6 @@ const handleImageChange = async (e) => {
       
         reader.readAsDataURL(file);
       } else {
-        // Non-iOS devices don't need rotation
         setSelectedImage(file);
         setImageUrl(URL.createObjectURL(file));
       }
@@ -273,35 +271,35 @@ const handleImageChange = async (e) => {
   };
 
   return (
-    <div>
+    <>
       <form 
-  onSubmit={handleSubmit} 
-  className="mb-6 
-    bg-gradient-to-br 
-    from-purple-900/10 
-    via-gray-800/20 
-    to-blue-900/10 
-    backdrop-blur-sm 
-    border 
-    border-white/10 
-    rounded-2xl 
-    shadow-xl 
-    hover:from-purple-900/15 
-    hover:via-gray-800/25 
-    hover:to-blue-900/15 
-    transition-all 
-    duration-300 
-    ease-in-out 
-    relative 
-    overflow-hidden 
-    p-4"
->
+        onSubmit={handleSubmit} 
+        className="mb-6 
+          bg-gradient-to-br 
+          from-purple-900/10 
+          via-gray-800/20 
+          to-blue-900/10 
+          backdrop-blur-sm 
+          border 
+          border-white/10 
+          rounded-2xl 
+          shadow-xl 
+          hover:from-purple-900/15 
+          hover:via-gray-800/25 
+          hover:to-blue-900/15 
+          transition-all 
+          duration-300 
+          ease-in-out 
+          relative 
+          overflow-hidden 
+          p-4"
+      >
         {showAuthWarning && (
           <div className="absolute top-0 left-0 right-0 bg-yellow-500 text-yellow-900 p-2 rounded-t-lg text-center animate-fade-in">
             Please log in to create a post
           </div>
         )}
-
+  
         <div className="relative"></div>
         <LoadingOverlay isLoading={loading} />
         <label htmlFor="post-content" className="sr-only">Post Content</label>
@@ -314,9 +312,9 @@ const handleImageChange = async (e) => {
           placeholder={user ? "What's on your mind?" : "Please log in to create a post"}
           disabled={!user}
         />
-
+  
         {error && <div className="text-red-500">{error}</div>}
-
+  
         <div className="flex items-center justify-between mx-1">
           <div className="flex space-x-2 justify-start items-center">
             {isMobile ? (
@@ -326,7 +324,7 @@ const handleImageChange = async (e) => {
                 className={`mt-2 rounded-lg drop-shadow-md ${user ? 'bg-gray-700 active:bg-purple-300 active:bg-opacity-50 fill-gray-400 active:fill-purple-500' : 'bg-gray-400 fill-gray-600 cursor-not-allowed'}`}
                 disabled={!user}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="drop-shadow-md m-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" className="</svg>drop-shadow-md m-1">
                   <path d="M13.5 9a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3" opacity={0.25}></path>
                   <path d="M19 2H5a3.01 3.01 0 0 0-3 3v8.86l3.88-3.88a3.075 3.075 0 0 1 4.24 0l2.871 2.887l.888-.888a3.01 3.01 0 0 1 4.242 0L22 15.86V5a3.01 3.01 0 0 0-3-3m-5.5 7a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3" opacity={0.5}></path>
                   <path d="M10.12 9.98a3.075 3.075 0 0 0-4.24 0L2 13.86V19a3.01 3.01 0 0 0 3 3h14a3 3 0 0 0 2.16-.92z"></path>
@@ -355,7 +353,7 @@ const handleImageChange = async (e) => {
                 </svg>
               </button>
             )}
-
+  
             {isMobile ? (
               <label
                 htmlFor='open-camcorder'
@@ -391,12 +389,12 @@ const handleImageChange = async (e) => {
               </button>
             )}
           </div>
-
+  
           <div className="text-gray-500 items-center">
             {postContent.length} / {maxCharacters}
           </div>
         </div>
-
+  
         {imageUrl && (
           <div className="relative mt-2">
             <Image
@@ -415,7 +413,7 @@ const handleImageChange = async (e) => {
             </button>
           </div>
         )}
-
+  
         {isUploaderVisible && !isCameraOpen && !imageUrl && (
           <div className="flex items-center justify-center w-full mt-2">
             <label htmlFor="image-upload" className={`flex flex-col items-center justify-center w-full h-64 border rounded-lg cursor-pointer ${user
@@ -443,46 +441,24 @@ const handleImageChange = async (e) => {
             </label>
           </div>
         )}
-
-        {isCameraOpen && (
-          <Camera
-            setSelectedImage={setSelectedImage}
-            setImageUrl={setImageUrl}
-            handleCloseCamera={handleCloseCamera}
-            isCameraActive={isCameraOpen}
-          />
-        )}
-
-<button
-  type="submit"
-  className={`
-    mt-2 
-    px-12 
-    py-2 
-    rounded-lg 
-    bg-purple-900/20 
-    backdrop-blur-xl 
-    border 
-    border-purple-500/30 
-    text-white 
-    hover:bg-purple-900/30 
-    transition-all 
-    duration-300 
-    ease-in-out 
-    shadow-lg 
-    hover:shadow-xl 
-    focus:outline-none 
-    focus:ring-2 
-    focus:ring-purple-500/50
-    ${user
-      ? 'opacity-100'
-      : 'opacity-50 cursor-not-allowed'
-    }`}
-  disabled={loading || !user || (!postContent.trim() && !selectedImage)}
->
-  {loading ? 'Posting...' : 'Post'}
-</button>
+  
+        <button
+          type="submit"
+          className={`mt-2 px-12 py-2 rounded-lg bg-purple-900/20 backdrop-blur-xl border border-purple-500/30 text-white hover:bg-purple-900/30 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${user ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}
+          disabled={loading || !user || (!postContent.trim() && !selectedImage)}
+        >
+          {loading ? 'Posting...' : 'Post'}
+        </button>
       </form>
-    </div>
+  
+      {isCameraOpen && (
+        <Camera
+          setSelectedImage={setSelectedImage}
+          setImageUrl={setImageUrl}
+          handleCloseCamera={handleCloseCamera}
+          isCameraActive={isCameraOpen}
+        />
+      )}
+    </>
   );
 }

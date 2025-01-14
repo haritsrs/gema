@@ -20,31 +20,23 @@ export default function AuthSidebar() {
     return email.split('@')[0];
   };
 
-  // Function to add user to database
   const addUserToDatabase = async (user) => {
     const userRef = ref(db, `users/${user.uid}`);
 
     try {
-      // First, check if the user already exists
       const snapshot = await get(userRef);
       const existingData = snapshot.val();
 
-      // Prepare the user data object
       const userData = {
         email: user.email,
-        // Only set username and displayName for new users
         username: existingData?.username || getDefaultUsername(user.email),
         displayName: existingData?.displayName || user.displayName || getDefaultUsername(user.email),
         profilePicture: user.photoURL || existingData?.profilePicture || '',
         admin: existingData?.admin || false,
-        // Only set createdAt if it's a new user
         ...(existingData ? {} : { createdAt: new Date().toISOString() }),
-        // Preserve any other existing data
         ...existingData
       };
 
-      // Important: The spread of existingData is after the new fields
-      // This ensures we don't overwrite any existing values
 
       await set(userRef, userData);
     } catch (error) {
@@ -101,30 +93,6 @@ export default function AuthSidebar() {
     return true;
   };
 
-  /* Temporarily disabled email sign-up
-  const handleEmailSignUp = async () => {
-    if (!validatePasswords()) {
-      return;
-    }
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const displayName = username || getDefaultUsername(email);
-
-      await updateProfile(user, {
-        displayName: username
-      });
-
-      addUserToDatabase(user);
-      
-      console.log("User signed up:", user);
-    } catch (error) {
-      console.error("Error signing up with Email: ", error);
-      setPasswordError(error.message);
-    }
-  };
-  */
 
   const handleSignOut = async () => {
     try {
@@ -189,20 +157,8 @@ export default function AuthSidebar() {
           </div>
 
           <div className="flex-col bg-gray-950  outline-1 outline-gray-700 active:outline-purple-800 rounded-xl w-full h-full p-4 space-y-2">
-            {/* Temporarily disabled email sign-up input fields
-            {isSignUp && (
-              <div>
-                <span className="font-white font-sm">Username</span>
-                <input
-                  type="text"
-                  placeholder=""
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="flex w-full p-2 rounded-lg text-black text-sm  outline-2 outline-gray-700 focus:outline-purple-400"
-                />
-              </div>
-            )}
-            */}
+            {
+}
             <div>
               <span className="font-white font-sm">Email</span>
               <input
@@ -227,26 +183,8 @@ export default function AuthSidebar() {
               />
             </div>
 
-            {/* Temporarily disabled confirm password input
-            {isSignUp && (
-              <div>
-                <span className="font-white font-sm">Confirm Password</span>
-                <input
-                  type="password"
-                  placeholder=""
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    setPasswordError('');
-                  }}
-                  className="flex w-full p-2 rounded-lg text-black text-sm  outline-2 outline-gray-700 focus:outline-purple-400"
-                />
-                {passwordError && (
-                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-                )}
-              </div>
-            )}
-            */}
+            {
+}
 
             <div className="py-4 items-center justify-center">
               {isSignUp ? (

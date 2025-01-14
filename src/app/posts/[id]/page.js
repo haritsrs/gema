@@ -23,7 +23,6 @@ export default function PostPage() {
   const [submitting, setSubmitting] = useState(false);
 
 
-  // Handle Like Button Click
   const handleLike = async (postId, currentLikes, likedBy = []) => {
     if (!currentUser) return;
 
@@ -37,7 +36,6 @@ export default function PostPage() {
       await set(ref(database, `posts/${postId}/likes`), hasLiked ? (currentLikes - 1) : (currentLikes + 1));
       await set(ref(database, `posts/${postId}/likedBy`), updatedLikedBy);
 
-      // Update the post state locally
       setPost(prevPost => ({
         ...prevPost,
         likes: hasLiked ? currentLikes - 1 : currentLikes + 1,
@@ -48,7 +46,6 @@ export default function PostPage() {
     }
   };
 
-  // Handle New Comment Submission
   const handleCommentSubmit = useCallback(async (post, postId, newComment, currentUser) => {
     if (!currentUser) return;
     if (!newComment.trim()) return;
@@ -64,17 +61,13 @@ export default function PostPage() {
         createdAt: new Date().toISOString(),
       };
   
-      // Disable the submit button
       setSubmitting(true);
   
-      // Add the new comment to the database
       await set(newCommentRef, commentData);
   
-      // Update the comment count in the post data
       const currentCount = (post.comment || 0) + 1;
       await update(ref(database, `posts/${postId}`), { comment: currentCount });
   
-      // Send notification to the post author
       const postAuthorId = post.userId;
       const notification = {
         type: 'comment',
@@ -87,13 +80,11 @@ export default function PostPage() {
       };
       addNotification(postAuthorId, notification);
   
-      // ANTI DUPLIKAT COMMENT INI
       setComments(prevComments => {
         if (prevComments.some(comment => comment.id === newCommentRef.key)) {
           return prevComments;
         }
   
-        // Add the new comment
         return [
           ...prevComments,
           {
@@ -103,17 +94,14 @@ export default function PostPage() {
         ];
       });
   
-      // Clear the new comment input
       setNewComment("");
     } catch (error) {
       console.error("Error submitting comment:", error);
     } finally {
-      // Re-enable the submit button
       setSubmitting(false);
     }
   }, [database, addNotification, setComments, setNewComment, setSubmitting]);
   
-  // Updated component to use handleCommentSubmit
   const handleFormSubmit = (e) => {
     e.preventDefault();
     handleCommentSubmit(post, postId, newComment, currentUser);
@@ -123,18 +111,15 @@ export default function PostPage() {
     try {
       await set(ref(database, `posts/${postId}/comments/${commentId}`), null);
       
-      // Decrease the comment count
       const currentCount = (post.comment || 0) - 1;
       await set(ref(database, `posts/${postId}/comment`), Math.max(0, currentCount));
       
-      // Update local state to immediately reflect the deletion
       setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
   };
 
-  // Share post methods
   const sharePost = (post) => {
     if (navigator.share) {
       navigator.share({
@@ -161,7 +146,6 @@ export default function PostPage() {
       });
   };
 
-  // Get postId from URL
   useEffect(() => {
     const currentPath = window.location.pathname;
     const id = currentPath.split("/posts/")[1];
@@ -170,12 +154,10 @@ export default function PostPage() {
     }
   }, []);
 
-  // Fetch post data and listen for updates
   useEffect(() => {
     if (postId) {
       const postRef = ref(database, `posts/${postId}`);
 
-      // Set up listener for post data
       onValue(postRef, (snapshot) => {
         if (snapshot.exists()) {
           const postData = snapshot.val();
@@ -186,12 +168,10 @@ export default function PostPage() {
         setLoading(false);
       });
 
-      // Clean up listener
       return () => off(postRef);
     }
   }, [postId]);
 
-  // Listen for comments updates
   useEffect(() => {
     if (postId) {
       const commentsRef = ref(database, `posts/${postId}/comments`);
@@ -221,7 +201,7 @@ export default function PostPage() {
   return (
     <div className="flex w-full text-white p-4 items-center justify-center">
       <div className="flex-col w-full max-w-xl bg-gray-800 p-5 rounded-xl">
-        {/* Post Display */}
+        {}
         <div className="flex justify-start space-x-2">
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <Image
@@ -308,7 +288,7 @@ export default function PostPage() {
                 </li>
               ))}
             </ul>
-            {/* New Comment Input */}
+            {}
             {currentUser && (
                <form onSubmit={handleFormSubmit} className="flex mt-4">
                <input

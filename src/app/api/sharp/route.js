@@ -1,4 +1,3 @@
-// gema/src/app/api/sharp/route.js
 
 import sharp from 'sharp';
 import { NextResponse } from 'next/server';
@@ -9,10 +8,9 @@ export async function POST(req) {
     const file = formData.get('file');
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Use Sharp to compress and resize image
     const optimizedImage = await sharp(buffer)
-      .resize({ width: 800 }) // Set max width for compression
-      .jpeg({ quality: 80 }) // Adjust quality as needed
+      .resize({ width: 800 })
+      .jpeg({ quality: 80 })
       .toBuffer();
 
     return new NextResponse(optimizedImage, {

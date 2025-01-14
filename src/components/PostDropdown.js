@@ -82,7 +82,6 @@ const DeleteDialog = ({ isOpen, onClose, userData, post, onPostDeleted }) => {
 };
 
 const UserInteractionButtons = ({ post, currentUser }) => {
-  // Only show these buttons if user is logged in and isn't viewing their own post
   if (!currentUser || currentUser.uid === post.userId) return null;
 
   return (
@@ -91,7 +90,6 @@ const UserInteractionButtons = ({ post, currentUser }) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Follow user function will go here
         }}
         className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
       >
@@ -103,7 +101,6 @@ const UserInteractionButtons = ({ post, currentUser }) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Mute user function will go here
         }}
         className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
       >
@@ -115,7 +112,6 @@ const UserInteractionButtons = ({ post, currentUser }) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Block user function will go here
         }}
         className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
       >
@@ -127,7 +123,6 @@ const UserInteractionButtons = ({ post, currentUser }) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Report post function will go here
         }}
         className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center space-x-2"
       >
@@ -194,7 +189,6 @@ const PostDropdown = ({ post, currentUser, onPostDeleted }) => {
   const isOwnPost = currentUser?.uid === post.userId;
   const shouldShowDeleteOption = isAdmin || isOwnPost;
 
-  // Show dropdown if user is logged in (either for their own post actions or interaction options)
   if (!currentUser) return null;
 
   return (

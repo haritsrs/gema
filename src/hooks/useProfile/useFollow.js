@@ -27,7 +27,6 @@ export function useFollow(currentUser, profileUser) {
   const {addNotification} = useNotifications();
   const database = getDatabase();
 
-  // Fetch followers and following data
   useEffect(() => {
     if (!profileUser?.uid) return;
 
@@ -35,18 +34,15 @@ export function useFollow(currentUser, profileUser) {
     const followingRef = ref(database, `follows/${profileUser.uid}/following`);
 
     const fetchFollowers = onValue(followersRef, (snapshot) => {
-      // Get full user objects for displaying detailed information
       const followersData = snapshot.exists() ? Object.values(snapshot.val()) : [];
       setFollowers(followersData);
     });
 
     const fetchFollowing = onValue(followingRef, (snapshot) => {
-      // Get full user objects for displaying detailed information
       const followingData = snapshot.exists() ? Object.values(snapshot.val()) : [];
       setFollowing(followingData);
     });
 
-    // Check if current user is following the profile user
     if (currentUser) {
       const isFollowingRef = ref(database, `follows/${currentUser.uid}/following/${profileUser.uid}`);
       get(isFollowingRef).then((snapshot) => setIsFollowing(snapshot.exists()));
@@ -58,7 +54,6 @@ export function useFollow(currentUser, profileUser) {
     };
   }, [profileUser, currentUser, database]);
 
-  // Handle follow/unfollow actions
   const toggleFollow = async () => {
     if (!currentUser || !profileUser) return;
 
@@ -67,17 +62,14 @@ export function useFollow(currentUser, profileUser) {
 
     try {
       if (isFollowing) {
-        // Unfollow
         await unFollow(currentUser, profileUser, database, setIsFollowing);
       } else {
-        // Following data submission
         await update(followRef, {
           uid: profileUser.uid,
           displayName: profileUser.displayName || '',
           photoURL: profileUser.profilePicture || '',
           userName: profileUser.username || profileUser.email?.split('@')[0],
         });
-        // Follower data submission 
         await update(followerRef, {
           uid: currentUser.uid,
           displayName: currentUser.displayName || '',
@@ -104,8 +96,8 @@ export function useFollow(currentUser, profileUser) {
   return {
     followers,
     following,
-    followersCount: followers.length,  // Add count properties
-    followingCount: following.length,  // Add count properties
+    followersCount: followers.length,
+    followingCount: following.length,
     isFollowing,
     toggleFollow,
     unFollow: () => unFollow(currentUser, profileUser, database, setIsFollowing),

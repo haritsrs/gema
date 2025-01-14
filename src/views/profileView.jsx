@@ -46,7 +46,6 @@ export default function ProfileView({
 
   return (
     <div className={`${fontClass} antialiased min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black`}>
-      {/* Profile Header */}
       <div className="w-full h-80 bg-gradient-to-r from-purple-600 to-blue-600 pt-16 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex flex-col items-center justify-center w-full space-y-2">
@@ -92,9 +91,7 @@ export default function ProfileView({
         </div>
       </div>
 
-      {/* Profile Content */}
       <div className="max-w-2xl mx-auto px-4 mt-8">
-        {/* User Stats */}
         <div className="mb-6">
           <div className="bg-gradient-to-br from-gray-900/40 to-gray-800/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 relative">
             <div className="grid grid-cols-3 gap-4 items-center">

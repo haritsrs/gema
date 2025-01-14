@@ -10,7 +10,6 @@ const LIKE_WEIGHT = 2;
 const CACHE_EXPIRY = 5 * 60 * 1000;
 const SORT_DELAY = 5000;
 
-// Utility functions
 const createPostsCache = () => {
   const cache = new Map();
   const lastCleanup = Date.now();
@@ -18,7 +17,6 @@ const createPostsCache = () => {
   return {
     get: (key) => cache.get(key),
     set: (key, value) => {
-      // Clean up old entries if needed
       if (Date.now() - lastCleanup > CACHE_EXPIRY) {
         for (const [k, v] of cache.entries()) {
           if (Date.now() - v.timestamp > CACHE_EXPIRY) {
@@ -46,7 +44,6 @@ export function usePostSystem() {
   const sortTimeoutRef = useRef(null);
   const database = getDatabase();
 
-  // Memoized relevancy score calculator
   const calculateRelevancyScore = useCallback((post) => {
     const cacheKey = `relevancy-${post.id}-${post.likes}-${post.createdAt}`;
     const cachedScore = postsCache.current.get(cacheKey);
@@ -65,7 +62,6 @@ export function usePostSystem() {
     return score;
   }, []);
 
-  // Optimized sort function with memoization
   const sortPostsByRelevancy = useCallback((postsToSort) => {
     return [...postsToSort].sort((a, b) => {
       const scoreA = calculateRelevancyScore(a);
@@ -74,7 +70,6 @@ export function usePostSystem() {
     });
   }, [calculateRelevancyScore]);
 
-  // Effect to handle delayed sorting
   useEffect(() => {
     if (shouldSort) {
       if (sortTimeoutRef.current) {
@@ -94,12 +89,10 @@ export function usePostSystem() {
     }
   }, [shouldSort, sortPostsByRelevancy]);
 
-  // Modified batch update handler that always sorts
   const batchUpdatePosts = useCallback((newPosts) => {
     setPosts(prevPosts => {
       const postsMap = new Map(prevPosts.map(post => [post.id, post]));
 
-      // Update existing posts and add new ones
       newPosts.forEach(post => {
         postsMap.set(post.id, post);
       });
@@ -110,14 +103,12 @@ export function usePostSystem() {
   }, [sortPostsByRelevancy]);
 
   const handlePostDeleted = (deletedPostId) => {
-    // Update the local state by filtering out the deleted post
     setPosts((currentPosts) =>
       currentPosts.filter(post => post.id !== deletedPostId)
     );
 
   };
 
-  // Optimized fetch older posts with immediate sorting
   const fetchOlderPosts = useCallback(async () => {
     if (loading || noMorePosts || !lastVisibleTimestamp) return;
 
@@ -152,7 +143,6 @@ export function usePostSystem() {
 
       batchUpdatePosts(olderPosts);
 
-      // Update last visible timestamp
       const oldestPost = olderPosts[0];
       if (oldestPost) {
         setLastVisibleTimestamp(oldestPost.createdAt);
@@ -169,7 +159,6 @@ export function usePostSystem() {
     }
   }, [loading, noMorePosts, lastVisibleTimestamp, batchUpdatePosts]);
 
-  // Optimized real-time posts listener
   useEffect(() => {
     if (!postsRef.current) {
       postsRef.current = ref(database, 'posts');
@@ -220,7 +209,6 @@ export function usePostSystem() {
     };
   }, [database, batchUpdatePosts]);
 
-  // Modified handleLike that doesn't trigger immediate sort
   const handleLike = useCallback(async (post, currentLikes, likedBy = [], currentUser) => {
     if (!currentUser) return;
 
@@ -231,7 +219,6 @@ export function usePostSystem() {
       ? likedBy.filter(uid => uid !== currentUser.uid)
       : [...likedBy, currentUser.uid];
 
-    // Update without sorting
     setPosts(prevPosts =>
       prevPosts.map(p =>
         p.id === post.id
@@ -261,7 +248,6 @@ export function usePostSystem() {
       }
     } catch (error) {
       console.error("Error updating likes:", error);
-      // Revert update without sorting
       setPosts(prevPosts =>
         prevPosts.map(p =>
           p.id === post.id
@@ -285,11 +271,10 @@ export function usePostSystem() {
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
     if (secondsAgo < 604800) return `${Math.floor(secondsAgo / 86400)}d ago`;
   
-    // Format the date based on the time difference
     const options = {
       month: "short",
       day: "2-digit",
-      ...(secondsAgo >= 31536000 && { year: "numeric" }), // Add year if it's over a year ago
+      ...(secondsAgo >= 31536000 && { year: "numeric" }),
     };
   
     return postDate.toLocaleDateString("en-US", options);
@@ -297,7 +282,6 @@ export function usePostSystem() {
   
 
 
-  // Function to manually trigger sorting
   const triggerSort = useCallback(() => {
     setShouldSort(true);
   }, []);

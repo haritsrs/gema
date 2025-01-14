@@ -40,7 +40,6 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
       if (error.name === 'OverconstrainedError') {
         console.warn('Constraints could not be satisfied. Retrying with default settings.');
         try {
-          // Retry without any specific width/height or deviceId constraints
           const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
           videoRef.current.srcObject = fallbackStream;
           setCameraReady(true);
@@ -58,19 +57,16 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    // Use video dimensions for canvas
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     setDimensions({ width: video.videoWidth, height: video.videoHeight });
 
 
-    // Flip horizontally if needed (since video is mirrored)
     context.translate(canvas.width, 0);
     context.scale(-1, 1);
 
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Reset transform
     context.setTransform(1, 0, 0, 1, 0, 0);
 
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
@@ -81,9 +77,8 @@ export default function Camera({ setImageUrl, handleCloseCamera, isCameraActive,
     if (!image) return;
 
     const blob = await (await fetch(image)).blob();
-    // Create a File object from the blob
     const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
-    setSelectedImage(file);  // Add this line to set the selectedImage
+    setSelectedImage(file);
 
     const storage = getStorage();
     const storageRef = ref(storage, `images/${Date.now()}.jpg`);

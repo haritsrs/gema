@@ -1,4 +1,3 @@
-// PostsView.jsx
 import Link from 'next/link';
 import Image from 'next/legacy/image';
 import LoadingOverlay from '../components/LoadingOverlay';

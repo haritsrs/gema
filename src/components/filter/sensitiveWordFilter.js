@@ -5,7 +5,6 @@ export const sensitiveWords = [
   'babi ngepet', 'pecundang', 'gila', 'gantung diri', 'penipu', 'toilet', 'berengsek', 'ngentot', 
   'kampret', 'pencabul', 'bersetubuh', 'cerai', 'seks', 
   'pelacuran', 'asusu', 'bandel', 'jembut', 'balon', 'belakang',
-   // Variations of sensitive words
    'kntl', 'kntol', 'kontl', 'kont0l', 'k0ntol', 'k0ntl', 'knt0l', 
    'm3m3k', 'memeck', 'm3mek', 'memek', 
    'b4bi', 'babi', 'b@bi', 'b4b1', 'b4b1', 

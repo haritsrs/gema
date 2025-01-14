@@ -1,4 +1,3 @@
-// page.jsx
 "use client";
 
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
@@ -36,7 +35,6 @@ export default function Page() {
     formatTimestamp
   } = usePostSystem();
 
-  // Load more posts when shouldLoad is true
   useEffect(() => {
     if (shouldLoad && !loading && !noMorePosts) {
       fetchOlderPosts();
@@ -44,7 +42,6 @@ export default function Page() {
     }
   }, [shouldLoad, loading, noMorePosts, fetchOlderPosts]);
 
-  // Set up intersection observer using useLayoutEffect
   useLayoutEffect(() => {
     let observer = null;
 
@@ -67,10 +64,8 @@ export default function Page() {
       }
     };
 
-    // Initial setup
     setupObserver();
 
-    // Cleanup
     return () => {
       if (observer) {
         observer.disconnect();
