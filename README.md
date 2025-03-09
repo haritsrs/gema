@@ -1,6 +1,6 @@
 
 
-## GEMA (CLOSED UNTIL FURTHER NOTICE)
+## GEMA
 https://gema-610a4.web.app/
 
 
